@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Menu Visualizer</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --black: #0A0A0A;
+            --charcoal: #1A1A1A;
+            --gold: #D4AF37;
+            --gold-dark: #C9A227;
+            --sage: #8AA193;
+            --silver: #CBD5E0;
+            --white: #FFFFFF;
+            --glass-bg: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--black);
+            color: var(--white);
+            padding: 2rem;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 3rem;
+            text-align: center;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, var(--white) 0%, var(--gold) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: var(--silver);
+            margin-bottom: 3rem;
+            font-size: 1.1rem;
+        }
+
+        /* Week Navigation */
+        .week-nav {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 1rem;
+            margin-bottom: 3rem;
+            position: sticky;
+            top: 1rem;
+            z-index: 100;
+            background: var(--black);
+            padding: 1rem 0;
+        }
+
+        .day-tab {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 1.5rem 1rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .day-tab:hover {
+            background: rgba(255, 255, 255, 0.08);
+            transform: translateY(-4px);
+        }
+
+        .day-tab.active {
+            background: linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%);
+            border-color: var(--gold);
+            transform: scale(1.05);
+            box-shadow: 0 10px 30px rgba(212, 175, 55, 0.4);
+        }
+
+        .day-tab.active .day-name,
+        .day-tab.active .day-label {
+            color: var(--black);
+        }
+
+        .day-name {
+            font-size: 1.2rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 0.5rem;
+            color: var(--white);
+        }
+
+        .day-label {
+            font-size: 0.85rem;
+            color: var(--silver);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Day Content */
+        .day-content {
+            display: none;
+        }
+
+        .day-content.active {
+            display: block;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .day-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .day-header h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 3.5rem;
+            font-weight: 700;
+            color: var(--gold);
+            margin-bottom: 0.5rem;
+        }
+
+        .day-header .date-info {
+            color: var(--silver);
+            font-size: 1.1rem;
+            letter-spacing: 2px;
+        }
+
+        /* Meals Grid */
+        .meals-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .meal-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 2.5rem;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .meal-card:hover {
+            background: rgba(255, 255, 255, 0.08);
+            transform: translateY(-4px);
+        }
+
+        .meal-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 6px;
+            height: 100%;
+        }
+
+        .meal-card.desayuno::before {
+            background: linear-gradient(180deg, #FBBF24, #F59E0B);
+        }
+
+        .meal-card.comida::before {
+            background: linear-gradient(180deg, var(--sage), #7A9184);
+        }
+
+        .meal-card.merienda::before {
+            background: linear-gradient(180deg, #60A5FA, #3B82F6);
+        }
+
+        .meal-card.cena::before {
+            background: linear-gradient(180deg, var(--gold), var(--gold-dark));
+        }
+
+        .meal-type {
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .meal-type.desayuno { color: #FBBF24; }
+        .meal-type.comida { color: var(--sage); }
+        .meal-type.merienda { color: #60A5FA; }
+        .meal-type.cena { color: var(--gold); }
+
+        .meal-icon {
+            font-size: 1.5rem;
+        }
+
+        .meal-name {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            color: var(--white);
+            line-height: 1.3;
+        }
+
+        .meal-info {
+            margin-bottom: 1rem;
+        }
+
+        .meal-info-row {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 0.75rem;
+            color: var(--silver);
+            font-size: 0.95rem;
+        }
+
+        .meal-info-icon {
+            font-size: 1.2rem;
+            opacity: 0.7;
+        }
+
+        .ingredients-list {
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .ingredients-label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--gold);
+            margin-bottom: 0.5rem;
+        }
+
+        .ingredients-items {
+            color: var(--silver);
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        .meal-notes {
+            background: rgba(138, 161, 147, 0.1);
+            border-left: 3px solid var(--sage);
+            padding: 1rem;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            color: var(--sage);
+            font-style: italic;
+            margin-top: 1rem;
+        }
+
+        /* Recommendations */
+        .recommendations-card {
+            background: rgba(212, 175, 55, 0.1);
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .recommendations-card h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            color: var(--gold);
+            margin-bottom: 1rem;
+        }
+
+        .recommendations-card p {
+            color: var(--silver);
+            line-height: 1.7;
+            font-size: 1rem;
+        }
+
+        /* Menu Section Titles */
+        .menu-section-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5rem;
+            margin-bottom: 2rem;
+            text-align: center;
+            font-weight: 700;
+        }
+
+        .menu-section-title.adults {
+            color: var(--gold);
+        }
+
+        .menu-section-title.children {
+            color: var(--sage);
+        }
+
+        .menu-section {
+            margin-bottom: 4rem;
+        }
+
+        @media (max-width: 768px) {
+            .week-nav {
+                grid-template-columns: repeat(4, 1fr);
+            }
+
+            .meals-grid {
+                grid-template-columns: 1fr;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📅 k[AI]tchen - Weekly Menu Visualizer</h1>
+        <p class="subtitle">Transform AI JSON into beautiful day-by-day view</p>
+
+        <!-- Week Navigation -->
+        <div class="week-nav" id="weekNav"></div>
+
+        <!-- Recommendations -->
+        <div id="recommendations"></div>
+
+        <!-- Day Content -->
+        <div id="dayContent"></div>
+    </div>
+
+    <script>
+        const dias = ['lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado', 'domingo'];
+        const diasES = {
+            'lunes': 'Lunes',
+            'martes': 'Martes',
+            'miercoles': 'Miércoles',
+            'jueves': 'Jueves',
+            'viernes': 'Viernes',
+            'sabado': 'Sábado',
+            'domingo': 'Domingo'
+        };
+
+        const mealIcons = {
+            'desayuno': '🌅',
+            'comida': '🍽️',
+            'merienda': '☕',
+            'cena': '🌙'
+        };
+
+        const mealNames = {
+            'desayuno': 'Desayuno',
+            'comida': 'Comida',
+            'merienda': 'Merienda',
+            'cena': 'Cena'
+        };
+
+        let menuData = null;
+        let currentDay = 'lunes';
+
+        function initializeMenu(data) {
+            menuData = data;
+            renderWeekNav();
+            renderRecommendations();
+            renderDay(currentDay);
+        }
+
+        function renderWeekNav() {
+            const weekNav = document.getElementById('weekNav');
+            weekNav.innerHTML = dias.map(dia => `
+                <div class="day-tab ${dia === currentDay ? 'active' : ''}" data-day="${dia}">
+                    <div class="day-name">${diasES[dia].substring(0, 3)}</div>
+                    <div class="day-label">${diasES[dia]}</div>
+                </div>
+            `).join('');
+
+            // Add click handlers
+            document.querySelectorAll('.day-tab').forEach(tab => {
+                tab.addEventListener('click', () => {
+                    currentDay = tab.dataset.day;
+                    document.querySelectorAll('.day-tab').forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    renderDay(currentDay);
+                });
+            });
+        }
+
+        function renderRecommendations() {
+            if (!menuData.recomendaciones_generales) return;
+            
+            document.getElementById('recommendations').innerHTML = `
+                <div class="recommendations-card">
+                    <h3>💡 General Recommendations</h3>
+                    <p>${menuData.recomendaciones_generales}</p>
+                </div>
+            `;
+        }
+
+        function renderDay(day) {
+            const adultsDayData = menuData.menu_adultos?.dias?.[day];
+            const childrenDayData = menuData.menu_ninos?.dias?.[day];
+            
+            if (!adultsDayData && !childrenDayData) {
+                document.getElementById('dayContent').innerHTML = '<p style="text-align:center;color:var(--silver);">No data for this day</p>';
+                return;
+            }
+
+            let html = `
+                <div class="day-content active">
+                    <div class="day-header">
+                        <h2>${diasES[day]}</h2>
+                        <div class="date-info">Week of ${menuData.semana || 'N/A'}</div>
+                    </div>
+            `;
+
+            // Adults Section
+            if (adultsDayData) {
+                html += `
+                    <div class="menu-section">
+                        <h3 class="menu-section-title adults">
+                            👨‍👩‍👧‍👦 Menú Adultos
+                        </h3>
+                        <div class="meals-grid">
+                `;
+                
+                const adultMeals = ['desayuno', 'comida', 'merienda', 'cena']
+                    .filter(meal => adultsDayData[meal])
+                    .map(meal => renderMeal(meal, adultsDayData[meal]))
+                    .join('');
+                
+                html += adultMeals + '</div></div>';
+            }
+
+            // Children Section
+            if (childrenDayData) {
+                html += `
+                    <div class="menu-section">
+                        <h3 class="menu-section-title children">
+                            🧒 Menú Niños
+                        </h3>
+                        <div class="meals-grid">
+                `;
+                
+                const childrenMeals = ['desayuno', 'comida', 'merienda', 'cena']
+                    .filter(meal => childrenDayData[meal])
+                    .map(meal => renderMeal(meal, childrenDayData[meal]))
+                    .join('');
+                
+                html += childrenMeals + '</div></div>';
+            }
+
+            html += '</div>';
+            document.getElementById('dayContent').innerHTML = html;
+        }
+
+        function renderMeal(type, mealData) {
+            const ingredientsList = mealData.ingredientes ? 
+                mealData.ingredientes.join(', ') : 'No ingredients listed';
+
+            return `
+                <div class="meal-card ${type}">
+                    <div class="meal-type ${type}">
+                        <span class="meal-icon">${mealIcons[type]}</span>
+                        ${mealNames[type]}
+                    </div>
+                    <div class="meal-name">${mealData.nombre}</div>
+                    
+                    ${mealData.tiempo_prep ? `
+                        <div class="meal-info-row">
+                            <span class="meal-info-icon">⏱️</span>
+                            <span>${mealData.tiempo_prep} minutos</span>
+                        </div>
+                    ` : ''}
+                    
+                    ${mealData.ingredientes ? `
+                        <div class="ingredients-list">
+                            <div class="ingredients-label">Ingredientes</div>
+                            <div class="ingredients-items">${ingredientsList}</div>
+                        </div>
+                    ` : ''}
+                    
+                    ${mealData.notas ? `
+                        <div class="meal-notes">
+                            💡 ${mealData.notas}
+                        </div>
+                    ` : ''}
+                    
+                    ${mealData.instrucciones ? `
+                        <div class="meal-info-row">
+                            <span class="meal-info-icon">📋</span>
+                            <span style="font-size: 0.85rem;">${mealData.instrucciones}</span>
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+        }
+
+        // Function to load JSON from external source
+        function loadMenuFromJSON(jsonString) {
+            try {
+                const data = typeof jsonString === 'string' ? JSON.parse(jsonString) : jsonString;
+                initializeMenu(data);
+            } catch (error) {
+                console.error('Error parsing JSON:', error);
+                alert('Error loading menu data');
+            }
+        }
+
+        // Make it available globally
+        window.loadMenuFromJSON = loadMenuFromJSON;
+
+        // Listen for postMessage from parent window
+        window.addEventListener('message', (event) => {
+            if (event.data && event.data.type === 'loadMenu' && event.data.data) {
+                loadMenuFromJSON(event.data.data);
+            }
+        });
+
+        // Try to get menu data from URL hash or localStorage as fallback
+        window.addEventListener('load', () => {
+            // Check URL hash for JSON data
+            if (window.location.hash && window.location.hash.length > 1) {
+                try {
+                    const data = JSON.parse(decodeURIComponent(window.location.hash.substring(1)));
+                    loadMenuFromJSON(data);
+                } catch (e) {
+                    console.error('Error parsing hash data:', e);
+                }
+            }
+            // Check localStorage
+            else if (localStorage.getItem('menuData')) {
+                try {
+                    const data = JSON.parse(localStorage.getItem('menuData'));
+                    loadMenuFromJSON(data);
+                } catch (e) {
+                    console.error('Error parsing localStorage data:', e);
+                }
+            }
+        });
+    </script>
+</body>
+</html>

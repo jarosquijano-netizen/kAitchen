@@ -1,0 +1,243 @@
+# Cursor Rules - Family Kitchen Menu System
+
+## Project Context
+You are working on a family kitchen management system that:
+- Manages family member profiles (adults and children) with dietary preferences
+- Extracts recipes from web URLs automatically
+- Generates personalized weekly menus using Claude AI (Anthropic)
+- Displays menus on a kitchen TV interface
+- Is built with Flask (Python backend) and vanilla JavaScript frontend
+
+## Tech Stack
+- **Backend**: Flask 3.0, Python 3.8+
+- **Database**: SQLite3 (local), PostgreSQL (production on Railway)
+- **AI**: Anthropic Claude API (Sonnet 4)
+- **Deployment**: Railway
+- **Auth**: Clerk (optional)
+- **Email**: Resend (optional)
+- **Frontend**: Vanilla JavaScript, HTML5, CSS3
+
+## Project Structure
+```
+family-kitchen-menu/
+├── app.py                    # Main Flask application
+├── database.py               # Database models and operations
+├── recipe_extractor.py       # Web scraping for recipes
+├── menu_generator.py         # AI menu generation with Claude
+├── auth.py                   # Clerk authentication integration
+├── email_service.py          # Resend email integration
+├── requirements.txt          # Python dependencies
+├── Procfile                  # Railway deployment config
+├── railway.toml              # Railway configuration
+├── .env                      # Environment variables (DO NOT COMMIT)
+├── .env.example             # Environment variables template
+├── templates/               # HTML templates
+│   ├── index.html          # Admin interface
+│   └── tv_display.html     # TV kitchen display
+└── static/                  # Static assets
+    ├── css/
+    └── js/
+        └── app.js          # Frontend JavaScript
+```
+
+## Coding Conventions
+
+### Python
+- Use **type hints** for all function signatures
+- Follow **PEP 8** style guide
+- Use **docstrings** for all functions (Google style)
+- Prefer **f-strings** over .format() or %
+- Use **list/dict comprehensions** when readable
+- Handle errors with specific exceptions, not bare except
+- Use **environment variables** for all secrets/config
+
+### JavaScript
+- Use **modern ES6+** syntax
+- Prefer **const/let** over var
+- Use **async/await** over .then() for promises
+- Use **template literals** for strings
+- Add JSDoc comments for complex functions
+
+### SQL/Database
+- Use **parameterized queries** ALWAYS (security)
+- Create indexes for frequently queried columns
+- Use transactions for multi-step operations
+- In production, migrate from SQLite to PostgreSQL
+
+### API Design
+- Use RESTful conventions
+- Return consistent JSON structure: {success: bool, data: any, error: str}
+- Use appropriate HTTP status codes
+- Validate all user input
+- Use CORS appropriately
+
+## Security Best Practices
+- **Never commit .env** files
+- Use environment variables for:
+  - ANTHROPIC_API_KEY
+  - CLERK_SECRET_KEY (if using Clerk)
+  - RESEND_API_KEY (if using Resend)
+  - DATABASE_URL (for Railway PostgreSQL)
+  - SECRET_KEY (Flask session)
+- Validate all user input
+- Use HTTPS in production
+- Implement rate limiting for API endpoints
+- Sanitize data before storing in database
+
+## Key Features to Preserve
+1. **Family Profile Management**: Adult and child profiles with 15-20 fields each
+2. **Recipe Extraction**: BeautifulSoup + Trafilatura for web scraping
+3. **AI Menu Generation**: Claude API with detailed prompts considering all preferences
+4. **TV Display**: Large, readable interface that auto-refreshes
+5. **Dietary Restrictions**: ALWAYS prioritize allergies and intolerances
+
+## When Adding New Features
+
+### For Database Changes
+1. Update the schema in database.py
+2. Add migration logic if needed
+3. Update forms in templates/index.html
+4. Update API endpoints in app.py
+5. Update frontend JavaScript
+
+### For AI Prompt Changes
+1. Edit menu_generator.py
+2. Test with different family configurations
+3. Ensure JSON response parsing is robust
+4. Handle API errors gracefully
+
+### For UI Changes
+1. Maintain mobile-first responsive design
+2. Keep TV display optimized for distance viewing
+3. Use CSS variables for easy theming
+4. Test on multiple screen sizes
+
+## Common Tasks
+
+### Add a new family profile field
+```python
+# 1. Update database.py schema
+cursor.execute('''
+    ALTER TABLE adults ADD COLUMN new_field TEXT
+''')
+
+# 2. Update the add_adult method
+def add_adult(self, profile: Dict) -> int:
+    # Add new field to INSERT statement
+    
+# 3. Update templates/index.html form
+# 4. Update static/js/app.js to handle new field
+```
+
+### Add a new API endpoint
+```python
+# In app.py
+@app.route('/api/new-endpoint', methods=['POST'])
+def new_endpoint():
+    """Endpoint description"""
+    try:
+        data = request.json
+        # Validate input
+        if not data.get('required_field'):
+            return jsonify({
+                'success': False,
+                'error': 'required_field is required'
+            }), 400
+        
+        # Process
+        result = do_something(data)
+        
+        return jsonify({
+            'success': True,
+            'data': result
+        })
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+```
+
+### Modify AI menu generation
+```python
+# In menu_generator.py, edit _build_menu_prompt()
+# Add new constraints or preferences to the prompt
+# Test with: python -c "from menu_generator import MenuGenerator; ..."
+```
+
+## Railway Deployment Notes
+- Use PostgreSQL database (provided by Railway)
+- Set environment variables in Railway dashboard
+- Use gunicorn for production server
+- Enable persistent storage if needed
+- Monitor logs with `railway logs`
+
+## Clerk Authentication Integration
+- Users can have multiple family "households"
+- Each household has its own profiles and menus
+- Use Clerk user ID to associate data
+- Implement middleware to check authentication
+
+## Resend Email Integration
+- Send weekly menu emails on Sunday
+- Include shopping list
+- Format as HTML with nice design
+- Add unsubscribe option
+
+## Testing Strategy
+- Test with different family configurations
+- Test edge cases (all vegetarian, severe allergies, picky eaters)
+- Test recipe extraction on various websites
+- Test TV display on actual TV or large screen
+- Test mobile responsiveness
+
+## Performance Optimization
+- Cache recipe extractions
+- Implement pagination for large recipe lists
+- Use CDN for static assets in production
+- Optimize database queries with indexes
+- Consider Redis for session storage in production
+
+## Common Issues and Solutions
+
+### Issue: Claude API timeout
+**Solution**: Increase timeout, implement retry logic, cache results
+
+### Issue: Recipe extraction fails
+**Solution**: Fallback to manual entry, try different parsing strategy
+
+### Issue: TV display not updating
+**Solution**: Check CORS settings, verify network connectivity
+
+### Issue: Database locked (SQLite)
+**Solution**: Migrate to PostgreSQL for production
+
+## AI Assistant Instructions
+When I ask you to:
+- **"Add a feature"**: Follow the conventions above, update all related files
+- **"Fix a bug"**: Identify root cause, fix it properly, add error handling
+- **"Optimize"**: Focus on database queries and API calls first
+- **"Deploy"**: Provide Railway-specific instructions
+- **"Refactor"**: Maintain backward compatibility, add tests
+
+Always:
+- Explain your changes
+- Consider edge cases
+- Maintain existing functionality
+- Follow the security best practices
+- Keep the code DRY (Don't Repeat Yourself)
+
+## Spanish Language
+- Keep all user-facing text in Spanish
+- Use Spanish for comments when it makes sense
+- English for technical terms and code
+
+## Priority Order for Changes
+1. Security issues (fix immediately)
+2. Data integrity issues (fix immediately)
+3. User-facing bugs (fix soon)
+4. Performance issues (optimize when possible)
+5. New features (plan carefully)
+6. Code refactoring (when stable)
+
+Remember: This is a family system. Prioritize safety (allergies), usability (especially for TV display), and reliability above all else.

@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recuperar API Key - k[AI]tchen</title>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #0A0A0A;
+            color: #FFFFFF;
+            padding: 40px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 30px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        h1 {
+            color: #D4AF37;
+            margin-bottom: 20px;
+        }
+        .info {
+            background: rgba(251, 191, 36, 0.1);
+            border-left: 4px solid rgba(251, 191, 36, 0.5);
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        .success {
+            background: rgba(34, 197, 94, 0.1);
+            border-left: 4px solid rgba(34, 197, 94, 0.5);
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        .error {
+            background: rgba(239, 68, 68, 0.1);
+            border-left: 4px solid rgba(239, 68, 68, 0.5);
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        button {
+            background: #D4AF37;
+            color: #0A0A0A;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            margin: 10px 5px;
+        }
+        button:hover {
+            background: #C9A227;
+        }
+        .api-key-display {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 6px;
+            font-family: monospace;
+            word-break: break-all;
+            margin: 20px 0;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .copy-btn {
+            background: #8AA193;
+            color: white;
+            padding: 8px 16px;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔑 Recuperar API Key de Anthropic</h1>
+        
+        <div class="info">
+            <strong>⚠️ Importante:</strong> Esta página solo funciona desde localhost por seguridad.
+            Si el servidor tiene la API key en memoria, podrás recuperarla aquí.
+        </div>
+        
+        <div id="status"></div>
+        
+        <div id="api-key-section" style="display: none;">
+            <h2>API Key Encontrada:</h2>
+            <div class="api-key-display" id="api-key-display"></div>
+            <button class="copy-btn" onclick="copyApiKey()">📋 Copiar API Key</button>
+            <button onclick="saveToEnv()">💾 Guardar en .env</button>
+        </div>
+        
+        <div style="margin-top: 30px;">
+            <button onclick="checkApiKey()">🔍 Buscar API Key en el Servidor</button>
+            <button onclick="window.location.href='/'">🏠 Volver al Inicio</button>
+        </div>
+    </div>
+
+    <script>
+        async function checkApiKey() {
+            const statusDiv = document.getElementById('status');
+            statusDiv.innerHTML = '<div class="info">Buscando API key en el servidor...</div>';
+            
+            try {
+                // Intentar obtener la key completa
+                const response = await fetch('/api/temp/get-api-key');
+                const data = await response.json();
+                
+                if (data.success && data.api_key) {
+                    document.getElementById('api-key-display').textContent = data.api_key;
+                    document.getElementById('api-key-section').style.display = 'block';
+                    statusDiv.innerHTML = '<div class="success">✅ API Key encontrada en el servidor</div>';
+                } else {
+                    statusDiv.innerHTML = `<div class="error">❌ ${data.error || 'API key no encontrada en el servidor'}</div>`;
+                }
+            } catch (error) {
+                statusDiv.innerHTML = `<div class="error">❌ Error al conectar con el servidor: ${error.message}</div>`;
+            }
+        }
+        
+        function copyApiKey() {
+            const apiKey = document.getElementById('api-key-display').textContent;
+            navigator.clipboard.writeText(apiKey).then(() => {
+                alert('✅ API Key copiada al portapapeles');
+            }).catch(() => {
+                alert('❌ Error al copiar. Selecciona y copia manualmente.');
+            });
+        }
+        
+        async function saveToEnv() {
+            const apiKey = document.getElementById('api-key-display').textContent;
+            const statusDiv = document.getElementById('status');
+            
+            try {
+                const response = await fetch('/api/temp/save-api-key-to-env', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    statusDiv.innerHTML = `<div class="success">✅ ${data.message}</div>`;
+                } else {
+                    statusDiv.innerHTML = `<div class="error">❌ ${data.error}</div>`;
+                }
+            } catch (error) {
+                statusDiv.innerHTML = `<div class="error">❌ Error: ${error.message}</div>`;
+            }
+        }
+        
+        // Auto-check on load
+        window.addEventListener('load', () => {
+            setTimeout(checkApiKey, 500);
+        });
+    </script>
+</body>
+</html>

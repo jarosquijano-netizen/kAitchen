@@ -1,0 +1,1471 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>k[AI]tchen · Menu System</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --black: #0A0A0A;
+            --charcoal: #1A1A1A;
+            --slate: #2D3748;
+            --silver: #CBD5E0;
+            --white: #FFFFFF;
+            --gold: #D4AF37;
+            --gold-dark: #C9A227;
+            --sage: #8AA193;
+            --glass-bg: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--black);
+            color: var(--white);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        /* Grain texture overlay */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.03'/%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: 1;
+            opacity: 0.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            position: relative;
+            z-index: 2;
+        }
+
+        header {
+            padding: 4rem 0 3rem;
+            text-align: center;
+            position: relative;
+        }
+
+        h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 4rem;
+            font-weight: 900;
+            letter-spacing: -2px;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, var(--white) 0%, var(--silver) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            font-weight: 300;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: var(--silver);
+        }
+
+        .tabs {
+            display: flex;
+            gap: 1rem;
+            margin: 3rem 0;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .tab {
+            padding: 1rem 2rem;
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: var(--silver);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .tab:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.2);
+            color: var(--white);
+            transform: translateY(-2px);
+        }
+
+        .tab.active {
+            background: linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%);
+            border-color: var(--gold);
+            color: var(--black);
+            box-shadow: 0 10px 30px rgba(212, 175, 55, 0.3);
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 3rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .card h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 2rem;
+            color: var(--white);
+        }
+
+        .btn {
+            padding: 1rem 2.5rem;
+            border: none;
+            border-radius: 50px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            font-family: 'Inter', sans-serif;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%);
+            color: var(--black);
+            box-shadow: 0 10px 30px rgba(212, 175, 55, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(212, 175, 55, 0.5);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, var(--sage) 0%, #7A9184 100%);
+            color: var(--white);
+        }
+
+        .btn-danger {
+            background: rgba(239, 68, 68, 0.2);
+            color: #FCA5A5;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        .btn-danger:hover {
+            background: rgba(239, 68, 68, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .btn-sm {
+            padding: 0.7rem 1.5rem;
+            font-size: 0.85rem;
+        }
+
+        .form-group {
+            margin-bottom: 2rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.75rem;
+            font-weight: 500;
+            color: var(--silver);
+            font-size: 0.9rem;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        input, textarea, select {
+            width: 100%;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            color: var(--white);
+            font-size: 1rem;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.3s ease;
+        }
+
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            background: rgba(255, 255, 255, 0.05);
+            border-color: var(--gold);
+            box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1);
+        }
+
+        input::placeholder, textarea::placeholder {
+            color: rgba(255, 255, 255, 0.3);
+        }
+
+        textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        select option {
+            background: var(--charcoal);
+            color: var(--white);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+        }
+
+        .profile-list {
+            display: grid;
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .profile-item {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--glass-border);
+            border-left: 4px solid var(--gold);
+            padding: 2rem;
+            border-radius: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+
+        .profile-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-left-width: 6px;
+            transform: translateX(4px);
+        }
+
+        .profile-info h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.75rem;
+            margin-bottom: 0.5rem;
+            color: var(--white);
+        }
+
+        .profile-info p {
+            color: var(--silver);
+            font-size: 0.95rem;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.4rem 1rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            margin-right: 0.5rem;
+            margin-top: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .badge-warning {
+            background: rgba(251, 191, 36, 0.2);
+            color: #FCD34D;
+            border: 1px solid rgba(251, 191, 36, 0.3);
+        }
+
+        .badge-info {
+            background: rgba(59, 130, 246, 0.2);
+            color: #93C5FD;
+            border: 1px solid rgba(59, 130, 246, 0.3);
+        }
+
+        .alert {
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+            display: none;
+            border-left: 4px solid;
+        }
+
+        .alert.show {
+            display: block;
+            animation: slideDown 0.4s ease-out;
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .alert-success {
+            background: rgba(34, 197, 94, 0.1);
+            color: #86EFAC;
+            border-color: #22C55E;
+        }
+
+        .alert-error {
+            background: rgba(239, 68, 68, 0.1);
+            color: #FCA5A5;
+            border-color: #EF4444;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 4rem;
+        }
+
+        .loading.show {
+            display: block;
+        }
+
+        .spinner {
+            width: 60px;
+            height: 60px;
+            border: 3px solid rgba(255, 255, 255, 0.1);
+            border-top: 3px solid var(--gold);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1.5rem;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideOut {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 5rem 2rem;
+            color: var(--silver);
+        }
+
+        .empty-state h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            color: var(--white);
+        }
+
+        .menu-display {
+            margin-top: 2rem;
+        }
+
+        .day-menu {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .day-header {
+            font-family: 'Playfair Display', serif;
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--gold);
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .meal-item {
+            background: rgba(255, 255, 255, 0.02);
+            border-left: 3px solid var(--sage);
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            border-radius: 8px;
+        }
+
+        .meal-title {
+            font-weight: 600;
+            color: var(--white);
+            margin-bottom: 0.5rem;
+            font-size: 1.1rem;
+        }
+
+        .meal-details {
+            color: var(--silver);
+            font-size: 0.95rem;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2.5rem;
+            }
+
+            .card {
+                padding: 2rem 1.5rem;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+        /* Print styles for shopping list - optimized for 1-2 pages, no blank pages */
+        @media print {
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+            
+            html, body {
+                height: auto !important;
+                min-height: auto !important;
+                max-height: none !important;
+                background: white !important;
+                color: black !important;
+                font-size: 10pt !important;
+                line-height: 1.3 !important;
+                overflow: visible !important;
+            }
+            
+            body::before,
+            body::after {
+                display: none !important;
+                content: none !important;
+            }
+            
+            .tabs,
+            .btn,
+            #shopping-week-navigation,
+            header,
+            .auto-refresh,
+            #progress-container,
+            #family-composition-card,
+            #summary-card {
+                display: none !important;
+                height: 0 !important;
+                width: 0 !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+            
+            .tab-content {
+                display: block !important;
+                page-break-inside: auto !important;
+            }
+            
+            .container {
+                max-width: 100% !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                height: auto !important;
+            }
+            
+            /* Shopping List card - minimal padding, start immediately */
+            #shopping-tab .card {
+                background: white !important;
+                border: none !important;
+                box-shadow: none !important;
+                padding: 0.3cm 0.2cm 0.2cm 0.2cm !important;
+                margin: 0 !important;
+                height: auto !important;
+                min-height: auto !important;
+                page-break-before: auto !important;
+            }
+            
+            /* Title - compact, no page break */
+            #shopping-tab .card > div:first-child {
+                display: block !important;
+                margin-bottom: 0.3cm !important;
+                padding-bottom: 0.2cm !important;
+                border-bottom: 2px solid #000 !important;
+                height: auto !important;
+                min-height: auto !important;
+                page-break-after: avoid !important;
+            }
+            
+            /* Shopping List title - readable size */
+            #shopping-tab h2 {
+                font-size: 20pt !important;
+                font-weight: bold !important;
+                text-align: left !important;
+                margin: 0 0 0.2cm 0 !important;
+                padding: 0 !important;
+                color: black !important;
+                line-height: 1.2 !important;
+            }
+            
+            /* Hide subtitle, buttons, and navigation in print */
+            #shopping-tab .card > div:first-child > p,
+            #shopping-tab .card > div:first-child > div:last-child,
+            #shopping-week-navigation,
+            #family-composition-card,
+            #summary-card,
+            #progress-container {
+                display: none !important;
+                height: 0 !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+            
+            /* Shopping list display - no breaks, start immediately */
+            #shopping-list-display {
+                padding: 0 !important;
+                margin: 0 !important;
+                height: auto !important;
+                min-height: auto !important;
+                page-break-before: avoid !important;
+            }
+            
+            /* Main container div - allow page breaks, no forced breaks */
+            #shopping-list-display > div {
+                padding: 0.2cm !important;
+                margin-bottom: 0.2cm !important;
+                border: 1px solid #ccc !important;
+                border-radius: 2px !important;
+                page-break-inside: auto !important;
+                break-inside: auto !important;
+                orphans: 2;
+                widows: 2;
+                height: auto !important;
+                min-height: auto !important;
+            }
+            
+            /* First container - no margin top to avoid blank page */
+            #shopping-list-display > div:first-child {
+                margin-top: 0 !important;
+                padding-top: 0.2cm !important;
+            }
+            
+            /* Override inline styles from JavaScript - aggressive */
+            #shopping-list-display > div,
+            #shopping-list-display .shopping-week-container,
+            #shopping-list-display > div[style*="padding"] {
+                padding: 0.2cm !important;
+            }
+            
+            #shopping-list-display > div h3,
+            #shopping-list-display .shopping-week-title,
+            #shopping-list-display > div h3[style*="margin-bottom"] {
+                margin-bottom: 0.15cm !important;
+                font-size: 11pt !important;
+                padding: 0 !important;
+                margin-top: 0 !important;
+            }
+            
+            /* Prevent empty pages and elements */
+            #shopping-list-display > div:empty {
+                display: none !important;
+                height: 0 !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                border: none !important;
+            }
+            
+            /* Category sections - use 2 columns layout for readability */
+            #shopping-list-display > div > div[style*="grid"],
+            #shopping-list-display > div > div[style*="grid-template-columns"] {
+                display: grid !important;
+                grid-template-columns: repeat(2, 1fr) !important;
+                gap: 0.15cm !important;
+                margin-top: 0.15cm !important;
+                margin-bottom: 0 !important;
+                padding: 0 !important;
+            }
+            
+            /* Category header - readable */
+            #shopping-list-display > div > div:first-child {
+                margin-bottom: 0.15cm !important;
+                padding-bottom: 0.15cm !important;
+                border-bottom: 1px solid #ccc !important;
+                height: auto !important;
+                min-height: auto !important;
+            }
+            
+            #shopping-list-display h3 {
+                font-size: 11pt !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                font-weight: bold !important;
+                display: inline !important;
+                line-height: 1.3 !important;
+            }
+            
+            #shopping-list-display span[style*="font-size: 2rem"] {
+                font-size: 10pt !important;
+            }
+            
+            #shopping-list-display span[style*="background"] {
+                font-size: 7pt !important;
+                padding: 0.05cm 0.2cm !important;
+            }
+            
+            /* Shopping items - readable size, allow breaks */
+            .shopping-item {
+                padding: 0.15cm 0.2cm !important;
+                margin: 0 0 0.1cm 0 !important;
+                border-left: 2px solid #333 !important;
+                border-radius: 2px !important;
+                font-size: 9pt !important;
+                page-break-inside: auto !important;
+                break-inside: auto !important;
+                display: flex !important;
+                align-items: center !important;
+                gap: 0.2cm !important;
+                min-height: auto !important;
+                height: auto !important;
+                max-height: none !important;
+            }
+            
+            .shopping-item > div {
+                padding: 0 !important;
+                margin: 0 !important;
+            }
+            
+            .shopping-checkbox {
+                width: 12px !important;
+                height: 12px !important;
+                min-width: 12px !important;
+                border-width: 1.5px !important;
+                flex-shrink: 0 !important;
+            }
+            
+            .shopping-item div[style*="font-weight: 600"] {
+                font-size: 9pt !important;
+                margin-bottom: 0 !important;
+                color: black !important;
+                line-height: 1.3 !important;
+            }
+            
+            .shopping-item div[style*="font-size: 0.85rem"] {
+                font-size: 8pt !important;
+                color: #666 !important;
+                line-height: 1.2 !important;
+            }
+            
+            .shopping-item div[style*="font-weight: 700"][style*="color: var(--gold)"] {
+                font-size: 9pt !important;
+                color: black !important;
+                min-width: auto !important;
+                white-space: nowrap !important;
+            }
+            
+            /* Summary section - readable */
+            #shopping-summary-week {
+                padding: 0.2cm !important;
+                margin-bottom: 0.2cm !important;
+                border: 1px solid #ccc !important;
+                border-radius: 2px !important;
+                font-size: 9pt !important;
+                display: flex !important;
+                flex-wrap: wrap !important;
+                gap: 0.5cm !important;
+                height: auto !important;
+                min-height: auto !important;
+            }
+            
+            #shopping-summary-week > div {
+                display: inline-block !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+            
+            #shopping-summary-week > div > div {
+                font-size: 9pt !important;
+            }
+            
+            /* Hide empty states and loading */
+            .empty-state,
+            .loading,
+            .spinner {
+                display: none !important;
+            }
+            
+            /* Optimize page breaks - reasonable margins */
+            @page {
+                margin: 1cm;
+                size: A4;
+            }
+            
+            /* Suppress blank pages at start and end */
+            @page :first {
+                margin-top: 0.5cm !important;
+            }
+            
+            @page :last {
+                margin-bottom: 0.5cm !important;
+            }
+            
+            /* Prevent orphaned content but allow breaks */
+            .shopping-item {
+                orphans: 1;
+                widows: 1;
+            }
+            
+            /* Remove any trailing empty space */
+            #shopping-list-display > div:last-child {
+                margin-bottom: 0 !important;
+                padding-bottom: 0.2cm !important;
+                border-bottom: none !important;
+                page-break-after: auto !important;
+            }
+            
+            /* Ensure no blank page at start - remove any forced breaks */
+            body,
+            html,
+            .container,
+            .tab-content,
+            #shopping-tab,
+            #shopping-tab .card {
+                page-break-before: auto !important;
+            }
+            
+            /* Ensure content starts immediately */
+            #shopping-tab .card > div:first-child {
+                page-break-after: avoid !important;
+            }
+            
+            /* Ensure no blank page at end */
+            body,
+            html,
+            .container,
+            .tab-content,
+            #shopping-tab,
+            #shopping-tab .card,
+            #shopping-list-display,
+            #shopping-list-display > div:last-child {
+                page-break-after: auto !important;
+            }
+            
+            /* Remove any empty space after last element */
+            #shopping-list-display > div:last-child::after,
+            #shopping-list-display::after,
+            .card::after {
+                content: none !important;
+                display: none !important;
+                height: 0 !important;
+            }
+            
+            /* Remove empty space at end - aggressive */
+            body::after,
+            .tab-content::after,
+            #shopping-list-display::after,
+            .card::after {
+                content: none !important;
+                display: none !important;
+                height: 0 !important;
+            }
+            
+            /* Compact all text - override inline styles, readable size */
+            #shopping-list-display * {
+                font-size: 9pt !important;
+                line-height: 1.3 !important;
+            }
+            
+            /* Larger font for important text */
+            #shopping-list-display h3,
+            #shopping-list-display h4 {
+                font-size: 11pt !important;
+            }
+            
+            /* Override all padding and margins in shopping list */
+            #shopping-list-display [style*="padding"],
+            #shopping-list-display [style*="margin"] {
+                padding: 0.05cm !important;
+                margin: 0 !important;
+            }
+            
+            /* Specific overrides for common inline styles */
+            #shopping-list-display [style*="padding: 2rem"],
+            #shopping-list-display [style*="padding:2rem"],
+            #shopping-list-display [style*="padding: 1.5rem"],
+            #shopping-list-display [style*="padding:1.5rem"],
+            #shopping-list-display [style*="padding: 1rem"],
+            #shopping-list-display [style*="padding:1rem"] {
+                padding: 0.1cm !important;
+            }
+            
+            #shopping-list-display [style*="margin-bottom: 1.5rem"],
+            #shopping-list-display [style*="margin-bottom:1.5rem"],
+            #shopping-list-display [style*="margin-bottom: 2rem"],
+            #shopping-list-display [style*="margin-bottom:2rem"] {
+                margin-bottom: 0.1cm !important;
+            }
+            
+            /* Remove any unnecessary spacing */
+            #shopping-list-display br,
+            #shopping-list-display p:empty,
+            #shopping-list-display div:empty:not(.shopping-checkbox) {
+                display: none !important;
+                height: 0 !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+            
+            /* Remove empty grid gaps */
+            #shopping-list-display [style*="gap: 1rem"],
+            #shopping-list-display [style*="gap:1rem"],
+            #shopping-list-display [style*="gap: 1.5rem"],
+            #shopping-list-display [style*="gap:1.5rem"] {
+                gap: 0.08cm !important;
+            }
+            
+            /* Remove all hover effects and transitions */
+            .shopping-item:hover,
+            .shopping-item:active {
+                background: white !important;
+                transform: none !important;
+            }
+            
+            /* Remove borders and shadows */
+            #shopping-list-display > div {
+                box-shadow: none !important;
+            }
+            
+            /* Ensure no element creates blank pages */
+            #shopping-list-display > div:only-child:empty,
+            #shopping-list-display:empty,
+            #shopping-list-display > div:empty {
+                display: none !important;
+                height: 0 !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                border: none !important;
+            }
+            
+            /* Force remove any fixed heights */
+            #shopping-list-display,
+            #shopping-list-display > div,
+            .shopping-item,
+            .card,
+            #shopping-tab .card > div {
+                max-height: none !important;
+                height: auto !important;
+                min-height: 0 !important;
+            }
+            
+            /* Remove any section spacing */
+            #shopping-list-display > div + div {
+                margin-top: 0 !important;
+            }
+            
+            /* Ensure summary doesn't create extra space */
+            #shopping-summary-week:empty {
+                display: none !important;
+                height: 0 !important;
+            }
+            
+            /* Categories container */
+            #shopping-categories-week {
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>k[AI]tchen</h1>
+            <p class="subtitle">AI-Powered Menu Management</p>
+        </div>
+    </header>
+
+    <div class="container">
+        <div id="alerts"></div>
+
+        <div class="tabs">
+            <button class="tab active" data-tab="family">Family</button>
+            <button class="tab" data-tab="recipes">Recipes</button>
+            <button class="tab" data-tab="menu">Weekly Menu</button>
+            <button class="tab" data-tab="shopping">Shopping List</button>
+            <button class="tab" data-tab="tv">TV Display</button>
+            <button class="tab" data-tab="settings">Settings</button>
+        </div>
+
+        <!-- FAMILY TAB -->
+        <div class="tab-content active" id="family-tab">
+            <div class="card">
+                <h2>Adult Profiles</h2>
+                <button class="btn btn-primary" onclick="showAdultForm()">+ Add Adult</button>
+                
+                <div id="adult-form" style="display: none; margin-top: 2rem;">
+                    <h3 style="font-family: 'Playfair Display', serif; font-size: 1.8rem; margin-bottom: 1.5rem; color: var(--white);">New Adult Profile</h3>
+                    <form id="adultForm">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Name *</label>
+                                <input type="text" name="nombre" required placeholder="Enter name">
+                            </div>
+                            <div class="form-group">
+                                <label>Age</label>
+                                <input type="number" name="edad" min="18" placeholder="Age">
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Dietary Goal</label>
+                                <select name="objetivo_alimentario">
+                                    <option value="">Select...</option>
+                                    <option value="Mantener peso">Maintain weight</option>
+                                    <option value="Perder peso">Lose weight</option>
+                                    <option value="Ganar músculo">Gain muscle</option>
+                                    <option value="Más energía">More energy</option>
+                                    <option value="Salud general">General health</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Diet Style</label>
+                                <select name="estilo_alimentacion">
+                                    <option value="">Select...</option>
+                                    <option value="Omnívoro">Omnivore</option>
+                                    <option value="Vegetariano">Vegetarian</option>
+                                    <option value="Vegano">Vegan</option>
+                                    <option value="Pescetariano">Pescatarian</option>
+                                    <option value="Flexitariano">Flexitarian</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Favorite Cuisines</label>
+                            <input type="text" name="cocinas_favoritas" placeholder="e.g., Mediterranean, Asian, Italian">
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>⚠️ Allergies</label>
+                                <input type="text" name="alergias" placeholder="e.g., Nuts, Shellfish">
+                            </div>
+                            <div class="form-group">
+                                <label>⚠️ Intolerances</label>
+                                <input type="text" name="intolerancias" placeholder="e.g., Lactose, Gluten">
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Favorite Ingredients</label>
+                                <textarea name="ingredientes_favoritos" placeholder="e.g., Avocado, Salmon, Quinoa"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label>Disliked Ingredients</label>
+                                <textarea name="ingredientes_no_gustan" placeholder="e.g., Eggplant, Liver"></textarea>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Max Cooking Time (minutes)</label>
+                                <input type="number" name="tiempo_max_cocinar" placeholder="45">
+                            </div>
+                            <div class="form-group">
+                                <label>Cooking Level</label>
+                                <select name="nivel_cocina">
+                                    <option value="">Select...</option>
+                                    <option value="Principiante">Beginner</option>
+                                    <option value="Intermedio">Intermediate</option>
+                                    <option value="Avanzado">Advanced</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Additional Comments</label>
+                            <textarea name="comentarios" placeholder="Any additional information..."></textarea>
+                        </div>
+
+                        <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+                            <button type="submit" class="btn btn-success">Save Profile</button>
+                            <button type="button" class="btn btn-danger" onclick="hideAdultForm()">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div id="adults-list" class="profile-list"></div>
+            </div>
+
+            <div class="card">
+                <h2>Children Profiles</h2>
+                <button class="btn btn-primary" onclick="showChildForm()">+ Add Child</button>
+                
+                <div id="child-form" style="display: none; margin-top: 2rem;">
+                    <h3 style="font-family: 'Playfair Display', serif; font-size: 1.8rem; margin-bottom: 1.5rem; color: var(--white);">New Child Profile</h3>
+                    <form id="childForm">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Name *</label>
+                                <input type="text" name="nombre" required placeholder="Enter name">
+                            </div>
+                            <div class="form-group">
+                                <label>Age *</label>
+                                <input type="number" name="edad" min="0" max="18" required placeholder="Age">
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Pickiness Level</label>
+                                <select name="nivel_exigencia">
+                                    <option value="">Select...</option>
+                                    <option value="Bajo">Low - Eats most things</option>
+                                    <option value="Medio">Medium - Selective sometimes</option>
+                                    <option value="Alto">High - Very selective</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Accepts New Foods</label>
+                                <select name="acepta_comida_nueva">
+                                    <option value="">Select...</option>
+                                    <option value="Sí">Yes - Likes trying new things</option>
+                                    <option value="A veces">Sometimes - Depends</option>
+                                    <option value="No">No - Prefers familiar foods</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>⚠️ Allergies</label>
+                                <input type="text" name="alergias" placeholder="e.g., Eggs, Milk">
+                            </div>
+                            <div class="form-group">
+                                <label>⚠️ Intolerances</label>
+                                <input type="text" name="intolerancias" placeholder="e.g., Lactose">
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Favorite Ingredients</label>
+                                <textarea name="ingredientes_favoritos" placeholder="e.g., Pasta, Chicken, Rice"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label>Rejected Ingredients</label>
+                                <textarea name="ingredientes_rechaza" placeholder="e.g., Green vegetables, Fish"></textarea>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Accepted Vegetables</label>
+                                <input type="text" name="verduras_aceptadas" placeholder="e.g., Carrots, Tomatoes">
+                            </div>
+                            <div class="form-group">
+                                <label>Rejected Vegetables</label>
+                                <input type="text" name="verduras_rechazadas" placeholder="e.g., Broccoli, Spinach">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Disliked Textures</label>
+                            <input type="text" name="texturas_no_gustan" placeholder="e.g., Gelatinous, Crunchy">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Parent Comments</label>
+                            <textarea name="comentarios_padres" placeholder="Any additional information..."></textarea>
+                        </div>
+
+                        <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+                            <button type="submit" class="btn btn-success">Save Profile</button>
+                            <button type="button" class="btn btn-danger" onclick="hideChildForm()">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div id="children-list" class="profile-list"></div>
+            </div>
+        </div>
+
+        <!-- RECIPES TAB -->
+        <div class="tab-content" id="recipes-tab">
+            <div class="card">
+                <h2>Extract Recipes from URLs</h2>
+                <p style="color: var(--silver); margin-bottom: 2rem; font-size: 1.05rem;">
+                    Add recipe URLs from your favorite cooking blogs and the system will automatically extract ingredients and instructions.
+                </p>
+                
+                <div class="form-group">
+                    <label>Recipe URL</label>
+                    <input type="url" id="recipeUrl" placeholder="https://example.com/recipe">
+                </div>
+                
+                <button class="btn btn-primary" onclick="extractRecipe()">Extract Recipe</button>
+                <button class="btn btn-primary" onclick="showBatchExtract()" style="margin-left: 1rem;">Extract Multiple</button>
+                
+                <div id="batch-extract" style="display: none; margin-top: 2rem;">
+                    <div class="form-group">
+                        <label>URLs (one per line)</label>
+                        <textarea id="batchUrls" rows="5" placeholder="https://example.com/recipe1
+https://example.com/recipe2
+https://example.com/recipe3"></textarea>
+                    </div>
+                    <button class="btn btn-success" onclick="extractBatchRecipes()">Extract All</button>
+                    <button class="btn btn-danger" onclick="hideBatchExtract()">Cancel</button>
+                </div>
+
+                <div id="recipes-list" style="margin-top: 2rem;"></div>
+            </div>
+        </div>
+
+        <!-- MENU TAB -->
+        <div class="tab-content" id="menu-tab">
+            <div class="card">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
+                    <h2 style="margin: 0;">AI Weekly Menu Generator</h2>
+                    <button class="btn btn-primary" onclick="generateMenu()" id="generate-menu-btn" style="font-size: 1.1rem; padding: 1.25rem 3rem;">
+                        Generate Menu with AI
+                    </button>
+                </div>
+                
+                <!-- Week Navigation - Simplified -->
+                <div id="week-navigation" style="display: none; margin-bottom: 2rem; padding: 1.5rem; background: rgba(255, 255, 255, 0.05); border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.1);">
+                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+                        <button class="btn btn-secondary" onclick="navigateWeek('prev')" id="prev-week-btn" style="padding: 0.75rem 1.5rem; min-width: 120px;">
+                            ← Anterior
+                        </button>
+                        <div id="current-week-display" style="font-size: 1.2rem; color: var(--white); font-weight: 600; text-align: center; flex: 1;">
+                            Semana del ...
+                        </div>
+                        <button class="btn btn-secondary" onclick="navigateWeek('next')" id="next-week-btn" style="padding: 0.75rem 1.5rem; min-width: 120px;">
+                            Siguiente →
+                        </button>
+                    </div>
+                    <div style="text-align: center; margin-top: 1rem;">
+                        <button class="btn btn-primary" onclick="loadCurrentWeekMenu()" style="padding: 0.5rem 1.5rem; font-size: 0.9rem;">
+                            📅 Ver Semana Actual
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="loading" id="menu-loading">
+                    <div class="spinner"></div>
+                    <p style="margin-top: 1rem; color: var(--silver);">Generating personalized menu...</p>
+                </div>
+
+                <div id="menu-display" class="menu-display"></div>
+            </div>
+        </div>
+
+        <!-- SHOPPING LIST TAB -->
+        <div class="tab-content" id="shopping-tab">
+            <div class="card">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+                    <div>
+                        <h2 style="margin: 0;">🛒 Shopping List</h2>
+                        <p style="color: var(--silver); margin-top: 0.5rem; font-size: 0.95rem;">
+                            Listas de compra de la semana actual y próxima semana
+                        </p>
+                    </div>
+                    <div style="display: flex; gap: 0.75rem; flex-wrap: nowrap; align-items: center; overflow-x: auto;">
+                        <button class="btn btn-primary" onclick="loadShoppingLists()" style="font-size: 0.9rem; padding: 0.75rem 1.5rem; white-space: nowrap; flex-shrink: 0;">
+                            📥 Cargar Listas
+                        </button>
+                        <button class="btn btn-secondary" onclick="exportToGoogle()" style="font-size: 0.9rem; padding: 0.75rem 1.5rem; white-space: nowrap; flex-shrink: 0;">
+                            📝 Export to Google
+                        </button>
+                        <button class="btn btn-secondary" onclick="generateSimpleShoppingListText()" style="font-size: 0.9rem; padding: 0.75rem 1.5rem; white-space: nowrap; flex-shrink: 0;">
+                            🖨️ Print
+                        </button>
+                        <button class="btn btn-secondary" onclick="markAllAsPurchased()" style="font-size: 0.9rem; padding: 0.75rem 1.5rem; white-space: nowrap; flex-shrink: 0;">
+                            ✅ Mark All as Purchased
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Week Navigation -->
+                <div id="shopping-week-navigation" style="margin-bottom: 2rem; padding: 1.5rem; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px;">
+                    <!-- Filled dynamically by updateShoppingWeekNavigation() -->
+                </div>
+                
+                <!-- Family Composition Card -->
+                <div id="family-composition-card" style="display: none; background: rgba(212, 175, 55, 0.1); border: 1px solid rgba(212, 175, 55, 0.3); border-radius: 16px; padding: 1.5rem; margin-bottom: 2rem;">
+                    <div style="text-align: center; margin-bottom: 1rem;">
+                        <h3 style="font-family: 'Playfair Display', serif; font-size: 1.3rem; color: var(--gold); margin-bottom: 0.5rem;">
+                            👨‍👩‍👧‍👦 Family Composition
+                        </h3>
+                        <p style="color: var(--silver); font-size: 0.85rem;">Quantities calculated for:</p>
+                    </div>
+                    <div id="family-composition-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; text-align: center;">
+                        <!-- Filled dynamically -->
+                    </div>
+                </div>
+                
+                <!-- Summary Card -->
+                <div id="summary-card" style="display: none; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 16px; padding: 1.5rem; margin-bottom: 2rem;">
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1.5rem; text-align: center;">
+                        <div>
+                            <div style="font-family: 'Playfair Display', serif; font-size: 2rem; color: var(--gold); margin-bottom: 0.25rem;" id="total-items-summary">0</div>
+                            <div style="color: var(--silver); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px;">Total Items</div>
+                        </div>
+                        <div>
+                            <div style="font-family: 'Playfair Display', serif; font-size: 2rem; color: var(--gold); margin-bottom: 0.25rem;" id="total-weight-summary">-</div>
+                            <div style="color: var(--silver); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px;">Approx. Weight</div>
+                        </div>
+                        <div>
+                            <div style="font-family: 'Playfair Display', serif; font-size: 2rem; color: var(--gold); margin-bottom: 0.25rem;" id="total-budget-summary">-</div>
+                            <div style="color: var(--silver); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px;">Est. Budget</div>
+                        </div>
+                        <div>
+                            <div style="font-family: 'Playfair Display', serif; font-size: 1.5rem; color: var(--gold); margin-bottom: 0.25rem;" id="week-date-summary">-</div>
+                            <div style="color: var(--silver); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px;">Week Of</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Progress Bar -->
+                <div id="progress-container" style="display: none; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.75rem; color: var(--silver); font-size: 0.9rem;">
+                        <span>Shopping Progress</span>
+                        <span id="progress-text">0 / 0 items</span>
+                    </div>
+                    <div style="width: 100%; height: 12px; background: rgba(255, 255, 255, 0.1); border-radius: 6px; overflow: hidden;">
+                        <div id="progress-fill" style="height: 100%; background: linear-gradient(90deg, var(--gold), var(--gold-dark)); transition: width 0.5s ease; width: 0%; border-radius: 6px;"></div>
+                    </div>
+                </div>
+                
+                <!-- Shopping List Content -->
+                <div id="shopping-list-display"></div>
+            </div>
+        </div>
+
+        <!-- TV VIEW TAB -->
+        <div class="tab-content" id="tv-tab">
+            <div class="card">
+                <h2>Kitchen TV Display</h2>
+                <p style="color: var(--silver); margin-bottom: 2rem; font-size: 1.05rem;">
+                    Open this URL on your kitchen TV browser for full-screen display.
+                </p>
+                
+                <div style="background: rgba(255, 255, 255, 0.03); padding: 2rem; border-radius: 12px; margin-bottom: 2rem; border: 1px solid var(--glass-border);">
+                    <p style="font-weight: 600; margin-bottom: 1rem; font-size: 1.1rem; color: var(--gold);">TV URL:</p>
+                    <code id="tv-url" style="font-size: 1.2rem; color: var(--white); font-family: 'Inter', monospace;">http://localhost:7000/tv</code>
+                    <button class="btn btn-primary btn-sm" onclick="copyTvUrl()" style="margin-left: 1rem;">Copy</button>
+                </div>
+                
+                <button class="btn btn-primary" onclick="window.open('/tv', '_blank')">
+                    Open TV View
+                </button>
+            </div>
+        </div>
+
+        <!-- SETTINGS TAB -->
+        <div class="tab-content" id="settings-tab">
+            <div class="card">
+                <h2>⚙️ Settings</h2>
+                <p style="color: var(--silver); margin-bottom: 30px;">
+                    Configure system options, including the Anthropic API key for AI menu generation.
+                </p>
+
+                <div style="background: rgba(59, 130, 246, 0.1); border-left: 4px solid rgba(59, 130, 246, 0.5); padding: 20px; margin-bottom: 30px; border-radius: 4px;">
+                    <h3 style="margin-bottom: 10px; color: #93C5FD;">🔑 Anthropic API Key</h3>
+                    <p style="color: var(--silver); margin-bottom: 15px;">
+                        The Anthropic API key is required to generate weekly menus with AI. 
+                        Get your free key at: 
+                        <a href="https://console.anthropic.com/" target="_blank" style="color: #93C5FD; text-decoration: underline;">
+                            https://console.anthropic.com/
+                        </a>
+                    </p>
+                    
+                    <form id="settingsForm">
+                        <div class="form-group">
+                            <label for="anthropic-api-key">
+                                <strong>ANTHROPIC_API_KEY</strong>
+                                <span style="color: var(--silver); font-weight: normal; font-size: 0.9rem;">
+                                    (will be partially hidden for security)
+                                </span>
+                            </label>
+                            <input 
+                                type="password" 
+                                id="anthropic-api-key" 
+                                name="anthropic_api_key" 
+                                placeholder="sk-ant-api03-..."
+                                style="font-family: monospace; font-size: 0.95rem;"
+                            >
+                            <small style="color: var(--silver); display: block; margin-top: 5px;">
+                                💡 The key will be saved securely in the .env file
+                            </small>
+                        </div>
+
+                        <div id="api-key-status" style="margin-bottom: 15px;"></div>
+
+                        <div style="display: flex; gap: 10px;">
+                            <button type="submit" class="btn btn-success">
+                                💾 Save Settings
+                            </button>
+                            <button type="button" class="btn btn-primary" onclick="testApiKey()">
+                                🧪 Test API Key
+                            </button>
+                            <button type="button" class="btn btn-danger" onclick="loadSettings()">
+                                🔄 Reload
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <div style="background: rgba(251, 191, 36, 0.1); border-left: 4px solid rgba(251, 191, 36, 0.5); padding: 20px; border-radius: 4px;">
+                    <h3 style="margin-bottom: 10px; color: #FCD34D;">ℹ️ System Information</h3>
+                    <div style="color: var(--silver);">
+                        <p><strong>Server Port:</strong> <code>7000</code></p>
+                        <p><strong>Database:</strong> <code>SQLite (family_kitchen.db)</code></p>
+                        <p><strong>Mode:</strong> <code id="system-mode">Development</code></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- MENU PREFERENCES SECTION -->
+            <div class="card" style="margin-top: 2rem;">
+                <h2>📅 Menu Preferences</h2>
+                <p style="color: var(--silver); margin-bottom: 30px;">
+                    Configure which days and meals to include in your weekly menu.
+                </p>
+
+                <form id="menuPreferencesForm">
+                    <!-- Days Configuration -->
+                    <div style="background: rgba(255, 255, 255, 0.03); padding: 2rem; border-radius: 16px; margin-bottom: 2rem; border: 1px solid rgba(255, 255, 255, 0.1);">
+                        <h3 style="font-family: 'Playfair Display', serif; font-size: 1.5rem; color: var(--white); margin-bottom: 1.5rem;">Days Configuration</h3>
+                        
+                        <div class="form-group">
+                            <label style="display: flex; align-items: center; gap: 0.75rem; cursor: pointer;">
+                                <input type="checkbox" id="include-weekend" name="include_weekend" style="width: 20px; height: 20px; cursor: pointer;">
+                                <span>Include weekend (Saturday & Sunday)</span>
+                            </label>
+                            <small style="color: var(--silver); display: block; margin-top: 0.5rem; margin-left: 2rem;">
+                                If unchecked, menu will only include Monday to Friday
+                            </small>
+                        </div>
+
+                        <div class="form-group" style="margin-top: 1.5rem;">
+                            <label>Exclude specific days (e.g., if you're not home)</label>
+                            <div style="display: flex; flex-wrap: wrap; gap: 1rem; margin-top: 1rem;">
+                                <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; padding: 0.75rem 1rem; background: rgba(255, 255, 255, 0.03); border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.1);">
+                                    <input type="checkbox" class="excluded-day" value="lunes" style="width: 18px; height: 18px; cursor: pointer;">
+                                    <span>Monday</span>
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; padding: 0.75rem 1rem; background: rgba(255, 255, 255, 0.03); border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.1);">
+                                    <input type="checkbox" class="excluded-day" value="martes" style="width: 18px; height: 18px; cursor: pointer;">
+                                    <span>Tuesday</span>
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; padding: 0.75rem 1rem; background: rgba(255, 255, 255, 0.03); border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.1);">
+                                    <input type="checkbox" class="excluded-day" value="miércoles" style="width: 18px; height: 18px; cursor: pointer;">
+                                    <span>Wednesday</span>
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; padding: 0.75rem 1rem; background: rgba(255, 255, 255, 0.03); border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.1);">
+                                    <input type="checkbox" class="excluded-day" value="jueves" style="width: 18px; height: 18px; cursor: pointer;">
+                                    <span>Thursday</span>
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; padding: 0.75rem 1rem; background: rgba(255, 255, 255, 0.03); border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.1);">
+                                    <input type="checkbox" class="excluded-day" value="viernes" style="width: 18px; height: 18px; cursor: pointer;">
+                                    <span>Friday</span>
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; padding: 0.75rem 1rem; background: rgba(255, 255, 255, 0.03); border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.1);">
+                                    <input type="checkbox" class="excluded-day" value="sábado" style="width: 18px; height: 18px; cursor: pointer;">
+                                    <span>Saturday</span>
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; padding: 0.75rem 1rem; background: rgba(255, 255, 255, 0.03); border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.1);">
+                                    <input type="checkbox" class="excluded-day" value="domingo" style="width: 18px; height: 18px; cursor: pointer;">
+                                    <span>Sunday</span>
+                                </label>
+                            </div>
+                            <small style="color: var(--silver); display: block; margin-top: 0.75rem;">
+                                Check the days you want to exclude from the menu (e.g., if you're traveling or eating out)
+                            </small>
+                        </div>
+                    </div>
+
+                    <!-- Meals Configuration -->
+                    <div style="background: rgba(255, 255, 255, 0.03); padding: 2rem; border-radius: 16px; margin-bottom: 2rem; border: 1px solid rgba(255, 255, 255, 0.1);">
+                        <h3 style="font-family: 'Playfair Display', serif; font-size: 1.5rem; color: var(--white); margin-bottom: 1.5rem;">Meals Configuration</h3>
+                        
+                        <div class="form-group">
+                            <label style="display: flex; align-items: center; gap: 0.75rem; cursor: pointer; margin-bottom: 1rem;">
+                                <input type="checkbox" id="include-breakfast" name="include_breakfast" style="width: 20px; height: 20px; cursor: pointer;">
+                                <span style="font-size: 1.1rem;">🌅 Breakfast</span>
+                            </label>
+                        </div>
+
+                        <div class="form-group">
+                            <label style="display: flex; align-items: center; gap: 0.75rem; cursor: pointer; margin-bottom: 1rem;">
+                                <input type="checkbox" id="include-lunch" name="include_lunch" style="width: 20px; height: 20px; cursor: pointer;">
+                                <span style="font-size: 1.1rem;">🍽️ Lunch</span>
+                            </label>
+                        </div>
+
+                        <div class="form-group">
+                            <label style="display: flex; align-items: center; gap: 0.75rem; cursor: pointer; margin-bottom: 1rem;">
+                                <input type="checkbox" id="include-dinner" name="include_dinner" style="width: 20px; height: 20px; cursor: pointer;">
+                                <span style="font-size: 1.1rem;">🌙 Dinner</span>
+                            </label>
+                        </div>
+
+                        <small style="color: var(--silver); display: block; margin-top: 1rem;">
+                            Select which meals you want to include in your weekly menu. At least one meal must be selected.
+                        </small>
+                    </div>
+
+                    <div style="display: flex; gap: 1rem;">
+                        <button type="submit" class="btn btn-success">
+                            💾 Save Menu Preferences
+                        </button>
+                        <button type="button" class="btn btn-danger" onclick="loadMenuPreferences()">
+                            🔄 Reset to Defaults
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/js/app.js"></script>
+</body>
+</html>
