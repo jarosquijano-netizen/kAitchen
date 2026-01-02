@@ -198,18 +198,34 @@ def extract_recipe():
                 'error': 'URL es requerida'
             }), 400
         
+        print(f"[ExtractRecipe] Extracting recipe from URL: {url}")
+        
         # Extract recipe
         recipe_data = extractor.extract_from_url(url)
         
         if recipe_data.get('error'):
+            print(f"[ExtractRecipe] Extraction error: {recipe_data['error']}")
             return jsonify({
                 'success': False,
                 'error': recipe_data['error']
             }), 400
         
+        print(f"[ExtractRecipe] Recipe extracted: {recipe_data.get('title', 'Unknown')}")
+        print(f"[ExtractRecipe] Recipe data keys: {list(recipe_data.keys())}")
+        
         # Save to database
-        recipe_id = db.add_recipe(recipe_data)
-        recipe_data['id'] = recipe_id
+        try:
+            recipe_id = db.add_recipe(recipe_data)
+            recipe_data['id'] = recipe_id
+            print(f"[ExtractRecipe] Recipe saved successfully with ID: {recipe_id}")
+        except Exception as db_error:
+            print(f"[ExtractRecipe] Database error: {str(db_error)}")
+            import traceback
+            print(f"[ExtractRecipe] Traceback: {traceback.format_exc()}")
+            return jsonify({
+                'success': False,
+                'error': f'Error al guardar la receta: {str(db_error)}'
+            }), 500
         
         return jsonify({
             'success': True,
@@ -218,10 +234,13 @@ def extract_recipe():
         })
         
     except Exception as e:
+        import traceback
+        print(f"[ExtractRecipe] Unexpected error: {str(e)}")
+        print(f"[ExtractRecipe] Traceback: {traceback.format_exc()}")
         return jsonify({
             'success': False,
             'error': str(e)
-        }), 400
+        }), 500
 
 @app.route('/api/recipes/<int:recipe_id>', methods=['DELETE'])
 def delete_recipe(recipe_id):

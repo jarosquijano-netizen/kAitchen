@@ -454,43 +454,56 @@ class Database:
     
     def add_recipe(self, recipe: Dict) -> int:
         """Add recipe"""
-        conn = self.get_connection()
-        cursor = conn.cursor()
-        
-        ingredients_json = json.dumps(recipe.get('ingredients', []))
-        extracted_data_json = json.dumps(recipe.get('extracted_data', {}))
-        
-        if self.is_postgres:
-            cursor.execute('''
-                INSERT INTO recipes (title, url, ingredients, instructions, prep_time,
-                    cook_time, servings, cuisine_type, meal_type, difficulty, image_url, extracted_data)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-                RETURNING id
-            ''', (
-                recipe.get('title'), recipe.get('url'), ingredients_json,
-                recipe.get('instructions'), recipe.get('prep_time'),
-                recipe.get('cook_time'), recipe.get('servings'),
-                recipe.get('cuisine_type'), recipe.get('meal_type'),
-                recipe.get('difficulty'), recipe.get('image_url'), extracted_data_json
-            ))
-            recipe_id = cursor.fetchone()[0]
-        else:
-            cursor.execute('''
-                INSERT INTO recipes (title, url, ingredients, instructions, prep_time,
-                    cook_time, servings, cuisine_type, meal_type, difficulty, image_url, extracted_data)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            ''', (
-                recipe.get('title'), recipe.get('url'), ingredients_json,
-                recipe.get('instructions'), recipe.get('prep_time'),
-                recipe.get('cook_time'), recipe.get('servings'),
-                recipe.get('cuisine_type'), recipe.get('meal_type'),
-                recipe.get('difficulty'), recipe.get('image_url'), extracted_data_json
-            ))
-            recipe_id = cursor.lastrowid
-        
-        conn.commit()
-        conn.close()
-        return recipe_id
+        conn = None
+        try:
+            conn = self.get_connection()
+            cursor = conn.cursor()
+            
+            ingredients_json = json.dumps(recipe.get('ingredients', []))
+            extracted_data_json = json.dumps(recipe.get('extracted_data', {}))
+            
+            if self.is_postgres:
+                cursor.execute('''
+                    INSERT INTO recipes (title, url, ingredients, instructions, prep_time,
+                        cook_time, servings, cuisine_type, meal_type, difficulty, image_url, extracted_data)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                    RETURNING id
+                ''', (
+                    recipe.get('title'), recipe.get('url'), ingredients_json,
+                    recipe.get('instructions'), recipe.get('prep_time'),
+                    recipe.get('cook_time'), recipe.get('servings'),
+                    recipe.get('cuisine_type'), recipe.get('meal_type'),
+                    recipe.get('difficulty'), recipe.get('image_url'), extracted_data_json
+                ))
+                recipe_id = cursor.fetchone()[0]
+            else:
+                cursor.execute('''
+                    INSERT INTO recipes (title, url, ingredients, instructions, prep_time,
+                        cook_time, servings, cuisine_type, meal_type, difficulty, image_url, extracted_data)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ''', (
+                    recipe.get('title'), recipe.get('url'), ingredients_json,
+                    recipe.get('instructions'), recipe.get('prep_time'),
+                    recipe.get('cook_time'), recipe.get('servings'),
+                    recipe.get('cuisine_type'), recipe.get('meal_type'),
+                    recipe.get('difficulty'), recipe.get('image_url'), extracted_data_json
+                ))
+                recipe_id = cursor.lastrowid
+            
+            conn.commit()
+            print(f"[Database] Recipe saved: '{recipe.get('title')}' (ID: {recipe_id})")
+            return recipe_id
+        except Exception as e:
+            print(f"[Database] Error saving recipe '{recipe.get('title')}': {str(e)}")
+            if conn:
+                conn.rollback()
+            raise
+        finally:
+            if conn:
+                if self.is_postgres:
+                    self._pool.putconn(conn)
+                else:
+                    conn.close()
     
     def get_all_recipes(self) -> List[Dict]:
         """Get all recipes"""
