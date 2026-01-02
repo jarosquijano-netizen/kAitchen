@@ -906,4 +906,5 @@ class Database:
             menu['menu_data'] = json.loads(menu.get('menu_data', '{}'))
             menus.append(menu)
         
+        self._close_connection(conn)
         return menus
