@@ -62,6 +62,14 @@ class Database:
             conn.row_factory = sqlite3.Row
             return conn
     
+    def _close_connection(self, conn):
+        """Close or return connection to pool"""
+        if conn:
+            if self.is_postgres:
+                self._pool.putconn(conn)
+            else:
+                conn.close()
+    
     def init_database(self):
         """Initialize database tables"""
         conn = self.get_connection()
@@ -278,7 +286,7 @@ class Database:
                 ''')
         
         conn.commit()
-        conn.close()
+        self._close_connection(conn)
     
     # ==================== ADULT PROFILES ====================
     
@@ -332,24 +340,24 @@ class Database:
             adult_id = cursor.lastrowid
         
         conn.commit()
-        conn.close()
+        self._close_connection(conn)
         return adult_id
     
     def get_all_adults(self) -> List[Dict]:
         """Get all adult profiles"""
         conn = self.get_connection()
-        
-        if self.is_postgres:
-            cursor = conn.cursor(cursor_factory=RealDictCursor)
-            cursor.execute('SELECT * FROM adults ORDER BY nombre')
-        else:
-            cursor = conn.cursor()
-            cursor.execute('SELECT * FROM adults ORDER BY nombre')
-        
-        rows = cursor.fetchall()
-        conn.close()
-        
-        return [dict(row) for row in rows]
+        try:
+            if self.is_postgres:
+                cursor = conn.cursor(cursor_factory=RealDictCursor)
+                cursor.execute('SELECT * FROM adults ORDER BY nombre')
+            else:
+                cursor = conn.cursor()
+                cursor.execute('SELECT * FROM adults ORDER BY nombre')
+            
+            rows = cursor.fetchall()
+            return [dict(row) for row in rows]
+        finally:
+            self._close_connection(conn)
     
     def delete_adult(self, adult_id: int) -> bool:
         """Delete adult profile"""
@@ -363,7 +371,7 @@ class Database:
         
         conn.commit()
         success = cursor.rowcount > 0
-        conn.close()
+        self._close_connection(conn)
         return success
     
     # ==================== CHILDREN PROFILES ====================
@@ -416,24 +424,24 @@ class Database:
             child_id = cursor.lastrowid
         
         conn.commit()
-        conn.close()
+        self._close_connection(conn)
         return child_id
     
     def get_all_children(self) -> List[Dict]:
         """Get all children profiles"""
         conn = self.get_connection()
-        
-        if self.is_postgres:
-            cursor = conn.cursor(cursor_factory=RealDictCursor)
-            cursor.execute('SELECT * FROM children ORDER BY nombre')
-        else:
-            cursor = conn.cursor()
-            cursor.execute('SELECT * FROM children ORDER BY nombre')
-        
-        rows = cursor.fetchall()
-        conn.close()
-        
-        return [dict(row) for row in rows]
+        try:
+            if self.is_postgres:
+                cursor = conn.cursor(cursor_factory=RealDictCursor)
+                cursor.execute('SELECT * FROM children ORDER BY nombre')
+            else:
+                cursor = conn.cursor()
+                cursor.execute('SELECT * FROM children ORDER BY nombre')
+            
+            rows = cursor.fetchall()
+            return [dict(row) for row in rows]
+        finally:
+            self._close_connection(conn)
     
     def delete_child(self, child_id: int) -> bool:
         """Delete child profile"""
@@ -447,7 +455,7 @@ class Database:
         
         conn.commit()
         success = cursor.rowcount > 0
-        conn.close()
+        self._close_connection(conn)
         return success
     
     # ==================== RECIPES ====================
@@ -499,49 +507,48 @@ class Database:
                 conn.rollback()
             raise
         finally:
-            if conn:
-                if self.is_postgres:
-                    self._pool.putconn(conn)
-                else:
-                    conn.close()
+            self._close_connection(conn)
     
     def get_all_recipes(self) -> List[Dict]:
         """Get all recipes"""
         conn = self.get_connection()
-        
-        if self.is_postgres:
-            cursor = conn.cursor(cursor_factory=RealDictCursor)
-            cursor.execute('SELECT * FROM recipes ORDER BY title')
-        else:
-            cursor = conn.cursor()
-            cursor.execute('SELECT * FROM recipes ORDER BY title')
-        
-        rows = cursor.fetchall()
-        conn.close()
-        
-        recipes = []
-        for row in rows:
-            recipe = dict(row)
-            recipe['ingredients'] = json.loads(recipe.get('ingredients', '[]'))
-            recipe['extracted_data'] = json.loads(recipe.get('extracted_data', '{}'))
-            recipes.append(recipe)
-        
-        return recipes
+        try:
+            if self.is_postgres:
+                cursor = conn.cursor(cursor_factory=RealDictCursor)
+                cursor.execute('SELECT * FROM recipes ORDER BY title')
+            else:
+                cursor = conn.cursor()
+                cursor.execute('SELECT * FROM recipes ORDER BY title')
+            
+            rows = cursor.fetchall()
+            
+            recipes = []
+            for row in rows:
+                recipe = dict(row)
+                recipe['ingredients'] = json.loads(recipe.get('ingredients', '[]'))
+                recipe['extracted_data'] = json.loads(recipe.get('extracted_data', '{}'))
+                recipes.append(recipe)
+            
+            return recipes
+        finally:
+            self._close_connection(conn)
     
     def delete_recipe(self, recipe_id: int) -> bool:
         """Delete recipe"""
         conn = self.get_connection()
-        cursor = conn.cursor()
-        
-        if self.is_postgres:
-            cursor.execute('DELETE FROM recipes WHERE id = %s', (recipe_id,))
-        else:
-            cursor.execute('DELETE FROM recipes WHERE id = ?', (recipe_id,))
-        
-        conn.commit()
-        success = cursor.rowcount > 0
-        conn.close()
-        return success
+        try:
+            cursor = conn.cursor()
+            
+            if self.is_postgres:
+                cursor.execute('DELETE FROM recipes WHERE id = %s', (recipe_id,))
+            else:
+                cursor.execute('DELETE FROM recipes WHERE id = ?', (recipe_id,))
+            
+            conn.commit()
+            success = cursor.rowcount > 0
+            return success
+        finally:
+            self._close_connection(conn)
     
     # ==================== WEEKLY MENUS ====================
     
@@ -595,7 +602,7 @@ class Database:
                 menu_id = cursor.lastrowid
         
         conn.commit()
-        conn.close()
+        self._close_connection(conn)
         return menu_id
     
     def get_latest_menu(self) -> Optional[Dict]:
@@ -618,35 +625,37 @@ class Database:
             ''')
         
         row = cursor.fetchone()
-        conn.close()
         
         if row:
             menu = dict(row)
             menu['menu_data'] = json.loads(menu.get('menu_data', '{}'))
             menu['metadata'] = json.loads(menu.get('metadata', '{}'))
+            self._close_connection(conn)
             return menu
+        self._close_connection(conn)
         return None
     
     def get_menu_by_week_start(self, week_start_date: str) -> Optional[Dict]:
         """Get menu for specific week start date"""
         conn = self.get_connection()
-        
-        if self.is_postgres:
-            cursor = conn.cursor(cursor_factory=RealDictCursor)
-            cursor.execute('SELECT * FROM weekly_menus WHERE week_start_date = %s', (week_start_date,))
-        else:
-            cursor = conn.cursor()
-            cursor.execute('SELECT * FROM weekly_menus WHERE week_start_date = ?', (week_start_date,))
-        
-        row = cursor.fetchone()
-        conn.close()
-        
-        if row:
-            menu = dict(row)
-            menu['menu_data'] = json.loads(menu.get('menu_data', '{}'))
-            menu['metadata'] = json.loads(menu.get('metadata', '{}'))
-            return menu
-        return None
+        try:
+            if self.is_postgres:
+                cursor = conn.cursor(cursor_factory=RealDictCursor)
+                cursor.execute('SELECT * FROM weekly_menus WHERE week_start_date = %s', (week_start_date,))
+            else:
+                cursor = conn.cursor()
+                cursor.execute('SELECT * FROM weekly_menus WHERE week_start_date = ?', (week_start_date,))
+            
+            row = cursor.fetchone()
+            
+            if row:
+                menu = dict(row)
+                menu['menu_data'] = json.loads(menu.get('menu_data', '{}'))
+                menu['metadata'] = json.loads(menu.get('metadata', '{}'))
+                return menu
+            return None
+        finally:
+            self._close_connection(conn)
     
     def get_all_menus(self) -> List[Dict]:
         """Get all weekly menus"""
@@ -660,7 +669,6 @@ class Database:
             cursor.execute('SELECT * FROM weekly_menus ORDER BY week_start_date DESC')
         
         rows = cursor.fetchall()
-        conn.close()
         
         menus = []
         for row in rows:
@@ -669,6 +677,7 @@ class Database:
             menu['metadata'] = json.loads(menu.get('metadata', '{}'))
             menus.append(menu)
         
+        self._close_connection(conn)
         return menus
     
     # ==================== MENU PREFERENCES ====================
@@ -685,14 +694,16 @@ class Database:
             cursor.execute('SELECT * FROM menu_preferences ORDER BY id DESC LIMIT 1')
         
         row = cursor.fetchone()
-        conn.close()
         
         if row:
             prefs = dict(row)
             excluded_days = prefs.get('excluded_days', '[]')
             if isinstance(excluded_days, str):
                 prefs['excluded_days'] = json.loads(excluded_days)
+            self._close_connection(conn)
             return prefs
+        
+        self._close_connection(conn)
         
         # Return defaults if no preferences found
         return {
@@ -736,7 +747,7 @@ class Database:
             ))
         
         conn.commit()
-        conn.close()
+        self._close_connection(conn)
         return True
     
     # ==================== RECIPE EXTRACTION FROM MENU ====================
@@ -822,13 +833,14 @@ class Database:
             cursor.execute('SELECT * FROM recipes WHERE LOWER(title) = LOWER(?) LIMIT 1', (title,))
         
         row = cursor.fetchone()
-        conn.close()
         
         if row:
             recipe = dict(row)
             recipe['ingredients'] = json.loads(recipe.get('ingredients', '[]'))
             recipe['extracted_data'] = json.loads(recipe.get('extracted_data', '{}'))
+            self._close_connection(conn)
             return recipe
+        self._close_connection(conn)
         return None
     
     def rate_menu(self, menu_id: int, rating: int) -> bool:
@@ -856,7 +868,7 @@ class Database:
             ''', (rating, menu_id))
         
         conn.commit()
-        conn.close()
+        self._close_connection(conn)
         return True
     
     def get_highly_rated_menus(self, min_rating: int = 4, limit: int = 10) -> List[Dict]:
@@ -887,7 +899,6 @@ class Database:
             ''', (min_rating, limit))
         
         rows = cursor.fetchall()
-        conn.close()
         
         menus = []
         for row in rows:
