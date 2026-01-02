@@ -713,6 +713,7 @@ class Database:
         
         conn.commit()
         conn.close()
+        return True
     
     # ==================== RECIPE EXTRACTION FROM MENU ====================
     
