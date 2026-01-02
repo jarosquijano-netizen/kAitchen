@@ -29,7 +29,18 @@ class Database:
                     If None, uses DATABASE_URL from environment or defaults to SQLite
         """
         self.db_url = db_url or os.getenv('DATABASE_URL', 'sqlite:///family_kitchen.db')
-        self.is_postgres = self.db_url.startswith('postgresql://')
+        
+        # Debug: Print database URL (first 50 chars only for security)
+        db_url_preview = self.db_url[:50] + '...' if len(self.db_url) > 50 else self.db_url
+        print(f"[Database] Initializing with DB URL: {db_url_preview}")
+        
+        # Check for PostgreSQL - support both postgresql:// and postgres://
+        self.is_postgres = (
+            self.db_url.startswith('postgresql://') or 
+            self.db_url.startswith('postgres://')
+        )
+        
+        print(f"[Database] Is PostgreSQL: {self.is_postgres}")
         
         if self.is_postgres and not POSTGRES_AVAILABLE:
             raise ImportError("psycopg2 is required for PostgreSQL support")
