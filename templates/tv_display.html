@@ -284,6 +284,7 @@
             align-items: center;
             justify-content: space-between;
             gap: 1rem;
+            flex-shrink: 0; /* Prevent header from shrinking */
         }
 
         .panel-title {
@@ -325,8 +326,8 @@
             grid-template-columns: 1fr;
             gap: 2.5rem;
             flex: 1;
-            overflow-y: auto;
             min-height: 0;
+            width: 100%;
         }
 
         .meal-card {
@@ -576,6 +577,7 @@
             background: var(--gold-dark);
         }
 
+        /* Responsive Design */
         @media (max-width: 1600px) {
             .main-content {
                 grid-template-columns: 1fr;
@@ -602,6 +604,222 @@
             
             .meal-name {
                 font-size: 2.2rem;
+            }
+        }
+
+        /* Tablet (iPad) */
+        @media (max-width: 1024px) {
+            body {
+                padding: 1rem;
+            }
+
+            .tv-container {
+                height: calc(100vh - 2rem);
+            }
+
+            .top-bar {
+                padding: 0.5rem 1rem;
+                margin-bottom: 0.75rem;
+            }
+
+            .clock {
+                font-size: 1.5rem;
+            }
+
+            .date-display {
+                font-size: 1rem;
+            }
+
+            .week-nav {
+                padding: 0.5rem 1rem;
+                margin-bottom: 0.75rem;
+            }
+
+            .week-days {
+                grid-template-columns: repeat(7, 1fr);
+                gap: 0.5rem;
+            }
+
+            .week-day-card {
+                padding: 0.75rem 0.5rem;
+            }
+
+            .week-day-name {
+                font-size: 1.1rem;
+            }
+
+            .week-day-date {
+                font-size: 1.3rem;
+            }
+
+            .menu-panel {
+                padding: 1.5rem;
+            }
+
+            .panel-title {
+                font-size: 2rem;
+            }
+
+            .meal-name {
+                font-size: 2rem;
+            }
+
+            .meal-grid {
+                gap: 1.5rem;
+            }
+
+            .qr-code {
+                width: 80px;
+                height: 80px;
+            }
+        }
+
+        /* Mobile */
+        @media (max-width: 768px) {
+            body {
+                padding: 0.5rem;
+            }
+
+            .tv-container {
+                height: calc(100vh - 1rem);
+            }
+
+            .top-bar {
+                padding: 0.5rem;
+                margin-bottom: 0.5rem;
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            .clock-weather {
+                flex-direction: column;
+                gap: 0.5rem;
+                width: 100%;
+            }
+
+            .clock {
+                font-size: 1.2rem;
+            }
+
+            .date-display {
+                font-size: 0.9rem;
+            }
+
+            .weather {
+                font-size: 1rem;
+            }
+
+            .qr-containers-wrapper {
+                flex-direction: column;
+                width: 100%;
+                align-items: center;
+            }
+
+            .qr-code {
+                width: 60px;
+                height: 60px;
+            }
+
+            .week-nav {
+                padding: 0.5rem;
+                margin-bottom: 0.5rem;
+            }
+
+            .week-days {
+                grid-template-columns: repeat(7, 1fr);
+                gap: 0.25rem;
+            }
+
+            .week-day-card {
+                padding: 0.5rem 0.25rem;
+            }
+
+            .week-day-name {
+                font-size: 0.9rem;
+                margin-bottom: 0.1rem;
+            }
+
+            .week-day-date {
+                font-size: 1rem;
+            }
+
+            .main-content {
+                gap: 1rem;
+            }
+
+            .menu-panel {
+                padding: 1rem;
+                border-radius: 16px;
+            }
+
+            .panel-header {
+                flex-direction: column;
+                align-items: flex-start;
+                margin-bottom: 1rem;
+            }
+
+            .panel-title {
+                font-size: 1.5rem;
+            }
+
+            .panel-subtitle {
+                font-size: 1rem;
+            }
+
+            .meal-card {
+                padding: 1rem;
+                min-height: 200px;
+            }
+
+            .meal-name {
+                font-size: 1.5rem;
+            }
+
+            .meal-meta {
+                gap: 0.75rem;
+                flex-direction: column;
+            }
+
+            .meal-meta-item {
+                font-size: 1rem;
+            }
+
+            .meal-ingredients {
+                font-size: 1rem;
+            }
+
+            .meal-grid {
+                gap: 1rem;
+            }
+
+            .auto-refresh {
+                bottom: 0.5rem;
+                right: 0.5rem;
+                padding: 0.5rem 1rem;
+                font-size: 0.8rem;
+            }
+        }
+
+        /* Small Mobile */
+        @media (max-width: 480px) {
+            .week-day-name {
+                font-size: 0.75rem;
+            }
+
+            .week-day-date {
+                font-size: 0.9rem;
+            }
+
+            .panel-title {
+                font-size: 1.2rem;
+            }
+
+            .meal-name {
+                font-size: 1.2rem;
+            }
+
+            .meal-card {
+                padding: 0.75rem;
             }
         }
     </style>
