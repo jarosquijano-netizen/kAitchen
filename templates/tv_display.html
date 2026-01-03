@@ -445,24 +445,27 @@
         }
 
         .meal-type {
-            font-size: 1rem;
+            font-size: 0.65rem;
             font-weight: 600;
             margin-bottom: 0.5rem;
             text-transform: uppercase;
-            letter-spacing: 1px;
-            color: var(--silver);
+            letter-spacing: 0.15em;
+            color: rgba(255, 255, 255, 0.4);
             font-family: 'Inter', sans-serif;
-            opacity: 0.7;
         }
 
         .meal-name {
             font-family: 'Playfair Display', serif;
-            font-size: 2.8rem;
-            font-weight: 900;
-            margin-bottom: 1rem;
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0;
             color: var(--white);
             line-height: 1.2;
-            flex: 1;
+            transition: color 0.3s ease;
+        }
+
+        .meal-card:hover .meal-name {
+            color: var(--gold);
         }
 
         .meal-meta {
@@ -1540,66 +1543,125 @@
                     }
                 }
                 
-                // Return complete meal card HTML and recipe base
+                // Extract nutrients from meal data
+                const nutrientes = meal.nutrientes || {};
+                const proteinas = nutrientes.proteinas || '';
+                const carbohidratos = nutrientes.carbohidratos || '';
+                const grasas = nutrientes.grasas || '';
+                
+                // Build nutrition focus grid
+                let nutritionHtml = '';
+                if (proteinas || carbohidratos || grasas) {
+                    const nutritionItems = [];
+                    if (proteinas) nutritionItems.push({ label: 'PROTEIN', value: proteinas });
+                    if (carbohidratos) nutritionItems.push({ label: 'CARBS', value: carbohidratos });
+                    if (grasas) nutritionItems.push({ label: 'FAT', value: grasas });
+                    
+                    if (nutritionItems.length > 0) {
+                        nutritionHtml = `
+                            <div style="margin-top: 1.5rem;">
+                                <div class="meal-ingredients-label" style="margin-bottom: 0.75rem;">
+                                    <span>ℹ️</span>
+                                    <span>Nutrition Focus</span>
+                                </div>
+                                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem;">
+                                    ${nutritionItems.map(item => `
+                                        <div style="padding: 0.75rem; background: rgba(255, 255, 255, 0.05); border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.05); text-align: center;">
+                                            <div style="font-size: 0.65rem; text-transform: uppercase; color: rgba(255, 255, 255, 0.3); font-weight: 700; margin-bottom: 0.25rem; letter-spacing: 0.5px;">${item.label}</div>
+                                            <div style="font-size: 0.9rem; font-weight: 700; color: rgba(255, 255, 255, 0.9);">${item.value}</div>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        `;
+                    }
+                }
+                
+                // Return complete meal card HTML with new zenith-style design
                 return {
                     html: `
                                 <div class="meal-card">
-                                    <div class="meal-image" style="display: none;">
-                                    </div>
-                                    <div class="meal-type">
+                                    <!-- Meal Type (small, above name) -->
+                                    <div style="font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.15em; color: rgba(255, 255, 255, 0.4); margin-bottom: 0.5rem; font-weight: 600;">
                                         ${mealNames[mealType].es} / ${mealNames[mealType].en}
                                     </div>
-                                    <div class="meal-name">${mealName}</div>
-                        ${recipeBaseHtml}
-                        ${porqueSeleccionada ? `
-                            <div style="background: rgba(138, 161, 147, 0.15); padding: 1rem; border-radius: 12px; margin-bottom: 1rem; border-left: 3px solid var(--sage);">
-                                <div style="font-size: 1rem; color: var(--sage); line-height: 1.6;">
-                                    ✓ ${porqueSeleccionada}
-                                </div>
-                            </div>
-                        ` : ''}
-                                    <div class="meal-meta">
+                                    
+                                    <!-- Meal Name (large, prominent) -->
+                                    <div class="meal-name" style="font-size: 2.5rem; line-height: 1.2; margin-bottom: 1rem;">${mealName}</div>
+                                    
+                                    <!-- Description with sparkles icon (zenith style) -->
+                                    ${porqueSeleccionada ? `
+                                        <div style="display: flex; align-items: flex-start; gap: 0.75rem; padding: 0.75rem; background: rgba(255, 255, 255, 0.05); border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.05); margin-bottom: 1.5rem;">
+                                            <span style="font-size: 1rem; color: var(--gold); flex-shrink: 0;">✨</span>
+                                            <p style="font-size: 0.85rem; color: rgba(255, 255, 255, 0.7); line-height: 1.6; font-style: italic; margin: 0;">
+                                                ${porqueSeleccionada}
+                                            </p>
+                                        </div>
+                                    ` : ''}
+                                    
+                                    <!-- Stats bar (zenith style with borders) -->
+                                    <div style="display: flex; flex-wrap: wrap; gap: 1rem; padding: 1rem 0; border-top: 1px solid rgba(255, 255, 255, 0.05); border-bottom: 1px solid rgba(255, 255, 255, 0.05); margin-bottom: 1.5rem;">
                                         ${prepTime ? `
-                                            <div class="meal-meta-item">
-                                    <span class="meal-meta-icon">⏱️</span>
-                                                <span>${prepTime} min</span>
+                                            <div style="display: flex; align-items: center; gap: 0.5rem; color: rgba(255, 255, 255, 0.6);">
+                                                <span style="font-size: 1rem;">⏱️</span>
+                                                <span style="font-size: 0.9rem; font-weight: 500;">${prepTime} min</span>
                                             </div>
                                         ` : ''}
                                         ${calories ? `
-                                            <div class="meal-meta-item">
-                                                <span class="meal-meta-icon">🔥</span>
-                                                <span>${calories} cal</span>
+                                            <div style="display: flex; align-items: center; gap: 0.5rem; color: rgba(255, 255, 255, 0.6);">
+                                                <span style="font-size: 1rem;">🔥</span>
+                                                <span style="font-size: 0.9rem; font-weight: 500;">${calories} kcal</span>
+                                            </div>
+                                        ` : ''}
+                                        ${ingredients.length > 0 ? `
+                                            <div style="display: flex; align-items: center; gap: 0.5rem; color: rgba(255, 255, 255, 0.6);">
+                                                <span style="font-size: 1rem;">🍴</span>
+                                                <span style="font-size: 0.9rem; font-weight: 500;">${ingredients.length} Items</span>
                                             </div>
                                         ` : ''}
                                     </div>
-                            ${ingredientsHtml ? `
-                                <div style="margin-top: 1rem; margin-bottom: 1rem; width: 100%;">
-                                    <div class="meal-ingredients-label">
-                                        <span>🥘</span>
-                                        <span>Ingredientes</span>
-                                    </div>
-                                    ${ingredientsHtml}
-                                </div>
-                            ` : ''}
-                        ${instrucciones ? `
-                            <div style="margin-bottom: 1rem;">
-                                <div style="font-size: 1rem; color: var(--silver); margin-bottom: 0.5rem; font-weight: 600;">📖 Preparación:</div>
-                                <div style="font-size: 1.1rem; color: var(--white); line-height: 1.7; padding-left: 1rem; border-left: 3px solid rgba(255, 255, 255, 0.2);">
-                                    ${instrucciones}
-                                </div>
+                                    
+                                    <!-- Ingredients Section -->
+                                    ${ingredientsHtml ? `
+                                        <div style="margin-bottom: 1.5rem;">
+                                            <div class="meal-ingredients-label" style="margin-bottom: 0.75rem;">
+                                                <span>✓</span>
+                                                <span>Ingredients</span>
+                                            </div>
+                                            ${ingredientsHtml}
                                         </div>
                                     ` : ''}
+                                    
+                                    <!-- Nutrition Focus Section -->
+                                    ${nutritionHtml}
+                                    
+                                    <!-- Recipe Base (if exists) -->
+                                    ${recipeBaseHtml}
+                                    
+                                    <!-- Instructions (if exists) -->
+                                    ${instrucciones ? `
+                                        <div style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid rgba(255, 255, 255, 0.05);">
+                                            <div style="font-size: 0.75rem; color: rgba(255, 255, 255, 0.4); margin-bottom: 0.5rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em;">📖 Preparation</div>
+                                            <div style="font-size: 0.9rem; color: rgba(255, 255, 255, 0.8); line-height: 1.7;">
+                                                ${instrucciones}
+                                            </div>
+                                        </div>
+                                    ` : ''}
+                                    
+                                    <!-- Adaptations (if exists) -->
                                     ${adaptaciones ? `
-                            <div style="background: rgba(212, 175, 55, 0.15); padding: 1rem; border-radius: 12px; margin-bottom: 1rem; border-left: 3px solid var(--gold);">
-                                <div style="font-size: 0.95rem; color: var(--gold); font-weight: 600; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.5px;">✨ Adaptaciones</div>
-                                <div style="font-size: 1rem; color: var(--silver); line-height: 1.6;">${adaptaciones}</div>
+                                        <div style="margin-top: 1rem; padding: 0.75rem; background: rgba(212, 175, 55, 0.1); border-radius: 8px; border: 1px solid rgba(212, 175, 55, 0.2);">
+                                            <div style="font-size: 0.75rem; color: var(--gold); font-weight: 600; margin-bottom: 0.25rem; text-transform: uppercase; letter-spacing: 0.1em;">✨ Adaptations</div>
+                                            <div style="font-size: 0.85rem; color: rgba(255, 255, 255, 0.7); line-height: 1.5;">${adaptaciones}</div>
                                         </div>
                                     ` : ''}
+                                    
+                                    <!-- Notes (if exists) -->
                                     ${notas ? `
-                            <div style="background: rgba(138, 161, 147, 0.15); padding: 1rem; border-radius: 12px; margin-top: auto; border-left: 3px solid var(--sage);">
-                                <div style="font-size: 1rem; color: var(--sage); line-height: 1.6;">
-                                            💡 ${notas}
-                                </div>
+                                        <div style="margin-top: 1rem; padding: 0.75rem; background: rgba(138, 161, 147, 0.1); border-radius: 8px; border: 1px solid rgba(138, 161, 147, 0.2);">
+                                            <div style="font-size: 0.85rem; color: var(--sage); line-height: 1.5;">
+                                                💡 ${notas}
+                                            </div>
                                         </div>
                                     ` : ''}
                                 </div>
@@ -1626,8 +1688,13 @@
                     adultosHtml += `
                         <div class="menu-panel adults">
                             <div class="panel-header">
-                                <div class="panel-title adults"><span class="emoji">👨‍👩‍👧‍👦</span> ADULTS</div>
-                                <div class="panel-subtitle">${getDayWithDate(selectedDay, 'es')} / ${getDayWithDate(selectedDay, 'en')}</div>
+                                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                                    <div style="padding: 0.625rem; border-radius: 12px; background: rgba(59, 130, 246, 0.2); color: var(--blue-adults); font-size: 1.25rem;">
+                                        👨‍👩‍👧‍👦
+                                    </div>
+                                    <span class="panel-title adults" style="font-size: 0.875rem; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase;">ADULTS</span>
+                                </div>
+                                <div class="panel-subtitle" style="font-size: 0.625rem; color: rgba(255, 255, 255, 0.3); font-weight: 500; letter-spacing: 0.15em; text-transform: uppercase;">${getDayWithDate(selectedDay, 'en')}</div>
                             </div>
                             <div class="meal-grid">
                     `;
@@ -1672,8 +1739,13 @@
                     ninosHtml += `
                         <div class="menu-panel children">
                             <div class="panel-header">
-                                <div class="panel-title children"><span class="emoji">👶</span> CHILDREN</div>
-                                <div class="panel-subtitle">${getDayWithDate(selectedDay, 'es')} / ${getDayWithDate(selectedDay, 'en')}</div>
+                                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                                    <div style="padding: 0.625rem; border-radius: 12px; background: rgba(249, 115, 22, 0.2); color: var(--orange-children); font-size: 1.25rem;">
+                                        👶
+                                    </div>
+                                    <span class="panel-title children" style="font-size: 0.875rem; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase;">CHILDREN</span>
+                                </div>
+                                <div class="panel-subtitle" style="font-size: 0.625rem; color: rgba(255, 255, 255, 0.3); font-weight: 500; letter-spacing: 0.15em; text-transform: uppercase;">${getDayWithDate(selectedDay, 'en')}</div>
                             </div>
                             <div class="meal-grid">
                     `;
