@@ -28,8 +28,8 @@
             --orange-children-dark: #EA580C;
             --silver: #CBD5E0;
             --white: #FFFFFF;
-            --glass-bg: rgba(255, 255, 255, 0.05);
-            --glass-border: rgba(255, 255, 255, 0.1);
+            --glass-bg: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.05);
         }
 
         body {
@@ -199,27 +199,49 @@
         }
 
         .week-day-card {
-            background: rgba(255, 255, 255, 0.03);
-            border: 2px solid var(--glass-border);
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
             border-radius: 16px;
             padding: 1rem 0.75rem;
             text-align: center;
             cursor: pointer;
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .week-day-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.05);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .week-day-card:hover::before {
+            opacity: 1;
         }
 
         .week-day-card:hover {
-            background: rgba(255, 255, 255, 0.06);
-            transform: translateY(-4px);
-            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3);
+            transform: translateY(-2px);
+            border-color: rgba(255, 255, 255, 0.1);
         }
 
         .week-day-card.active {
             background: linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%);
             color: var(--black);
             transform: scale(1.05);
-            box-shadow: 0 15px 40px rgba(212, 175, 55, 0.4);
+            box-shadow: 0 15px 40px rgba(212, 175, 55, 0.4), 0 0 0 1px rgba(212, 175, 55, 0.2);
             border-color: var(--gold);
+        }
+
+        .week-day-card.active::before {
+            opacity: 0;
         }
 
         .week-day-name {
@@ -256,7 +278,7 @@
 
         .menu-panel {
             background: var(--glass-bg);
-            backdrop-filter: blur(30px);
+            backdrop-filter: blur(12px);
             border: 1px solid var(--glass-border);
             border-radius: 24px;
             padding: 2.5rem;
@@ -272,6 +294,42 @@
             /* Ensure scroll works on touch devices */
             -webkit-overflow-scrolling: touch;
             overscroll-behavior: contain;
+            transition: all 0.3s ease;
+        }
+
+        .menu-panel:hover {
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Background accent blur effect */
+        .menu-panel.adults::after {
+            content: '';
+            position: absolute;
+            top: -100px;
+            right: -100px;
+            width: 300px;
+            height: 300px;
+            background: var(--blue-adults);
+            opacity: 0.1;
+            filter: blur(100px);
+            pointer-events: none;
+            border-radius: 50%;
+            z-index: 0;
+        }
+
+        .menu-panel.children::after {
+            content: '';
+            position: absolute;
+            top: -100px;
+            right: -100px;
+            width: 300px;
+            height: 300px;
+            background: var(--orange-children);
+            opacity: 0.1;
+            filter: blur(100px);
+            pointer-events: none;
+            border-radius: 50%;
+            z-index: 0;
         }
 
         .menu-panel.adults {
@@ -334,20 +392,29 @@
             min-height: 0;
             width: 100%;
             overflow: visible; /* Allow content to overflow for scrolling */
+            position: relative;
+            z-index: 2; /* Above blur effect */
         }
 
         .meal-card {
             background: rgba(255, 255, 255, 0.03);
-            backdrop-filter: blur(10px);
-            border: 2px solid var(--glass-border);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
             border-radius: 20px;
             padding: 1.5rem;
             position: relative;
             overflow: hidden;
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             min-height: 300px;
             display: flex;
             flex-direction: column;
+            z-index: 1;
+        }
+
+        .meal-card:hover {
+            border-color: rgba(255, 255, 255, 0.15);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
         }
 
         .meal-card::before {
@@ -430,10 +497,39 @@
         .meal-ingredients-label {
             font-weight: 700;
             color: var(--white);
-            margin-bottom: 0.4rem;
+            margin-bottom: 0.75rem;
             text-transform: uppercase;
             letter-spacing: 1px;
             font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* Ingredient badges */
+        .ingredient-badges {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .ingredient-badge {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.9);
+            transition: all 0.2s ease;
+        }
+
+        .ingredient-badge:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.2);
+            transform: translateY(-1px);
         }
 
         .meal-notes {
@@ -1377,12 +1473,16 @@
                 const porqueSeleccionada = typeof meal.porque_seleccionada === 'string' ? meal.porque_seleccionada : '';
                 const instrucciones = typeof meal.instrucciones === 'string' ? meal.instrucciones : '';
                 
-                // Format ingredients: show first 5, then "+X más"
+                // Format ingredients as badges: show first 8, then "+X más"
                 let ingredientsHtml = '';
                 if (ingredients.length > 0) {
-                    const ingList = ingredients.slice(0, 5).join(', ');
-                    const more = ingredients.length > 5 ? ` (+${ingredients.length - 5} más)` : '';
-                    ingredientsHtml = `${ingList}${more}`;
+                    const displayIngredients = ingredients.slice(0, 8);
+                    const moreCount = ingredients.length - 8;
+                    const badges = displayIngredients.map(ing => 
+                        `<span class="ingredient-badge">${ing}</span>`
+                    ).join('');
+                    const moreBadge = moreCount > 0 ? `<span class="ingredient-badge" style="opacity: 0.7;">+${moreCount} más</span>` : '';
+                    ingredientsHtml = `<div class="ingredient-badges">${badges}${moreBadge}</div>`;
                 }
                 
                 // Search for recipe URL if recipe_base exists
@@ -1449,12 +1549,6 @@
                                                 <span>${prepTime} min</span>
                                             </div>
                                         ` : ''}
-                            ${ingredientsHtml ? `
-                                <div class="meal-meta-item">
-                                    <span class="meal-meta-icon">🥘</span>
-                                    <span style="font-size: 1.1rem;">${ingredientsHtml}</span>
-                                </div>
-                            ` : ''}
                                         ${calories ? `
                                             <div class="meal-meta-item">
                                                 <span class="meal-meta-icon">🔥</span>
@@ -1462,6 +1556,15 @@
                                             </div>
                                         ` : ''}
                                     </div>
+                            ${ingredientsHtml ? `
+                                <div style="margin-top: 1rem; margin-bottom: 1rem;">
+                                    <div class="meal-ingredients-label">
+                                        <span>🥘</span>
+                                        <span>Ingredientes</span>
+                                    </div>
+                                    ${ingredientsHtml}
+                                </div>
+                            ` : ''}
                         ${instrucciones ? `
                             <div style="margin-bottom: 1rem;">
                                 <div style="font-size: 1rem; color: var(--silver); margin-bottom: 0.5rem; font-weight: 600;">📖 Preparación:</div>
