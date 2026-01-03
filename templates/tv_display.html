@@ -264,9 +264,14 @@
             overflow-x: hidden;
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
             min-height: 0; /* Critical for grid children to allow scrolling */
+            max-height: 100%; /* Ensure it doesn't exceed parent */
             height: 100%; /* Take full height of grid cell */
             display: flex;
             flex-direction: column;
+            position: relative; /* Ensure scroll works */
+            /* Ensure scroll works on touch devices */
+            -webkit-overflow-scrolling: touch;
+            overscroll-behavior: contain;
         }
 
         .menu-panel.adults {
@@ -328,6 +333,7 @@
             flex: 1;
             min-height: 0;
             width: 100%;
+            overflow: visible; /* Allow content to overflow for scrolling */
         }
 
         .meal-card {
@@ -558,23 +564,31 @@
             z-index: 10;
         }
 
-        /* Scrollbar styling */
+        /* Scrollbar styling - Make it more visible and functional */
         .menu-panel::-webkit-scrollbar {
-            width: 8px;
+            width: 12px;
         }
 
         .menu-panel::-webkit-scrollbar-track {
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+            margin: 0.5rem 0;
         }
 
         .menu-panel::-webkit-scrollbar-thumb {
             background: var(--gold);
-            border-radius: 4px;
+            border-radius: 6px;
+            border: 2px solid rgba(255, 255, 255, 0.1);
         }
 
         .menu-panel::-webkit-scrollbar-thumb:hover {
             background: var(--gold-dark);
+        }
+
+        /* Ensure scrollbar is always visible when content overflows */
+        .menu-panel {
+            scrollbar-width: thin;
+            scrollbar-color: var(--gold) rgba(255, 255, 255, 0.1);
         }
 
         /* Responsive Design */
