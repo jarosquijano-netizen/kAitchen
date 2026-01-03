@@ -508,28 +508,31 @@
 
         /* Ingredient badges */
         .ingredient-badges {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.5rem;
-            margin-top: 0.5rem;
+            display: flex !important;
+            flex-wrap: wrap !important;
+            gap: 0.5rem !important;
+            margin-top: 0.5rem !important;
+            width: 100% !important;
         }
 
         .ingredient-badge {
-            display: inline-block;
-            padding: 0.5rem 1rem;
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(8px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 8px;
-            font-size: 0.9rem;
-            color: rgba(255, 255, 255, 0.9);
-            transition: all 0.2s ease;
+            display: inline-block !important;
+            padding: 0.5rem 1rem !important;
+            background: rgba(255, 255, 255, 0.05) !important;
+            backdrop-filter: blur(8px) !important;
+            -webkit-backdrop-filter: blur(8px) !important;
+            border: 1px solid rgba(255, 255, 255, 0.1) !important;
+            border-radius: 8px !important;
+            font-size: 0.9rem !important;
+            color: rgba(255, 255, 255, 0.9) !important;
+            transition: all 0.2s ease !important;
+            white-space: nowrap !important;
         }
 
         .ingredient-badge:hover {
-            background: rgba(255, 255, 255, 0.1);
-            border-color: rgba(255, 255, 255, 0.2);
-            transform: translateY(-1px);
+            background: rgba(255, 255, 255, 0.1) !important;
+            border-color: rgba(255, 255, 255, 0.2) !important;
+            transform: translateY(-1px) !important;
         }
 
         .meal-notes {
@@ -1483,6 +1486,9 @@
                     ).join('');
                     const moreBadge = moreCount > 0 ? `<span class="ingredient-badge" style="opacity: 0.7;">+${moreCount} más</span>` : '';
                     ingredientsHtml = `<div class="ingredient-badges">${badges}${moreBadge}</div>`;
+                    console.log('[TV] Generated ingredients HTML:', ingredientsHtml.substring(0, 100));
+                } else {
+                    console.log('[TV] No ingredients found for meal:', mealName);
                 }
                 
                 // Search for recipe URL if recipe_base exists
