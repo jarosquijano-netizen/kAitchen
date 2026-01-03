@@ -567,28 +567,59 @@ def get_menu_by_week(week_start):
 
 @app.route('/api/menu/current-week', methods=['GET'])
 def get_current_week_menu():
-    """Get menu for current week (Monday of current week)"""
+    """Get menu for current week (Monday of current week) with fallback to latest menu"""
     try:
         today = datetime.now()
         days_since_monday = today.weekday()  # 0 = Monday, 6 = Sunday
         week_start = (today - timedelta(days=days_since_monday)).strftime('%Y-%m-%d')
         
+        print(f"[GetCurrentWeekMenu] Calculating current week start: {week_start} (today: {today.strftime('%Y-%m-%d')})")
+        
         menu = db.get_menu_by_week_start(week_start)
         
         if not menu:
-            return jsonify({
-                'success': False,
-                'error': 'No hay menú disponible para esta semana',
-                'week_start': week_start
-            }), 404
+            # Fallback to latest menu if no menu for current week
+            print(f"[GetCurrentWeekMenu] No menu found for week {week_start}, trying latest menu...")
+            latest_menu = db.get_latest_menu()
+            
+            if latest_menu:
+                print(f"[GetCurrentWeekMenu] Using latest menu as fallback (week_start: {latest_menu.get('week_start_date', 'unknown')})")
+                return jsonify({
+                    'success': True,
+                    'data': latest_menu,
+                    'week_start': latest_menu.get('week_start_date', week_start),
+                    'is_fallback': True  # Indicate this is a fallback
+                })
+            else:
+                return jsonify({
+                    'success': False,
+                    'error': 'No hay menú disponible para esta semana',
+                    'week_start': week_start
+                }), 404
         
         return jsonify({
             'success': True,
             'data': menu,
-            'week_start': week_start
+            'week_start': week_start,
+            'is_fallback': False
         })
         
     except Exception as e:
+        print(f"[GetCurrentWeekMenu] Error: {e}")
+        # Try fallback even on error
+        try:
+            latest_menu = db.get_latest_menu()
+            if latest_menu:
+                print(f"[GetCurrentWeekMenu] Using latest menu as error fallback")
+                return jsonify({
+                    'success': True,
+                    'data': latest_menu,
+                    'week_start': latest_menu.get('week_start_date', 'unknown'),
+                    'is_fallback': True
+                })
+        except:
+            pass
+        
         return jsonify({
             'success': False,
             'error': str(e)

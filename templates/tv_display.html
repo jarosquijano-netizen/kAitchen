@@ -837,7 +837,45 @@
                 const response = await fetch('/api/menu/current-week');
                 
                 if (response.status === 404) {
-                    console.log('[TV] No menu for current week');
+                    console.log('[TV] No menu for current week, trying latest menu...');
+                    // Fallback to latest menu
+                    try {
+                        const latestResponse = await fetch('/api/menu/latest');
+                        if (latestResponse.ok) {
+                            const latestResult = await latestResponse.json();
+                            console.log('[TV] Latest menu API response:', latestResult);
+                            
+                            if (latestResult.success && latestResult.data) {
+                                let menuData = latestResult.data.menu_data;
+                                
+                                if (typeof menuData === 'string') {
+                                    try {
+                                        menuData = JSON.parse(menuData);
+                                    } catch (e) {
+                                        console.error('[TV] Failed to parse menu_data:', e);
+                                        showNoMenu();
+                                        return;
+                                    }
+                                }
+                                
+                                currentMenu = menuData;
+                                console.log('[TV] Latest menu loaded successfully as fallback');
+                                
+                                // Always set selectedDay to today if not already set
+                                if (!selectedDay) {
+                                    selectedDay = getCurrentDayName();
+                                    console.log('[TV] Setting selectedDay to today:', selectedDay);
+                                }
+                                
+                                displayMenu();
+                                return;
+                            }
+                        }
+                    } catch (fallbackError) {
+                        console.error('[TV] Error loading latest menu:', fallbackError);
+                    }
+                    
+                    // If fallback also failed, show no menu
                     showNoMenu();
                     return;
                 }
@@ -877,6 +915,34 @@
                 }
             } catch (error) {
                 console.error('[TV] Error loading menu:', error);
+                // Try fallback to latest menu on error
+                try {
+                    const latestResponse = await fetch('/api/menu/latest');
+                    if (latestResponse.ok) {
+                        const latestResult = await latestResponse.json();
+                        if (latestResult.success && latestResult.data) {
+                            let menuData = latestResult.data.menu_data;
+                            if (typeof menuData === 'string') {
+                                try {
+                                    menuData = JSON.parse(menuData);
+                                } catch (e) {
+                                    console.error('[TV] Failed to parse latest menu_data:', e);
+                                    showNoMenu();
+                                    return;
+                                }
+                            }
+                            currentMenu = menuData;
+                            if (!selectedDay) {
+                                selectedDay = getCurrentDayName();
+                            }
+                            console.log('[TV] Latest menu loaded successfully as error fallback');
+                            displayMenu();
+                            return;
+                        }
+                    }
+                } catch (fallbackError) {
+                    console.error('[TV] Error loading latest menu fallback:', fallbackError);
+                }
                 showNoMenu();
             }
         }
@@ -960,6 +1026,72 @@
 
             // Render old structure (not used in new design, but kept for compatibility)
             showNoMenu();
+        }
+
+        // Helper function to normalize day names (remove accents for matching)
+        function normalizeDayName(dayName) {
+            if (!dayName) return '';
+            
+            // Direct mapping for Spanish day names
+            const dayMap = {
+                'lunes': 'lunes',
+                'martes': 'martes',
+                'miércoles': 'miercoles',
+                'miercoles': 'miercoles',
+                'jueves': 'jueves',
+                'viernes': 'viernes',
+                'sábado': 'sabado',
+                'sabado': 'sabado',
+                'domingo': 'domingo'
+            };
+            
+            const lower = dayName.toLowerCase().trim();
+            const result = dayMap[lower] || lower.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+            console.log('[TV] normalizeDayName: "' + dayName + '" -> "' + result + '"');
+            return result;
+        }
+        
+        // Helper function to get day data from menu, trying multiple variations
+        function getDayDataFromMenu(menuDias, dayName) {
+            if (!menuDias || !dayName) {
+                console.log('[TV] getDayDataFromMenu: Invalid params', { hasMenuDias: !!menuDias, dayName });
+                return null;
+            }
+            
+            const availableKeys = Object.keys(menuDias);
+            console.log('[TV] getDayDataFromMenu: Looking for "' + dayName + '" in menu keys:', availableKeys);
+            
+            // Try exact match first (case-sensitive)
+            if (menuDias[dayName]) {
+                console.log('[TV] getDayDataFromMenu: Found exact match for "' + dayName + '"');
+                return menuDias[dayName];
+            }
+            
+            // Try normalized name (without accents)
+            const normalized = normalizeDayName(dayName);
+            console.log('[TV] getDayDataFromMenu: Normalized "' + dayName + '" to "' + normalized + '"');
+            
+            // Always try normalized version, even if it's the same
+            if (menuDias[normalized]) {
+                console.log('[TV] getDayDataFromMenu: Found normalized match for "' + normalized + '"');
+                return menuDias[normalized];
+            }
+            
+            // Try all keys to find a match (case-insensitive, accent-insensitive)
+            console.log('[TV] getDayDataFromMenu: Searching all keys with normalized term "' + normalized + '"');
+            
+            for (const key of availableKeys) {
+                const keyNormalized = normalizeDayName(key);
+                console.log('[TV] getDayDataFromMenu: Comparing key "' + key + '" (normalized: "' + keyNormalized + '") with "' + normalized + '"');
+                if (keyNormalized === normalized) {
+                    console.log('[TV] getDayDataFromMenu: Found match! Key "' + key + '" (normalized: "' + keyNormalized + '") matches "' + normalized + '"');
+                    return menuDias[key];
+                }
+            }
+            
+            console.log('[TV] getDayDataFromMenu: No match found for "' + dayName + '" (normalized: "' + normalized + '")');
+            console.log('[TV] getDayDataFromMenu: Available normalized keys:', availableKeys.map(k => normalizeDayName(k)));
+            return null;
         }
 
         async function displaySeparateMenus() {
@@ -1110,8 +1242,13 @@
 
             // ADULTOS MENU
             if (currentMenu.menu_adultos && currentMenu.menu_adultos.dias) {
-                const adultDayData = currentMenu.menu_adultos.dias[selectedDay];
-                console.log('[TV] Adult day data for', selectedDay, ':', adultDayData);
+                console.log('[TV] About to call getDayDataFromMenu for adults with selectedDay:', selectedDay);
+                console.log('[TV] menu_adultos.dias type:', typeof currentMenu.menu_adultos.dias);
+                console.log('[TV] menu_adultos.dias keys:', Object.keys(currentMenu.menu_adultos.dias));
+                try {
+                    const adultDayData = getDayDataFromMenu(currentMenu.menu_adultos.dias, selectedDay);
+                    console.log('[TV] Adult day data for', selectedDay, ':', adultDayData);
+                    console.log('[TV] Available day keys in menu:', Object.keys(currentMenu.menu_adultos.dias));
                 if (adultDayData) {
                     adultosHtml += `
                         <div class="menu-panel adults">
@@ -1140,6 +1277,10 @@
                     console.log('[TV] No adult day data for', selectedDay);
                     adultosHtml = `<div class="menu-panel adults"><div class="panel-header"><div class="panel-title adults"><span class="emoji">👨‍👩‍👧‍👦</span> ADULTS</div></div><div style="text-align: center; padding: 4rem; color: var(--silver); font-size: 2rem;">No menu available</div></div>`;
                 }
+                } catch (error) {
+                    console.error('[TV] Error in getDayDataFromMenu for adults:', error);
+                    adultosHtml = `<div class="menu-panel adults"><div class="panel-header"><div class="panel-title adults"><span class="emoji">👨‍👩‍👧‍👦</span> ADULTS</div></div><div style="text-align: center; padding: 4rem; color: var(--silver); font-size: 2rem;">Error loading menu</div></div>`;
+                }
             } else {
                 console.log('[TV] No menu_adultos.dias structure');
                 adultosHtml = `<div class="menu-panel adults"><div class="panel-header"><div class="panel-title adults"><span class="emoji">👨‍👩‍👧‍👦</span> ADULTS</div></div><div style="text-align: center; padding: 4rem; color: var(--silver); font-size: 2rem;">No menu structure</div></div>`;
@@ -1147,8 +1288,13 @@
             
             // NIÑOS MENU
             if (currentMenu.menu_ninos && currentMenu.menu_ninos.dias) {
-                const childDayData = currentMenu.menu_ninos.dias[selectedDay];
-                console.log('[TV] Child day data for', selectedDay, ':', childDayData);
+                console.log('[TV] About to call getDayDataFromMenu for children with selectedDay:', selectedDay);
+                console.log('[TV] menu_ninos.dias type:', typeof currentMenu.menu_ninos.dias);
+                console.log('[TV] menu_ninos.dias keys:', Object.keys(currentMenu.menu_ninos.dias));
+                try {
+                    const childDayData = getDayDataFromMenu(currentMenu.menu_ninos.dias, selectedDay);
+                    console.log('[TV] Child day data for', selectedDay, ':', childDayData);
+                    console.log('[TV] Available day keys in children menu:', Object.keys(currentMenu.menu_ninos.dias));
                 if (childDayData) {
                     ninosHtml += `
                         <div class="menu-panel children">
@@ -1176,6 +1322,10 @@
                 } else {
                     console.log('[TV] No child day data for', selectedDay);
                     ninosHtml = `<div class="menu-panel children"><div class="panel-header"><div class="panel-title children"><span class="emoji">👶</span> CHILDREN</div></div><div style="text-align: center; padding: 4rem; color: var(--silver); font-size: 2rem;">No menu available</div></div>`;
+                }
+                } catch (error) {
+                    console.error('[TV] Error in getDayDataFromMenu for children:', error);
+                    ninosHtml = `<div class="menu-panel children"><div class="panel-header"><div class="panel-title children"><span class="emoji">👶</span> CHILDREN</div></div><div style="text-align: center; padding: 4rem; color: var(--silver); font-size: 2rem;">Error loading menu</div></div>`;
                 }
             } else {
                 console.log('[TV] No menu_ninos.dias structure');
