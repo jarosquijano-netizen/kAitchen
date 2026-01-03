@@ -513,6 +513,8 @@
             gap: 0.5rem !important;
             margin-top: 0.5rem !important;
             width: 100% !important;
+            max-width: 100% !important;
+            box-sizing: border-box !important;
         }
 
         .ingredient-badge {
@@ -527,12 +529,20 @@
             color: rgba(255, 255, 255, 0.9) !important;
             transition: all 0.2s ease !important;
             white-space: nowrap !important;
+            margin: 0 !important;
+            line-height: 1.4 !important;
         }
 
         .ingredient-badge:hover {
             background: rgba(255, 255, 255, 0.1) !important;
             border-color: rgba(255, 255, 255, 0.2) !important;
             transform: translateY(-1px) !important;
+        }
+
+        /* Ensure meal card content is visible */
+        .meal-card > * {
+            position: relative;
+            z-index: 1;
         }
 
         .meal-notes {
@@ -1563,7 +1573,7 @@
                                         ` : ''}
                                     </div>
                             ${ingredientsHtml ? `
-                                <div style="margin-top: 1rem; margin-bottom: 1rem;">
+                                <div style="margin-top: 1rem; margin-bottom: 1rem; width: 100%;">
                                     <div class="meal-ingredients-label">
                                         <span>🥘</span>
                                         <span>Ingredientes</span>
