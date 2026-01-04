@@ -1517,6 +1517,9 @@
             console.log('[TV] innerHTML set successfully');
             console.log('[TV] Container children count:', container.children.length);
             
+            // Update QR code with menu information
+            generateZenithQRCode();
+            
             // Force a reflow to ensure rendering
             void container.offsetHeight;
         }
