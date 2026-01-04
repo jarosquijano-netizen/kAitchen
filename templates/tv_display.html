@@ -1291,10 +1291,7 @@
                                 </div>
                             ` : ''}
                             
-                            <!-- Nutrition Focus -->
-                            ${nutritionHtml}
-                            
-                            <!-- Instructions -->
+                            <!-- Instructions (moved up) -->
                             ${instrucciones ? `
                                 <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(255, 255, 255, 0.05); position: relative; z-index: 1;">
                                     <div style="font-size: 0.75rem; color: rgba(255, 255, 255, 0.4); margin-bottom: 0.5rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; display: flex; align-items: center; gap: 0.5rem;">
@@ -1323,6 +1320,9 @@
                                     </div>
                                 </div>
                             ` : ''}
+                            
+                            <!-- Nutrition Focus (moved to bottom) -->
+                            ${nutritionHtml}
                         </div>
                     `,
                     recipeBase: recipeBase
