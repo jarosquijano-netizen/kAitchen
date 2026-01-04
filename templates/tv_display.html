@@ -1432,8 +1432,35 @@
                 console.log('[TV] Adult day data for', selectedDay, ':', adultDayData);
                     console.log('[TV] Available day keys in menu:', Object.keys(currentMenu.menu_adultos.dias));
                 if (adultDayData) {
+                    // Add rating and regenerate section for adults
+                    const adultRatingId = `rating-adultos-${selectedDay}`;
+                    const adultRegenId = `regen-adultos-${selectedDay}`;
                     adultosHtml += `
                         <div class="menu-panel adults">
+                            <div style="margin-bottom: 1.5rem; padding: 1rem; background: rgba(255, 255, 255, 0.05); border-radius: 1rem; border: 1px solid rgba(255, 255, 255, 0.1); position: relative; z-index: 10;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+                                <div style="flex: 1; min-width: 200px;">
+                                    <div style="font-size: 0.75rem; color: rgba(255, 255, 255, 0.5); margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.1em;">Califica este menú</div>
+                                    <div id="${adultRatingId}" style="display: flex; gap: 0.25rem; align-items: center;">
+                                        ${[1, 2, 3, 4, 5].map(star => {
+                                            return '<button onclick="rateDayMenu(\'adultos\', ' + star + ')" ' +
+                                                'style="background: none; border: none; font-size: 1.5rem; cursor: pointer; padding: 0.25rem; transition: transform 0.2s;" ' +
+                                                'onmouseover="this.style.transform=\'scale(1.2)\'" ' +
+                                                'onmouseout="this.style.transform=\'scale(1)\'" ' +
+                                                'title="' + star + ' ' + (star === 1 ? 'estrella' : 'estrellas') + '">' +
+                                                '<span class="star-' + star + '" style="color: rgba(255, 255, 255, 0.3);">☆</span>' +
+                                                '</button>';
+                                        }).join('')}
+                                    </div>
+                                </div>
+                                <button id="${adultRegenId}" onclick="regenerateDayMenu('adultos')" 
+                                    style="padding: 0.75rem 1.5rem; background: rgba(59, 130, 246, 0.2); border: 1px solid rgba(59, 130, 246, 0.4); border-radius: 0.75rem; color: #60A5FA; font-size: 0.875rem; font-weight: 600; cursor: pointer; transition: all 0.3s; text-transform: uppercase; letter-spacing: 0.05em;"
+                                    onmouseover="this.style.background='rgba(59, 130, 246, 0.3)'; this.style.borderColor='rgba(59, 130, 246, 0.6)'"
+                                    onmouseout="this.style.background='rgba(59, 130, 246, 0.2)'; this.style.borderColor='rgba(59, 130, 246, 0.4)'">
+                                    🔄 Regenerar Menú Adultos
+                                </button>
+                            </div>
+                        </div>
                             <div class="meal-grid">
                     `;
                     
@@ -1490,15 +1517,15 @@
                                 <div style="flex: 1; min-width: 200px;">
                                     <div style="font-size: 0.75rem; color: rgba(255, 255, 255, 0.5); margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.1em;">Califica este menú</div>
                                     <div id="${childRatingId}" style="display: flex; gap: 0.25rem; align-items: center;">
-                                        ${[1, 2, 3, 4, 5].map(star => `
-                                            <button onclick="rateDayMenu('ninos', ${star})" 
-                                                style="background: none; border: none; font-size: 1.5rem; cursor: pointer; padding: 0.25rem; transition: transform 0.2s;"
-                                                onmouseover="this.style.transform='scale(1.2)'"
-                                                onmouseout="this.style.transform='scale(1)'"
-                                                title="${star} ${star === 1 ? 'estrella' : 'estrellas'}">
-                                                <span class="star-${star}" style="color: rgba(255, 255, 255, 0.3);">☆</span>
-                                            </button>
-                                        `).join('')}
+                                        ${[1, 2, 3, 4, 5].map(star => {
+                                            return '<button onclick="rateDayMenu(\'ninos\', ' + star + ')" ' +
+                                                'style="background: none; border: none; font-size: 1.5rem; cursor: pointer; padding: 0.25rem; transition: transform 0.2s;" ' +
+                                                'onmouseover="this.style.transform=\'scale(1.2)\'" ' +
+                                                'onmouseout="this.style.transform=\'scale(1)\'" ' +
+                                                'title="' + star + ' ' + (star === 1 ? 'estrella' : 'estrellas') + '">' +
+                                                '<span class="star-' + star + '" style="color: rgba(255, 255, 255, 0.3);">☆</span>' +
+                                                '</button>';
+                                        }).join('')}
                                     </div>
                                 </div>
                                 <button id="${childRegenId}" onclick="regenerateDayMenu('ninos')" 
@@ -1634,15 +1661,16 @@
                     const ratingId = `rating-${menuType}-${selectedDay}`;
                     const ratingContainer = document.getElementById(ratingId);
                     if (ratingContainer) {
-                        ratingContainer.innerHTML = [1, 2, 3, 4, 5].map(star => `
-                            <button onclick="rateDayMenu('${menuType}', ${star})" 
+                        ratingContainer.innerHTML = [1, 2, 3, 4, 5].map(star => {
+                            const isFilled = rating >= star;
+                            return `<button onclick="rateDayMenu('${menuType}', ${star})" 
                                 style="background: none; border: none; font-size: 1.5rem; cursor: pointer; padding: 0.25rem; transition: transform 0.2s;"
                                 onmouseover="this.style.transform='scale(1.2)'"
                                 onmouseout="this.style.transform='scale(1)'"
                                 title="${star} ${star === 1 ? 'estrella' : 'estrellas'}">
-                                <span style="color: ${rating >= star ? '#D4AF37' : 'rgba(255, 255, 255, 0.3)';">${rating >= star ? '⭐' : '☆'}</span>
-                            </button>
-                        `).join('');
+                                <span style="color: ${isFilled ? '#D4AF37' : 'rgba(255, 255, 255, 0.3)';">${isFilled ? '⭐' : '☆'}</span>
+                            </button>`;
+                        }).join('');
                     }
                     console.log(`[TV] Rating saved: ${rating} stars for ${menuType} on ${selectedDay}`);
                 } else {
@@ -1707,7 +1735,10 @@
         
         // Load existing ratings when menu is displayed
         async function loadDayRatings() {
-            if (!currentMenuId || !selectedDay) return;
+            if (!currentMenuId || !selectedDay) {
+                console.log('[TV] Cannot load ratings: missing menuId or selectedDay', { currentMenuId, selectedDay });
+                return;
+            }
             
             try {
                 // Load adults rating
@@ -1738,21 +1769,27 @@
                     const ratingId = `rating-ninos-${selectedDay}`;
                     const ratingContainer = document.getElementById(ratingId);
                     if (ratingContainer) {
-                        ratingContainer.innerHTML = [1, 2, 3, 4, 5].map(star => `
-                            <button onclick="rateDayMenu('ninos', ${star})" 
-                                style="background: none; border: none; font-size: 1.5rem; cursor: pointer; padding: 0.25rem; transition: transform 0.2s;"
-                                onmouseover="this.style.transform='scale(1.2)'"
-                                onmouseout="this.style.transform='scale(1)'"
-                                title="${star} ${star === 1 ? 'estrella' : 'estrellas'}">
-                                <span style="color: ${rating >= star ? '#D4AF37' : 'rgba(255, 255, 255, 0.3)';">${rating >= star ? '⭐' : '☆'}</span>
-                            </button>
-                        `).join('');
+                        ratingContainer.innerHTML = [1, 2, 3, 4, 5].map(star => {
+                            const isFilled = rating >= star;
+                            return '<button onclick="rateDayMenu(\'ninos\', ' + star + ')" ' +
+                                'style="background: none; border: none; font-size: 1.5rem; cursor: pointer; padding: 0.25rem; transition: transform 0.2s;" ' +
+                                'onmouseover="this.style.transform=\'scale(1.2)\'" ' +
+                                'onmouseout="this.style.transform=\'scale(1)\'" ' +
+                                'title="' + star + ' ' + (star === 1 ? 'estrella' : 'estrellas') + '">' +
+                                '<span style="color: ' + (isFilled ? '#D4AF37' : 'rgba(255, 255, 255, 0.3)') + ';">' + (isFilled ? '⭐' : '☆') + '</span>' +
+                                '</button>';
+                        }).join('');
                     }
                 }
             } catch (error) {
                 console.error('[TV] Error loading ratings:', error);
+                // Don't show alert, just log - ratings are optional
             }
         }
+        
+        // Make functions globally available
+        window.rateDayMenu = rateDayMenu;
+        window.regenerateDayMenu = regenerateDayMenu;
         
         // Start when page loads
         if (document.readyState === 'loading') {
