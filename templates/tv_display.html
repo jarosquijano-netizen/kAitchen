@@ -340,49 +340,7 @@
             border-left: 6px solid var(--orange-children);
         }
 
-        .panel-header {
-            text-align: center;
-            margin-bottom: 1.5rem;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 1rem;
-            flex-shrink: 0; /* Prevent header from shrinking */
-        }
-
-        .panel-title {
-            font-family: 'Playfair Display', serif;
-            font-size: 2.5rem;
-            font-weight: 900;
-            text-transform: uppercase;
-            letter-spacing: -1px;
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-        }
-        
-        .panel-title .emoji {
-            font-size: 1.8rem;
-        }
-
-        .panel-title.adults {
-            color: var(--blue-adults);
-            text-shadow: 0 0 30px rgba(59, 130, 246, 0.3);
-        }
-
-        .panel-title.children {
-            color: var(--orange-children);
-            text-shadow: 0 0 30px rgba(249, 115, 22, 0.3);
-        }
-
-        .panel-subtitle {
-            font-size: 1.2rem;
-            color: var(--silver);
-            font-weight: 400;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            white-space: nowrap;
-        }
+        /* OLD STYLES REMOVED - All visual styling is now inline in HTML */
 
         .meal-grid {
             display: grid;
@@ -396,11 +354,7 @@
             z-index: 2; /* Above blur effect */
         }
 
-        /* NEW ZENITH-STYLE MEAL CARD - All styles are inline in HTML */
-        .meal-card {
-            /* Base styles only - all visual styles are inline */
-            /* No CSS here - everything is inline to ensure it works */
-        }
+        /* ZENITH-STYLE MEAL CARD - All styles are inline in HTML, no CSS needed */
 
         /* Ingredient badges */
         .ingredient-badges {
@@ -571,9 +525,6 @@
                 grid-template-columns: repeat(4, 1fr);
             }
             
-            .panel-title {
-                font-size: 2.5rem;
-            }
         }
 
         /* Tablet (iPad) */
@@ -717,19 +668,6 @@
                 border-radius: 16px;
             }
 
-            .panel-header {
-                flex-direction: column;
-                align-items: flex-start;
-                margin-bottom: 1rem;
-            }
-
-            .panel-title {
-                font-size: 1.5rem;
-            }
-
-            .panel-subtitle {
-                font-size: 1rem;
-            }
 
             .meal-grid {
                 gap: 1rem;
@@ -753,9 +691,6 @@
                 font-size: 0.9rem;
             }
 
-            .panel-title {
-                font-size: 1.2rem;
-            }
         }
     </style>
 </head>
@@ -1498,15 +1433,15 @@
                     adultosHtml += `</div></div>`;
                 } else {
                     console.log('[TV] No adult day data for', selectedDay);
-                    adultosHtml = `<div class="menu-panel adults"><div class="panel-header"><div class="panel-title adults"><span class="emoji">👨‍👩‍👧‍👦</span> ADULTS</div></div><div style="text-align: center; padding: 4rem; color: var(--silver); font-size: 2rem;">No menu available</div></div>`;
+                    adultosHtml = `<div class="menu-panel adults"><div style="text-align: center; padding: 4rem; color: #CBD5E0; font-size: 2rem;">No menu available</div></div>`;
                 }
                 } catch (error) {
                     console.error('[TV] Error in getDayDataFromMenu for adults:', error);
-                    adultosHtml = `<div class="menu-panel adults"><div class="panel-header"><div class="panel-title adults"><span class="emoji">👨‍👩‍👧‍👦</span> ADULTS</div></div><div style="text-align: center; padding: 4rem; color: var(--silver); font-size: 2rem;">Error loading menu</div></div>`;
+                    adultosHtml = `<div class="menu-panel adults"><div style="text-align: center; padding: 4rem; color: #CBD5E0; font-size: 2rem;">Error loading menu</div></div>`;
                 }
             } else {
                 console.log('[TV] No menu_adultos.dias structure');
-                adultosHtml = `<div class="menu-panel adults"><div class="panel-header"><div class="panel-title adults"><span class="emoji">👨‍👩‍👧‍👦</span> ADULTS</div></div><div style="text-align: center; padding: 4rem; color: var(--silver); font-size: 2rem;">No menu structure</div></div>`;
+                adultosHtml = `<div class="menu-panel adults"><div style="text-align: center; padding: 4rem; color: #CBD5E0; font-size: 2rem;">No menu structure</div></div>`;
             }
             
             // NIÑOS MENU
@@ -1546,15 +1481,15 @@
                     ninosHtml += `</div></div>`;
                 } else {
                     console.log('[TV] No child day data for', selectedDay);
-                    ninosHtml = `<div class="menu-panel children"><div class="panel-header"><div class="panel-title children"><span class="emoji">👶</span> CHILDREN</div></div><div style="text-align: center; padding: 4rem; color: var(--silver); font-size: 2rem;">No menu available</div></div>`;
+                    ninosHtml = `<div class="menu-panel children"><div style="text-align: center; padding: 4rem; color: #CBD5E0; font-size: 2rem;">No menu available</div></div>`;
                 }
                 } catch (error) {
                     console.error('[TV] Error in getDayDataFromMenu for children:', error);
-                    ninosHtml = `<div class="menu-panel children"><div class="panel-header"><div class="panel-title children"><span class="emoji">👶</span> CHILDREN</div></div><div style="text-align: center; padding: 4rem; color: var(--silver); font-size: 2rem;">Error loading menu</div></div>`;
+                    ninosHtml = `<div class="menu-panel children"><div style="text-align: center; padding: 4rem; color: #CBD5E0; font-size: 2rem;">Error loading menu</div></div>`;
                 }
             } else {
                 console.log('[TV] No menu_ninos.dias structure');
-                ninosHtml = `<div class="menu-panel children"><div class="panel-header"><div class="panel-title children"><span class="emoji">👶</span> CHILDREN</div></div><div style="text-align: center; padding: 4rem; color: var(--silver); font-size: 2rem;">No menu structure</div></div>`;
+                ninosHtml = `<div class="menu-panel children"><div style="text-align: center; padding: 4rem; color: #CBD5E0; font-size: 2rem;">No menu structure</div></div>`;
             }
             
             // Collect all recipes from both menus (use the ones we already collected)
