@@ -1229,7 +1229,7 @@
                 let ingredientsBadgesHtml = '';
                 if (ingredients.length > 0) {
                     const badges = ingredients.map(ing => 
-                        `<span style="font-size: 0.75rem; padding: 0.375rem 0.75rem; background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 0.5rem; color: rgba(255, 255, 255, 0.8);">${ing}</span>`
+                        `<span style="font-size: 0.75rem; padding: 0.375rem 0.75rem; background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 0.5rem; color: rgba(255, 255, 255, 0.8); white-space: nowrap;">${ing}</span>`
                     ).join('');
                     ingredientsBadgesHtml = `<div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">${badges}</div>`;
                 }
@@ -1245,7 +1245,7 @@
                     nutritionHtml = `
                         <div style="display: flex; flex-direction: column; gap: 0.75rem;">
                             <h3 style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: rgba(255, 255, 255, 0.4); display: flex; align-items: center; gap: 0.5rem;">
-                                <span>ℹ️</span>
+                                <span style="font-size: 0.875rem;">ℹ️</span>
                                 <span>Nutrition Focus</span>
                             </h3>
                             <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem;">
@@ -1266,14 +1266,14 @@
                 // Return complete meal card HTML matching zenith design EXACTLY
                 return {
                     html: `
-                        <div style="position: relative; overflow: hidden; background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 1.5rem; padding: clamp(1rem, 3vw, 2rem); display: flex; flex-direction: column; gap: 1.5rem; transition: all 0.5s ease;">
+                        <div style="position: relative; overflow: hidden; background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 1.5rem; padding: 2rem; display: flex; flex-direction: column; gap: 1.5rem; transition: all 0.5s ease;">
                             <!-- Background Accent Blur (zenith: -top-24 -right-24 w-64 h-64 blur-[100px] opacity-20) -->
                             <div style="position: absolute; top: -96px; right: -96px; width: 256px; height: 256px; background: ${isAdult ? '#3B82F6' : '#F97316'}; opacity: 0.2; filter: blur(100px); pointer-events: none; border-radius: 50%; z-index: 0;"></div>
                             
                             <!-- Header (zenith: flex items-center justify-between) -->
                             <div style="display: flex; align-items: center; justify-content: space-between; position: relative; z-index: 1;">
                                 <div style="display: flex; align-items: center; gap: 0.75rem;">
-                                    <div style="padding: 0.625rem; border-radius: 0.75rem; background: ${isAdult ? 'rgba(59, 130, 246, 0.2)' : 'rgba(249, 115, 22, 0.2)'}; color: ${isAdult ? '#60A5FA' : '#FB923C'}; display: flex; align-items: center; justify-content: center; font-size: clamp(1rem, 2vw, 1.25rem);">
+                                    <div style="padding: 0.625rem; border-radius: 0.75rem; background: ${isAdult ? 'rgba(59, 130, 246, 0.2)' : 'rgba(249, 115, 22, 0.2)'}; color: ${isAdult ? '#60A5FA' : '#FB923C'}; display: flex; align-items: center; justify-content: center; width: 1.25rem; height: 1.25rem; font-size: 1.25rem;">
                                         ${isAdult ? '👨‍👩‍👧‍👦' : '👶'}
                                     </div>
                                     <span style="font-size: 0.875rem; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: ${isAdult ? '#60A5FA' : '#FB923C'};">
@@ -1289,7 +1289,7 @@
                             <div style="display: flex; flex-direction: column; gap: 1rem; position: relative; z-index: 1;">
                                 <div style="display: flex; flex-direction: column;">
                                     <span style="font-size: 0.625rem; text-transform: uppercase; letter-spacing: 0.1em; color: rgba(255, 255, 255, 0.4); margin-bottom: 0.25rem;">${mealNames[mealType].es} / ${mealNames[mealType].en}</span>
-                                    <h2 style="font-family: 'Playfair Display', serif; font-size: clamp(1.5rem, 4vw, 3rem); color: #FFFFFF; line-height: 1.2; margin: 0; transition: color 0.3s ease;">
+                                    <h2 style="font-family: 'Playfair Display', serif; font-size: 1.875rem; color: #FFFFFF; line-height: 1.2; margin: 0; transition: color 0.3s ease;">
                                         ${mealName}
                                     </h2>
                                 </div>
@@ -1309,19 +1309,19 @@
                             <div style="display: flex; flex-wrap: wrap; gap: 1rem; padding: 0.5rem 0; border-top: 1px solid rgba(255, 255, 255, 0.05); border-bottom: 1px solid rgba(255, 255, 255, 0.05); position: relative; z-index: 1;">
                                 ${prepTime ? `
                                     <div style="display: flex; align-items: center; gap: 0.5rem; color: rgba(255, 255, 255, 0.6);">
-                                        <span style="font-size: 1rem;">⏱️</span>
+                                        <span style="font-size: 1rem; width: 1rem; height: 1rem; display: flex; align-items: center; justify-content: center;">⏱️</span>
                                         <span style="font-size: 0.875rem; font-weight: 500;">${prepTime} min</span>
                                     </div>
                                 ` : ''}
                                 ${calories ? `
                                     <div style="display: flex; align-items: center; gap: 0.5rem; color: rgba(255, 255, 255, 0.6);">
-                                        <span style="font-size: 1rem;">🔥</span>
+                                        <span style="font-size: 1rem; width: 1rem; height: 1rem; display: flex; align-items: center; justify-content: center;">🔥</span>
                                         <span style="font-size: 0.875rem; font-weight: 500;">${calories} kcal</span>
                                     </div>
                                 ` : ''}
                                 ${ingredients.length > 0 ? `
                                     <div style="display: flex; align-items: center; gap: 0.5rem; color: rgba(255, 255, 255, 0.6);">
-                                        <span style="font-size: 1rem;">🍴</span>
+                                        <span style="font-size: 1rem; width: 1rem; height: 1rem; display: flex; align-items: center; justify-content: center;">🍴</span>
                                         <span style="font-size: 0.875rem; font-weight: 500;">${ingredients.length} Items</span>
                                     </div>
                                 ` : ''}
