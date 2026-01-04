@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>k[AI]tchen · Weekly Menu</title>
     <!-- Version: Zenith Design v2.0 - Force cache refresh -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🍳</text></svg>">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -1663,13 +1664,16 @@
                     if (ratingContainer) {
                         ratingContainer.innerHTML = [1, 2, 3, 4, 5].map(star => {
                             const isFilled = rating >= star;
-                            return `<button onclick="rateDayMenu('${menuType}', ${star})" 
-                                style="background: none; border: none; font-size: 1.5rem; cursor: pointer; padding: 0.25rem; transition: transform 0.2s;"
-                                onmouseover="this.style.transform='scale(1.2)'"
-                                onmouseout="this.style.transform='scale(1)'"
-                                title="${star} ${star === 1 ? 'estrella' : 'estrellas'}">
-                                <span style="color: ${isFilled ? '#D4AF37' : 'rgba(255, 255, 255, 0.3)';">${isFilled ? '⭐' : '☆'}</span>
-                            </button>`;
+                            const starColor = isFilled ? '#D4AF37' : 'rgba(255, 255, 255, 0.3)';
+                            const starIcon = isFilled ? '⭐' : '☆';
+                            const starText = star === 1 ? 'estrella' : 'estrellas';
+                            return '<button onclick="rateDayMenu(\'' + menuType + '\', ' + star + ')" ' +
+                                'style="background: none; border: none; font-size: 1.5rem; cursor: pointer; padding: 0.25rem; transition: transform 0.2s;" ' +
+                                'onmouseover="this.style.transform=\'scale(1.2)\'" ' +
+                                'onmouseout="this.style.transform=\'scale(1)\'" ' +
+                                'title="' + star + ' ' + starText + '">' +
+                                '<span style="color: ' + starColor + ';">' + starIcon + '</span>' +
+                                '</button>';
                         }).join('');
                     }
                     console.log(`[TV] Rating saved: ${rating} stars for ${menuType} on ${selectedDay}`);
