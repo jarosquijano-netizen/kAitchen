@@ -171,6 +171,19 @@ class Database:
                     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 )
             ''')
+            
+            cursor.execute('''
+                CREATE TABLE IF NOT EXISTS menu_day_ratings (
+                    id SERIAL PRIMARY KEY,
+                    menu_id INTEGER NOT NULL,
+                    week_start_date DATE NOT NULL,
+                    day_name TEXT NOT NULL,
+                    menu_type TEXT NOT NULL,
+                    rating INTEGER NOT NULL CHECK (rating >= 1 AND rating <= 5),
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    UNIQUE(menu_id, day_name, menu_type)
+                )
+            ''')
         else:
             # SQLite table creation
             cursor.execute('''
@@ -265,6 +278,19 @@ class Database:
                     include_dinner BOOLEAN DEFAULT 1,
                     excluded_days TEXT,
                     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )
+            ''')
+            
+            cursor.execute('''
+                CREATE TABLE IF NOT EXISTS menu_day_ratings (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    menu_id INTEGER NOT NULL,
+                    week_start_date DATE NOT NULL,
+                    day_name TEXT NOT NULL,
+                    menu_type TEXT NOT NULL,
+                    rating INTEGER NOT NULL CHECK (rating >= 1 AND rating <= 5),
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    UNIQUE(menu_id, day_name, menu_type)
                 )
             ''')
         
@@ -679,6 +705,128 @@ class Database:
         
         self._close_connection(conn)
         return menus
+    
+    # ==================== MENU DAY RATINGS ====================
+    
+    def rate_menu_day(self, menu_id: int, week_start_date: str, day_name: str, menu_type: str, rating: int) -> bool:
+        """
+        Rate a specific day menu (adults or children).
+        
+        Args:
+            menu_id: ID of the weekly menu
+            week_start_date: Week start date (YYYY-MM-DD)
+            day_name: Day name (lunes, martes, etc.)
+            menu_type: 'adultos' or 'ninos'
+            rating: Rating from 1 to 5
+        
+        Returns:
+            True if successful, False otherwise
+        """
+        if rating < 1 or rating > 5:
+            return False
+        
+        if menu_type not in ['adultos', 'ninos']:
+            return False
+        
+        conn = self.get_connection()
+        cursor = conn.cursor()
+        
+        try:
+            if self.is_postgres:
+                cursor.execute('''
+                    INSERT INTO menu_day_ratings (menu_id, week_start_date, day_name, menu_type, rating)
+                    VALUES (%s, %s, %s, %s, %s)
+                    ON CONFLICT (menu_id, day_name, menu_type) 
+                    DO UPDATE SET rating = %s, created_at = CURRENT_TIMESTAMP
+                ''', (menu_id, week_start_date, day_name, menu_type, rating, rating))
+            else:
+                cursor.execute('''
+                    INSERT OR REPLACE INTO menu_day_ratings (menu_id, week_start_date, day_name, menu_type, rating, created_at)
+                    VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+                ''', (menu_id, week_start_date, day_name, menu_type, rating))
+            
+            conn.commit()
+            return True
+        except Exception as e:
+            print(f"[Database] Error rating menu day: {e}")
+            conn.rollback()
+            return False
+        finally:
+            self._close_connection(conn)
+    
+    def get_menu_day_rating(self, menu_id: int, day_name: str, menu_type: str) -> Optional[int]:
+        """
+        Get rating for a specific day menu.
+        
+        Returns:
+            Rating (1-5) or None if not rated
+        """
+        conn = self.get_connection()
+        cursor = conn.cursor()
+        
+        try:
+            if self.is_postgres:
+                cursor.execute('''
+                    SELECT rating FROM menu_day_ratings
+                    WHERE menu_id = %s AND day_name = %s AND menu_type = %s
+                ''', (menu_id, day_name, menu_type))
+            else:
+                cursor.execute('''
+                    SELECT rating FROM menu_day_ratings
+                    WHERE menu_id = ? AND day_name = ? AND menu_type = ?
+                ''', (menu_id, day_name, menu_type))
+            
+            row = cursor.fetchone()
+            if row:
+                return row[0] if self.is_postgres else row['rating']
+            return None
+        finally:
+            self._close_connection(conn)
+    
+    def get_all_menu_ratings(self, limit: int = 50) -> List[Dict]:
+        """
+        Get all menu day ratings for AI learning.
+        
+        Returns:
+            List of rating records with menu data
+        """
+        conn = self.get_connection()
+        
+        try:
+            if self.is_postgres:
+                cursor = conn.cursor(cursor_factory=RealDictCursor)
+                cursor.execute('''
+                    SELECT mdr.*, wm.menu_data
+                    FROM menu_day_ratings mdr
+                    JOIN weekly_menus wm ON mdr.menu_id = wm.id
+                    ORDER BY mdr.created_at DESC
+                    LIMIT %s
+                ''', (limit,))
+            else:
+                conn.row_factory = sqlite3.Row
+                cursor = conn.cursor()
+                cursor.execute('''
+                    SELECT mdr.*, wm.menu_data
+                    FROM menu_day_ratings mdr
+                    JOIN weekly_menus wm ON mdr.menu_id = wm.id
+                    ORDER BY mdr.created_at DESC
+                    LIMIT ?
+                ''', (limit,))
+            
+            rows = cursor.fetchall()
+            ratings = []
+            for row in rows:
+                rating = dict(row)
+                if rating.get('menu_data'):
+                    try:
+                        rating['menu_data'] = json.loads(rating['menu_data'])
+                    except:
+                        pass
+                ratings.append(rating)
+            
+            return ratings
+        finally:
+            self._close_connection(conn)
     
     # ==================== MENU PREFERENCES ====================
     

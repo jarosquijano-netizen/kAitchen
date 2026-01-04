@@ -817,6 +817,8 @@
 
         let currentMenu = null;
         let selectedDay = null;
+        let currentMenuId = null;
+        let currentWeekStart = null;
 
         // Update clock and date
         function updateDateTime() {
@@ -988,7 +990,9 @@
                                 }
                                 
                                 currentMenu = menuData;
-                                console.log('[TV] Latest menu loaded successfully as fallback');
+                                currentMenuId = latestResult.data.id;
+                                currentWeekStart = latestResult.data.week_start_date;
+                                console.log('[TV] Latest menu loaded successfully as fallback, ID:', currentMenuId);
                                 
                                 // Always set selectedDay to today if not already set
                                 if (!selectedDay) {
@@ -1030,7 +1034,9 @@
                     }
                     
                     currentMenu = menuData;
-                    console.log('[TV] Menu loaded successfully');
+                    currentMenuId = result.data.id;
+                    currentWeekStart = result.data.week_start_date;
+                    console.log('[TV] Menu loaded successfully, ID:', currentMenuId, 'Week:', currentWeekStart);
                     
                     // Always set selectedDay to today if not already set
                     if (!selectedDay) {
@@ -1061,10 +1067,12 @@
                                 }
                             }
                             currentMenu = menuData;
+                            currentMenuId = latestResult.data.id;
+                            currentWeekStart = latestResult.data.week_start_date;
                             if (!selectedDay) {
                                 selectedDay = getCurrentDayName();
                             }
-                            console.log('[TV] Latest menu loaded successfully as error fallback');
+                            console.log('[TV] Latest menu loaded successfully as error fallback, ID:', currentMenuId);
                             displayMenu();
                             return;
                         }
@@ -1472,8 +1480,35 @@
                 console.log('[TV] Child day data for', selectedDay, ':', childDayData);
                     console.log('[TV] Available day keys in children menu:', Object.keys(currentMenu.menu_ninos.dias));
                 if (childDayData) {
+                    // Add rating and regenerate section for children
+                    const childRatingId = `rating-ninos-${selectedDay}`;
+                    const childRegenId = `regen-ninos-${selectedDay}`;
                     ninosHtml += `
                         <div class="menu-panel children">
+                            <div style="margin-bottom: 1.5rem; padding: 1rem; background: rgba(255, 255, 255, 0.05); border-radius: 1rem; border: 1px solid rgba(255, 255, 255, 0.1); position: relative; z-index: 10;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+                                <div style="flex: 1; min-width: 200px;">
+                                    <div style="font-size: 0.75rem; color: rgba(255, 255, 255, 0.5); margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.1em;">Califica este menú</div>
+                                    <div id="${childRatingId}" style="display: flex; gap: 0.25rem; align-items: center;">
+                                        ${[1, 2, 3, 4, 5].map(star => `
+                                            <button onclick="rateDayMenu('ninos', ${star})" 
+                                                style="background: none; border: none; font-size: 1.5rem; cursor: pointer; padding: 0.25rem; transition: transform 0.2s;"
+                                                onmouseover="this.style.transform='scale(1.2)'"
+                                                onmouseout="this.style.transform='scale(1)'"
+                                                title="${star} ${star === 1 ? 'estrella' : 'estrellas'}">
+                                                <span class="star-${star}" style="color: rgba(255, 255, 255, 0.3);">☆</span>
+                                            </button>
+                                        `).join('')}
+                                    </div>
+                                </div>
+                                <button id="${childRegenId}" onclick="regenerateDayMenu('ninos')" 
+                                    style="padding: 0.75rem 1.5rem; background: rgba(249, 115, 22, 0.2); border: 1px solid rgba(249, 115, 22, 0.4); border-radius: 0.75rem; color: #FB923C; font-size: 0.875rem; font-weight: 600; cursor: pointer; transition: all 0.3s; text-transform: uppercase; letter-spacing: 0.05em;"
+                                    onmouseover="this.style.background='rgba(249, 115, 22, 0.3)'; this.style.borderColor='rgba(249, 115, 22, 0.6)'"
+                                    onmouseout="this.style.background='rgba(249, 115, 22, 0.2)'; this.style.borderColor='rgba(249, 115, 22, 0.4)'">
+                                    🔄 Regenerar Menú Niños
+                                </button>
+                            </div>
+                        </div>
                             <div class="meal-grid">
                     `;
                     
@@ -1536,6 +1571,9 @@
             
             // Force a reflow to ensure rendering
             void container.offsetHeight;
+            
+            // Load existing ratings
+            setTimeout(loadDayRatings, 100);
         }
 
         function showNoMenu() {
@@ -1567,6 +1605,155 @@
             setInterval(loadMenu, 300000);
         }
 
+        // Rating and regeneration functions
+        async function rateDayMenu(menuType, rating) {
+            if (!currentMenuId || !currentWeekStart || !selectedDay) {
+                alert('Error: No hay menú cargado');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/menu/rate-day', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        menu_id: currentMenuId,
+                        week_start_date: currentWeekStart,
+                        day_name: selectedDay,
+                        menu_type: menuType,
+                        rating: rating
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    // Update star display
+                    const ratingId = `rating-${menuType}-${selectedDay}`;
+                    const ratingContainer = document.getElementById(ratingId);
+                    if (ratingContainer) {
+                        ratingContainer.innerHTML = [1, 2, 3, 4, 5].map(star => `
+                            <button onclick="rateDayMenu('${menuType}', ${star})" 
+                                style="background: none; border: none; font-size: 1.5rem; cursor: pointer; padding: 0.25rem; transition: transform 0.2s;"
+                                onmouseover="this.style.transform='scale(1.2)'"
+                                onmouseout="this.style.transform='scale(1)'"
+                                title="${star} ${star === 1 ? 'estrella' : 'estrellas'}">
+                                <span style="color: ${rating >= star ? '#D4AF37' : 'rgba(255, 255, 255, 0.3)';">${rating >= star ? '⭐' : '☆'}</span>
+                            </button>
+                        `).join('');
+                    }
+                    console.log(`[TV] Rating saved: ${rating} stars for ${menuType} on ${selectedDay}`);
+                } else {
+                    alert('Error al guardar el rating: ' + (result.error || 'Error desconocido'));
+                }
+            } catch (error) {
+                console.error('[TV] Error rating menu:', error);
+                alert('Error al guardar el rating');
+            }
+        }
+        
+        async function regenerateDayMenu(menuType) {
+            if (!currentMenuId || !currentWeekStart || !selectedDay) {
+                alert('Error: No hay menú cargado');
+                return;
+            }
+            
+            if (!confirm(`¿Regenerar el menú de ${menuType} para ${selectedDay}?`)) {
+                return;
+            }
+            
+            const regenButtonId = `regen-${menuType}-${selectedDay}`;
+            const regenButton = document.getElementById(regenButtonId);
+            if (regenButton) {
+                regenButton.disabled = true;
+                regenButton.textContent = '⏳ Regenerando...';
+            }
+            
+            try {
+                const response = await fetch('/api/menu/regenerate-day', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        menu_id: currentMenuId,
+                        week_start_date: currentWeekStart,
+                        day_name: selectedDay,
+                        menu_type: menuType
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    // Reload menu
+                    await loadMenu();
+                    alert(`Menú de ${menuType} regenerado correctamente`);
+                } else {
+                    alert('Error al regenerar el menú: ' + (result.error || 'Error desconocido'));
+                }
+            } catch (error) {
+                console.error('[TV] Error regenerating menu:', error);
+                alert('Error al regenerar el menú');
+            } finally {
+                if (regenButton) {
+                    regenButton.disabled = false;
+                    regenButton.textContent = `🔄 Regenerar Menú ${menuType === 'adultos' ? 'Adultos' : 'Niños'}`;
+                }
+            }
+        }
+        
+        // Load existing ratings when menu is displayed
+        async function loadDayRatings() {
+            if (!currentMenuId || !selectedDay) return;
+            
+            try {
+                // Load adults rating
+                const adultResponse = await fetch(`/api/menu/get-day-rating?menu_id=${currentMenuId}&day_name=${selectedDay}&menu_type=adultos`);
+                const adultResult = await adultResponse.json();
+                if (adultResult.success && adultResult.data.rating) {
+                    const rating = adultResult.data.rating;
+                    const ratingId = `rating-adultos-${selectedDay}`;
+                    const ratingContainer = document.getElementById(ratingId);
+                    if (ratingContainer) {
+                        ratingContainer.innerHTML = [1, 2, 3, 4, 5].map(star => `
+                            <button onclick="rateDayMenu('adultos', ${star})" 
+                                style="background: none; border: none; font-size: 1.5rem; cursor: pointer; padding: 0.25rem; transition: transform 0.2s;"
+                                onmouseover="this.style.transform='scale(1.2)'"
+                                onmouseout="this.style.transform='scale(1)'"
+                                title="${star} ${star === 1 ? 'estrella' : 'estrellas'}">
+                                <span style="color: ${rating >= star ? '#D4AF37' : 'rgba(255, 255, 255, 0.3)';">${rating >= star ? '⭐' : '☆'}</span>
+                            </button>
+                        `).join('');
+                    }
+                }
+                
+                // Load children rating
+                const childResponse = await fetch(`/api/menu/get-day-rating?menu_id=${currentMenuId}&day_name=${selectedDay}&menu_type=ninos`);
+                const childResult = await childResponse.json();
+                if (childResult.success && childResult.data.rating) {
+                    const rating = childResult.data.rating;
+                    const ratingId = `rating-ninos-${selectedDay}`;
+                    const ratingContainer = document.getElementById(ratingId);
+                    if (ratingContainer) {
+                        ratingContainer.innerHTML = [1, 2, 3, 4, 5].map(star => `
+                            <button onclick="rateDayMenu('ninos', ${star})" 
+                                style="background: none; border: none; font-size: 1.5rem; cursor: pointer; padding: 0.25rem; transition: transform 0.2s;"
+                                onmouseover="this.style.transform='scale(1.2)'"
+                                onmouseout="this.style.transform='scale(1)'"
+                                title="${star} ${star === 1 ? 'estrella' : 'estrellas'}">
+                                <span style="color: ${rating >= star ? '#D4AF37' : 'rgba(255, 255, 255, 0.3)';">${rating >= star ? '⭐' : '☆'}</span>
+                            </button>
+                        `).join('');
+                    }
+                }
+            } catch (error) {
+                console.error('[TV] Error loading ratings:', error);
+            }
+        }
+        
         // Start when page loads
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', initialize);

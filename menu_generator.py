@@ -85,7 +85,8 @@ class MenuGenerator:
                             recipes: Optional[List[Dict]] = None,
                             preferences: Optional[Dict] = None,
                             day_settings: Optional[Dict] = None,
-                            highly_rated_menus: Optional[List[Dict]] = None) -> Dict:
+                            highly_rated_menus: Optional[List[Dict]] = None,
+                            historical_ratings: Optional[List[Dict]] = None) -> Dict:
         """
         Generate a personalized weekly menu for the family
         
@@ -102,7 +103,7 @@ class MenuGenerator:
         """
         
         # Build the prompt with family information
-        prompt = self._build_menu_prompt(adults, children, recipes, preferences, day_settings)
+        prompt = self._build_menu_prompt(adults, children, recipes, preferences, day_settings, historical_ratings)
         
         # Call Claude API
         try:
@@ -166,13 +167,244 @@ class MenuGenerator:
                 'menu': None
             }
     
+    def generate_single_day_menu(self,
+                                adults: List[Dict],
+                                children: List[Dict],
+                                recipes: Optional[List[Dict]] = None,
+                                preferences: Optional[Dict] = None,
+                                day_name: str = 'lunes',
+                                menu_type: str = 'adultos',
+                                historical_ratings: Optional[List[Dict]] = None) -> Dict:
+        """
+        Generate menu for a single day (adults or children only)
+        
+        Args:
+            adults: List of adult profiles
+            children: List of children profiles
+            recipes: Optional list of available recipes
+            preferences: Optional additional preferences
+            day_name: Day name (lunes, martes, etc.)
+            menu_type: 'adultos' or 'ninos'
+            historical_ratings: Optional historical ratings for learning
+        
+        Returns:
+            Dictionary with day menu
+        """
+        # Build prompt for single day
+        prompt = self._build_single_day_prompt(adults, children, recipes, preferences, day_name, menu_type, historical_ratings)
+        
+        try:
+            print(f"[MenuGenerator] Generating single day menu for {day_name} ({menu_type})...")
+            
+            message = self.client.messages.create(
+                model="claude-sonnet-4-20250514",
+                max_tokens=8000,
+                temperature=0.7,
+                messages=[
+                    {
+                        "role": "user",
+                        "content": prompt
+                    }
+                ]
+            )
+            
+            response_text = message.content[0].text
+            print(f"[MenuGenerator] Response received, length: {len(response_text)}")
+            
+            # Parse response
+            day_menu = self._parse_single_day_response(response_text, menu_type)
+            
+            return {
+                'success': True,
+                'day_menu': day_menu,
+                'raw_response': response_text
+            }
+            
+        except Exception as e:
+            error_msg = f"Error generando menú: {str(e)}"
+            print(f"[MenuGenerator] ERROR: {error_msg}")
+            import traceback
+            traceback.print_exc()
+            return {
+                'success': False,
+                'error': error_msg,
+                'day_menu': None
+            }
+    
+    def _build_single_day_prompt(self,
+                                adults: List[Dict],
+                                children: List[Dict],
+                                recipes: Optional[List[Dict]],
+                                preferences: Optional[Dict],
+                                day_name: str,
+                                menu_type: str,
+                                historical_ratings: Optional[List[Dict]] = None) -> str:
+        """Build prompt for single day menu generation"""
+        
+        prompt = f"""Eres un nutricionista y chef experto. Genera UN SOLO DÍA de menú para {menu_type}.
+
+**DÍA:** {day_name.capitalize()}
+**TIPO:** {menu_type.capitalize()}
+
+"""
+        
+        # Add family profiles (simplified)
+        if menu_type == 'adultos' and adults:
+            prompt += "**PERFILES DE ADULTOS:**\n\n"
+            for adult in adults:
+                prompt += f"- {adult.get('nombre', 'Sin nombre')}: "
+                if adult.get('alergias'):
+                    prompt += f"ALERGIAS: {adult['alergias']}. "
+                if adult.get('ingredientes_favoritos'):
+                    prompt += f"Le gusta: {adult['ingredientes_favoritos']}. "
+                if adult.get('ingredientes_no_gustan'):
+                    prompt += f"No le gusta: {adult['ingredientes_no_gustan']}. "
+                prompt += "\n"
+        elif menu_type == 'ninos' and children:
+            prompt += "**PERFILES DE NIÑOS:**\n\n"
+            for child in children:
+                prompt += f"- {child.get('nombre', 'Sin nombre')}: "
+                if child.get('alergias'):
+                    prompt += f"ALERGIAS: {child['alergias']}. "
+                if child.get('ingredientes_favoritos'):
+                    prompt += f"Le encanta: {child['ingredientes_favoritos']}. "
+                if child.get('ingredientes_rechaza'):
+                    prompt += f"RECHAZA: {child['ingredientes_rechaza']}. "
+                prompt += "\n"
+        
+        # Add historical ratings
+        if historical_ratings:
+            prompt += "\n**⭐ APRENDE DE ESTOS RATINGS:**\n\n"
+            high_ratings = [r for r in historical_ratings if r.get('rating', 0) >= 4 and r.get('menu_type') == menu_type]
+            low_ratings = [r for r in historical_ratings if r.get('rating', 0) <= 2 and r.get('menu_type') == menu_type]
+            
+            if high_ratings:
+                prompt += "✅ REPITE estilos similares a estos (4-5⭐):\n"
+                for rating in high_ratings[:5]:
+                    menu_data = rating.get('menu_data', {})
+                    day_data = menu_data.get(f'menu_{menu_type}', {}).get('dias', {}).get(day_name, {})
+                    if day_data:
+                        for meal_type in ['desayuno', 'comida', 'merienda', 'cena']:
+                            if meal_type in day_data:
+                                meal_name = day_data[meal_type].get('nombre', '')
+                                if isinstance(meal_name, dict):
+                                    meal_name = meal_name.get('name', '')
+                                if meal_name:
+                                    prompt += f"  • {meal_name}\n"
+                prompt += "\n"
+            
+            if low_ratings:
+                prompt += "❌ EVITA estos platos (1-2⭐):\n"
+                for rating in low_ratings[:3]:
+                    menu_data = rating.get('menu_data', {})
+                    day_data = menu_data.get(f'menu_{menu_type}', {}).get('dias', {}).get(day_name, {})
+                    if day_data:
+                        for meal_type in ['desayuno', 'comida', 'merienda', 'cena']:
+                            if meal_type in day_data:
+                                meal_name = day_data[meal_type].get('nombre', '')
+                                if isinstance(meal_name, dict):
+                                    meal_name = meal_name.get('name', '')
+                                if meal_name:
+                                    prompt += f"  • NO: {meal_name}\n"
+                prompt += "\n"
+        
+        # Add meal types
+        if menu_type == 'adultos':
+            prompt += "**GENERA estas comidas para este día:**\n"
+            prompt += "- desayuno\n"
+            prompt += "- comida\n"
+            prompt += "- cena\n\n"
+        else:
+            prompt += "**GENERA estas comidas para este día:**\n"
+            prompt += "- desayuno\n"
+            prompt += "- comida\n"
+            prompt += "- merienda\n"
+            prompt += "- cena\n\n"
+        
+        prompt += """**FORMATO JSON (solo el día solicitado):**
+
+{
+  "desayuno": {
+    "nombre": "Nombre del plato",
+    "ingredientes": ["ing1", "ing2"],
+    "tiempo_prep": 15,
+    "calorias": 350,
+    "nutrientes": {
+      "proteinas": "20g",
+      "carbohidratos": "40g",
+      "grasas": "12g"
+    },
+    "instrucciones": "Pasos de preparación",
+    "receta_base": "Nombre o 'Original'",
+    "porque_seleccionada": "Por qué es buena para esta familia"
+  },
+  "comida": { /* misma estructura */ },
+  "merienda": { /* solo para niños */ },
+  "cena": { /* misma estructura */ }
+}
+
+**IMPORTANTE:**
+- Respeta TODAS las alergias e intolerancias
+- Usa ingredientes que les gustan
+- Evita ingredientes que rechazan
+- Aprende de los ratings históricos
+- Genera SOLO el JSON, sin texto adicional
+
+**GENERA EL MENÚ AHORA:**
+"""
+        
+        return prompt
+    
+    def _parse_single_day_response(self, response: str, menu_type: str) -> Dict:
+        """Parse single day menu response"""
+        import re
+        
+        try:
+            # Try to find JSON in response
+            json_match = re.search(r'```json\s*(.*?)\s*```', response, re.DOTALL)
+            if json_match:
+                json_str = json_match.group(1).strip()
+            else:
+                json_match = re.search(r'```\s*(.*?)\s*```', response, re.DOTALL)
+                if json_match:
+                    json_str = json_match.group(1).strip()
+                else:
+                    # Try to find JSON object
+                    brace_count = 0
+                    start_pos = -1
+                    for i, char in enumerate(response):
+                        if char == '{':
+                            if brace_count == 0:
+                                start_pos = i
+                            brace_count += 1
+                        elif char == '}':
+                            brace_count -= 1
+                            if brace_count == 0 and start_pos != -1:
+                                json_str = response[start_pos:i+1]
+                                break
+                    else:
+                        json_str = response
+            
+            # Clean JSON
+            json_str = re.sub(r'//.*?$', '', json_str, flags=re.MULTILINE)
+            json_str = re.sub(r',\s*}', '}', json_str)
+            json_str = re.sub(r',\s*]', ']', json_str)
+            
+            day_menu = json.loads(json_str)
+            return day_menu
+            
+        except Exception as e:
+            print(f"[MenuGenerator] Error parsing single day response: {e}")
+            return {}
+    
     def _build_menu_prompt(self, 
                           adults: List[Dict], 
                           children: List[Dict],
                           recipes: Optional[List[Dict]],
                           preferences: Optional[Dict],
                           day_settings: Optional[Dict] = None,
-                          highly_rated_menus: Optional[List[Dict]] = None) -> str:
+                          highly_rated_menus: Optional[List[Dict]] = None,
+                          historical_ratings: Optional[List[Dict]] = None) -> str:
         """Build the enhanced prompt for Claude with nutrition and day settings"""
         
         prompt = """Eres un nutricionista y chef experto con especialización en:
@@ -348,6 +580,71 @@ Tu tarea es crear un menú semanal COMPLETO Y DETALLADO para una familia en Barc
                 for key, value in other_prefs.items():
                     prompt += f"- {key}: {value}\n"
                 prompt += "\n"
+        
+        # Add historical ratings for learning
+        if historical_ratings:
+            prompt += "**⭐ HISTORIAL DE CALIFICACIONES (APRENDE DE ESTO):**\n\n"
+            prompt += "La familia ha calificado estos menús anteriores. Usa esta información para entender sus gustos:\n\n"
+            
+            # Group by rating
+            high_ratings = [r for r in historical_ratings if r.get('rating', 0) >= 4]
+            low_ratings = [r for r in historical_ratings if r.get('rating', 0) <= 2]
+            
+            if high_ratings:
+                prompt += "**✅ MENÚS QUE LES GUSTARON (4-5 estrellas):**\n"
+                for rating in high_ratings[:10]:  # Top 10
+                    menu_data = rating.get('menu_data', {})
+                    day_name = rating.get('day_name', '')
+                    menu_type = rating.get('menu_type', '')
+                    rating_val = rating.get('rating', 0)
+                    
+                    if menu_data and day_name and menu_type:
+                        menu_key = f'menu_{menu_type}'
+                        if menu_key in menu_data and 'dias' in menu_data[menu_key]:
+                            day_data = menu_data[menu_key]['dias'].get(day_name, {})
+                            if day_data:
+                                prompt += f"- {day_name.capitalize()} ({menu_type}): {rating_val}⭐\n"
+                                # Add meal names
+                                for meal_type in ['desayuno', 'comida', 'merienda', 'cena']:
+                                    if meal_type in day_data:
+                                        meal = day_data[meal_type]
+                                        meal_name = meal.get('nombre', '')
+                                        if isinstance(meal_name, dict):
+                                            meal_name = meal_name.get('name', '')
+                                        if meal_name:
+                                            prompt += f"  • {meal_type}: {meal_name}\n"
+                prompt += "\n"
+            
+            if low_ratings:
+                prompt += "**❌ MENÚS QUE NO LES GUSTARON (1-2 estrellas):**\n"
+                prompt += "EVITA generar menús similares a estos:\n"
+                for rating in low_ratings[:5]:  # Top 5 worst
+                    menu_data = rating.get('menu_data', {})
+                    day_name = rating.get('day_name', '')
+                    menu_type = rating.get('menu_type', '')
+                    rating_val = rating.get('rating', 0)
+                    
+                    if menu_data and day_name and menu_type:
+                        menu_key = f'menu_{menu_type}'
+                        if menu_key in menu_data and 'dias' in menu_data[menu_key]:
+                            day_data = menu_data[menu_key]['dias'].get(day_name, {})
+                            if day_data:
+                                prompt += f"- {day_name.capitalize()} ({menu_type}): {rating_val}⭐ - EVITAR:\n"
+                                # Add meal names to avoid
+                                for meal_type in ['desayuno', 'comida', 'merienda', 'cena']:
+                                    if meal_type in day_data:
+                                        meal = day_data[meal_type]
+                                        meal_name = meal.get('nombre', '')
+                                        if isinstance(meal_name, dict):
+                                            meal_name = meal_name.get('name', '')
+                                        if meal_name:
+                                            prompt += f"  • NO repetir: {meal_name}\n"
+                prompt += "\n"
+            
+            prompt += "**IMPORTANTE:**\n"
+            prompt += "- Repite estilos y tipos de comida que recibieron 4-5 estrellas\n"
+            prompt += "- Evita completamente los platos que recibieron 1-2 estrellas\n"
+            prompt += "- Aprende de los ingredientes y combinaciones que funcionaron bien\n\n"
         
         # Enhanced instructions
         prompt += """

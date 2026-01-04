@@ -463,6 +463,9 @@ def generate_menu():
         # Get recipes
         recipes = db.get_all_recipes()
         
+        # Get historical ratings for learning
+        historical_ratings = db.get_all_menu_ratings(limit=30)
+        
         # Generate menu with enhanced parameters
         gen = get_menu_generator()
         result = gen.generate_weekly_menu(
@@ -470,7 +473,8 @@ def generate_menu():
             children=children, 
             recipes=recipes, 
             preferences=preferences,
-            day_settings=day_settings  # Pass day settings to generator
+            day_settings=day_settings,  # Pass day settings to generator
+            historical_ratings=historical_ratings  # Pass historical ratings for learning
         )
         
         if not result['success']:
@@ -668,6 +672,193 @@ def get_all_menus():
         })
         
     except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 400
+
+@app.route('/api/menu/rate-day', methods=['POST'])
+def rate_menu_day():
+    """Rate a specific day menu (adults or children)"""
+    try:
+        data = request.json
+        menu_id = data.get('menu_id')
+        week_start_date = data.get('week_start_date')
+        day_name = data.get('day_name')
+        menu_type = data.get('menu_type')  # 'adultos' or 'ninos'
+        rating = data.get('rating')
+        
+        if not all([menu_id, week_start_date, day_name, menu_type, rating]):
+            return jsonify({
+                'success': False,
+                'error': 'Faltan parámetros requeridos'
+            }), 400
+        
+        if menu_type not in ['adultos', 'ninos']:
+            return jsonify({
+                'success': False,
+                'error': 'menu_type debe ser "adultos" o "ninos"'
+            }), 400
+        
+        if rating < 1 or rating > 5:
+            return jsonify({
+                'success': False,
+                'error': 'Rating debe estar entre 1 y 5'
+            }), 400
+        
+        success = db.rate_menu_day(menu_id, week_start_date, day_name, menu_type, rating)
+        
+        if success:
+            return jsonify({
+                'success': True,
+                'message': 'Rating guardado correctamente'
+            })
+        else:
+            return jsonify({
+                'success': False,
+                'error': 'Error al guardar el rating'
+            }), 400
+        
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 400
+
+@app.route('/api/menu/get-day-rating', methods=['GET'])
+def get_menu_day_rating():
+    """Get rating for a specific day menu"""
+    try:
+        menu_id = request.args.get('menu_id', type=int)
+        day_name = request.args.get('day_name')
+        menu_type = request.args.get('menu_type')
+        
+        if not all([menu_id, day_name, menu_type]):
+            return jsonify({
+                'success': False,
+                'error': 'Faltan parámetros requeridos'
+            }), 400
+        
+        rating = db.get_menu_day_rating(menu_id, day_name, menu_type)
+        
+        return jsonify({
+            'success': True,
+            'data': {
+                'rating': rating
+            }
+        })
+        
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 400
+
+@app.route('/api/menu/regenerate-day', methods=['POST'])
+def regenerate_menu_day():
+    """Regenerate menu for a specific day (adults or children)"""
+    try:
+        data = request.json
+        menu_id = data.get('menu_id')
+        week_start_date = data.get('week_start_date')
+        day_name = data.get('day_name')
+        menu_type = data.get('menu_type')  # 'adultos' or 'ninos'
+        
+        if not all([menu_id, week_start_date, day_name, menu_type]):
+            return jsonify({
+                'success': False,
+                'error': 'Faltan parámetros requeridos'
+            }), 400
+        
+        if menu_type not in ['adultos', 'ninos']:
+            return jsonify({
+                'success': False,
+                'error': 'menu_type debe ser "adultos" o "ninos"'
+            }), 400
+        
+        # Get current menu
+        menu = db.get_menu_by_week_start(week_start_date)
+        if not menu:
+            return jsonify({
+                'success': False,
+                'error': 'Menú no encontrado'
+            }), 404
+        
+        # Get family profiles
+        adults = db.get_all_adults()
+        children = db.get_all_children()
+        
+        if not adults and not children:
+            return jsonify({
+                'success': False,
+                'error': 'Debes añadir al menos un perfil familiar primero'
+            }), 400
+        
+        # Get recipes
+        recipes = db.get_all_recipes()
+        
+        # Get menu preferences
+        menu_prefs = db.get_menu_preferences()
+        preferences = {
+            'include_weekend': menu_prefs.get('include_weekend', True),
+            'include_breakfast': menu_prefs.get('include_breakfast', True),
+            'include_lunch': menu_prefs.get('include_lunch', True),
+            'include_dinner': menu_prefs.get('include_dinner', True),
+            'excluded_days': menu_prefs.get('excluded_days', [])
+        }
+        
+        # Get historical ratings for learning
+        historical_ratings = db.get_all_menu_ratings(limit=30)
+        
+        # Generate menu for single day
+        gen = get_menu_generator()
+        result = gen.generate_single_day_menu(
+            adults=adults,
+            children=children,
+            recipes=recipes,
+            preferences=preferences,
+            day_name=day_name,
+            menu_type=menu_type,
+            historical_ratings=historical_ratings
+        )
+        
+        if not result['success']:
+            return jsonify(result), 400
+        
+        # Update the menu in database
+        menu_data = menu['menu_data']
+        if menu_type == 'adultos':
+            if 'menu_adultos' not in menu_data:
+                menu_data['menu_adultos'] = {'dias': {}}
+            if 'dias' not in menu_data['menu_adultos']:
+                menu_data['menu_adultos']['dias'] = {}
+            menu_data['menu_adultos']['dias'][day_name] = result['day_menu']
+        else:  # ninos
+            if 'menu_ninos' not in menu_data:
+                menu_data['menu_ninos'] = {'dias': {}}
+            if 'dias' not in menu_data['menu_ninos']:
+                menu_data['menu_ninos']['dias'] = {}
+            menu_data['menu_ninos']['dias'][day_name] = result['day_menu']
+        
+        # Save updated menu
+        metadata = menu.get('metadata', {})
+        if isinstance(metadata, str):
+            try:
+                metadata = json.loads(metadata)
+            except:
+                metadata = {}
+        
+        db.save_weekly_menu(week_start_date, menu_data, metadata)
+        
+        return jsonify({
+            'success': True,
+            'message': f'Menú regenerado para {day_name} ({menu_type})',
+            'data': result['day_menu']
+        })
+        
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
         return jsonify({
             'success': False,
             'error': str(e)
