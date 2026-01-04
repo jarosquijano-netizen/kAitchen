@@ -277,7 +277,7 @@
         }
 
         .menu-panel {
-            /* Layout only - no visual styling */
+            /* Layout only - NO visual styling, all styles are inline in HTML */
             overflow-y: auto;
             overflow-x: hidden;
             min-height: 0;
@@ -288,71 +288,21 @@
             position: relative;
             -webkit-overflow-scrolling: touch;
             overscroll-behavior: contain;
-            /* Visual styling moved to inline styles in HTML */
-            background: rgba(26, 26, 26, 0.8) !important;
-            backdrop-filter: blur(20px) !important;
-            -webkit-backdrop-filter: blur(20px) !important;
-            border: 2px solid rgba(255, 255, 255, 0.1) !important;
-            border-radius: 28px !important;
-            padding: 2.5rem !important;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6) !important;
         }
 
-        .menu-panel:hover {
-            border-color: rgba(255, 255, 255, 0.1);
-        }
-
-        /* Background accent blur effect */
-        .menu-panel.adults::after {
-            content: '';
-            position: absolute;
-            top: -100px;
-            right: -100px;
-            width: 300px;
-            height: 300px;
-            background: var(--blue-adults);
-            opacity: 0.1;
-            filter: blur(100px);
-            pointer-events: none;
-            border-radius: 50%;
-            z-index: 0;
-        }
-
-        .menu-panel.children::after {
-            content: '';
-            position: absolute;
-            top: -100px;
-            right: -100px;
-            width: 300px;
-            height: 300px;
-            background: var(--orange-children);
-            opacity: 0.1;
-            filter: blur(100px);
-            pointer-events: none;
-            border-radius: 50%;
-            z-index: 0;
-        }
-
-        .menu-panel.adults {
-            border-left: 6px solid #3B82F6 !important;
-        }
-
-        .menu-panel.children {
-            border-left: 6px solid #F97316 !important;
-        }
+        /* All visual styling removed - using only inline styles in HTML */
 
         /* OLD STYLES REMOVED - All visual styling is now inline in HTML */
 
         .meal-grid {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 2.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
             flex: 1;
             min-height: 0;
             width: 100%;
-            overflow: visible; /* Allow content to overflow for scrolling */
+            overflow: visible;
             position: relative;
-            z-index: 2; /* Above blur effect */
         }
 
         /* ZENITH-STYLE MEAL CARD - All styles are inline in HTML, no CSS needed */
