@@ -1538,15 +1538,15 @@
                     html: `
                         <div class="meal-card" style="position: relative; overflow: hidden;">
                             <!-- Background Accent Blur -->
-                            <div style="position: absolute; top: -100px; right: -100px; width: 256px; height: 256px; background: ${isAdult ? 'var(--blue-adults)' : 'var(--orange-children)'}; opacity: 0.2; filter: blur(100px); pointer-events: none; border-radius: 50%; z-index: 0;"></div>
+                            <div style="position: absolute; top: -100px; right: -100px; width: 256px; height: 256px; background: ${isAdult ? '#3B82F6' : '#F97316'}; opacity: 0.2; filter: blur(100px); pointer-events: none; border-radius: 50%; z-index: 0;"></div>
                             
                             <!-- Header with icon and title -->
                             <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; position: relative; z-index: 1;">
                                 <div style="display: flex; align-items: center; gap: 0.75rem;">
-                                    <div style="padding: 0.625rem; border-radius: 12px; background: ${isAdult ? 'rgba(59, 130, 246, 0.2)' : 'rgba(249, 115, 22, 0.2)'}; color: ${isAdult ? 'var(--blue-adults)' : 'var(--orange-children)'}; font-size: 1.25rem;">
+                                    <div style="padding: 0.625rem; border-radius: 12px; background: ${isAdult ? 'rgba(59, 130, 246, 0.2)' : 'rgba(249, 115, 22, 0.2)'}; color: ${isAdult ? '#3B82F6' : '#F97316'}; font-size: 1.25rem;">
                                         ${isAdult ? '👨‍👩‍👧‍👦' : '👶'}
                                     </div>
-                                    <span style="font-size: 0.875rem; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: ${isAdult ? 'var(--blue-adults)' : 'var(--orange-children)'};">
+                                    <span style="font-size: 0.875rem; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: ${isAdult ? '#3B82F6' : '#F97316'};">
                                         ${isAdult ? 'ADULTS' : 'CHILDREN'}
                                     </span>
                                 </div>
@@ -1561,7 +1561,7 @@
                                     <span style="font-size: 0.625rem; text-transform: uppercase; letter-spacing: 0.15em; color: rgba(255, 255, 255, 0.4); margin-bottom: 0.25rem; font-weight: 600;">
                                         ${mealNames[mealType].es} / ${mealNames[mealType].en}
                                     </span>
-                                    <h2 class="meal-name" style="font-family: 'Playfair Display', serif; font-size: 2.5rem; font-weight: 700; color: var(--white); line-height: 1.2; margin: 0; transition: color 0.3s ease;">
+                                    <h2 class="meal-name" style="font-family: 'Playfair Display', serif; font-size: 2.5rem; font-weight: 700; color: #FFFFFF; line-height: 1.2; margin: 0; transition: color 0.3s ease;">
                                         ${mealName}
                                     </h2>
                                 </div>
@@ -1569,7 +1569,7 @@
                                 <!-- Description with sparkles -->
                                 ${porqueSeleccionada ? `
                                     <div style="display: flex; align-items: flex-start; gap: 0.5rem; padding: 0.75rem; background: rgba(255, 255, 255, 0.05); border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.05);">
-                                        <span style="font-size: 0.875rem; color: var(--gold); flex-shrink: 0;">✨</span>
+                                        <span style="font-size: 0.875rem; color: #D4AF37; flex-shrink: 0;">✨</span>
                                         <p style="font-size: 0.75rem; color: rgba(255, 255, 255, 0.7); line-height: 1.6; font-style: italic; margin: 0;">
                                             ${porqueSeleccionada}
                                         </p>
@@ -1626,7 +1626,7 @@
                             <!-- Adaptations -->
                             ${adaptaciones ? `
                                 <div style="margin-top: 1rem; padding: 0.75rem; background: rgba(212, 175, 55, 0.1); border-radius: 8px; border: 1px solid rgba(212, 175, 55, 0.2); position: relative; z-index: 1;">
-                                    <div style="font-size: 0.75rem; color: var(--gold); font-weight: 600; margin-bottom: 0.25rem; text-transform: uppercase; letter-spacing: 0.1em;">✨ Adaptations</div>
+                                    <div style="font-size: 0.75rem; color: #D4AF37; font-weight: 600; margin-bottom: 0.25rem; text-transform: uppercase; letter-spacing: 0.1em;">✨ Adaptations</div>
                                     <div style="font-size: 0.85rem; color: rgba(255, 255, 255, 0.7); line-height: 1.5;">${adaptaciones}</div>
                                 </div>
                             ` : ''}
@@ -1634,7 +1634,7 @@
                             <!-- Notes -->
                             ${notas ? `
                                 <div style="margin-top: 1rem; padding: 0.75rem; background: rgba(138, 161, 147, 0.1); border-radius: 8px; border: 1px solid rgba(138, 161, 147, 0.2); position: relative; z-index: 1;">
-                                    <div style="font-size: 0.85rem; color: var(--sage); line-height: 1.5;">
+                                    <div style="font-size: 0.85rem; color: #8AA193; line-height: 1.5;">
                                         💡 ${notas}
                                     </div>
                                 </div>
@@ -1667,14 +1667,20 @@
                     
                     // Render meals asynchronously to fetch recipe URLs
                     const adultMeals = ['desayuno', 'comida', 'cena'].filter(mealType => adultDayData[mealType]);
+                    console.log('[TV] Adult meals to render:', adultMeals);
                     for (const mealType of adultMeals) {
                         const meal = adultDayData[mealType];
+                        console.log('[TV] Rendering adult meal:', mealType, meal);
                         const result = await renderMealCard(meal, mealType, mealNames, true);
+                        console.log('[TV] Render result for', mealType, ':', result ? 'OK' : 'FAILED');
                         if (result && result.html) {
+                            console.log('[TV] Adding HTML for', mealType, ', length:', result.html.length);
                             adultosHtml += result.html;
                             if (result.recipeBase && result.recipeBase !== 'Original' && result.recipeBase !== '') {
                                 adultRecipes.push(result.recipeBase);
                             }
+                        } else {
+                            console.error('[TV] Failed to render meal card for', mealType);
                         }
                     }
                     
@@ -1709,14 +1715,20 @@
                     
                     // Render meals asynchronously to fetch recipe URLs
                     const childMeals = ['desayuno', 'comida', 'merienda', 'cena'].filter(mealType => childDayData[mealType]);
+                    console.log('[TV] Child meals to render:', childMeals);
                     for (const mealType of childMeals) {
-                            const meal = childDayData[mealType];
+                        const meal = childDayData[mealType];
+                        console.log('[TV] Rendering child meal:', mealType, meal);
                         const result = await renderMealCard(meal, mealType, mealNames, false);
+                        console.log('[TV] Render result for', mealType, ':', result ? 'OK' : 'FAILED');
                         if (result && result.html) {
+                            console.log('[TV] Adding HTML for', mealType, ', length:', result.html.length);
                             ninosHtml += result.html;
                             if (result.recipeBase && result.recipeBase !== 'Original' && result.recipeBase !== '') {
                                 childRecipes.push(result.recipeBase);
                             }
+                        } else {
+                            console.error('[TV] Failed to render meal card for', mealType);
                         }
                     }
                     
@@ -1746,7 +1758,18 @@
                 ${ninosHtml}
             `;
             
+            console.log('[TV] Final HTML length:', finalHtml.length);
+            console.log('[TV] Adult HTML length:', adultosHtml.length);
+            console.log('[TV] Child HTML length:', ninosHtml.length);
+            console.log('[TV] About to set innerHTML');
+            
             container.innerHTML = finalHtml;
+            
+            console.log('[TV] innerHTML set successfully');
+            console.log('[TV] Container children count:', container.children.length);
+            
+            // Force a reflow to ensure rendering
+            void container.offsetHeight;
         }
 
         function showNoMenu() {
