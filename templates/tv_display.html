@@ -118,7 +118,7 @@
         }
 
         .clock {
-            font-size: 2rem;
+            font-size: 2.5rem;
             font-weight: 700;
             font-family: 'Inter', sans-serif;
             color: var(--white);
@@ -126,13 +126,13 @@
         }
 
         .date-display {
-            font-size: 0.9rem;
+            font-size: 1.1rem;
             color: var(--silver);
             font-weight: 400;
         }
 
         .weather {
-            font-size: 1.3rem;
+            font-size: 1.5rem;
             color: var(--silver);
             display: flex;
             align-items: center;
@@ -248,7 +248,7 @@
         }
 
         .week-day-name {
-            font-size: 1.4rem;
+            font-size: 1.6rem;
             font-weight: 800;
             margin-bottom: 0.25rem;
             text-transform: uppercase;
@@ -257,7 +257,7 @@
         }
 
         .week-day-date {
-            font-size: 1.6rem;
+            font-size: 1.8rem;
             font-weight: 700;
             opacity: 0.9;
         }
@@ -507,7 +507,7 @@
             }
 
             .panel-title {
-                font-size: 2rem;
+                font-size: 2.5rem;
             }
 
             .meal-grid {
@@ -654,10 +654,74 @@
             }
         }
 
-        /* Large screens (TV/Monitor) - Zenith responsive */
+        /* Large screens (TV/Monitor 24"+) - Optimized for 1920x1080 */
+        @media (min-width: 1600px) {
+            .clock {
+                font-size: 3rem;
+            }
+
+            .date-display {
+                font-size: 1.3rem;
+            }
+
+            .weather {
+                font-size: 1.8rem;
+            }
+
+            .week-day-name {
+                font-size: 1.8rem;
+            }
+
+            .week-day-date {
+                font-size: 2rem;
+            }
+
+            .main-content {
+                gap: 2rem;
+            }
+
+            .meal-grid {
+                gap: 1.5rem;
+            }
+
+            /* Increase font sizes in meal cards for better readability */
+            .menu-panel h2 {
+                font-size: 2.25rem !important;
+            }
+
+            .menu-panel p {
+                font-size: 1rem !important;
+            }
+
+            .menu-panel span[style*="font-size"] {
+                font-size: 1rem !important;
+            }
+        }
+
+        /* Extra large screens (TV/Monitor) - Zenith responsive */
         @media (min-width: 1920px) {
             .tv-container {
                 max-width: 1920px;
+            }
+
+            .clock {
+                font-size: 3.5rem;
+            }
+
+            .date-display {
+                font-size: 1.4rem;
+            }
+
+            .weather {
+                font-size: 2rem;
+            }
+
+            .week-day-name {
+                font-size: 2rem;
+            }
+
+            .week-day-date {
+                font-size: 2.2rem;
             }
 
             .main-content {
@@ -1271,7 +1335,7 @@
                 let ingredientsBadgesHtml = '';
                 if (ingredients.length > 0) {
                     const badges = ingredients.map(ing => 
-                        `<span style="font-size: 0.75rem; padding: 0.375rem 0.75rem; background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 0.5rem; color: rgba(255, 255, 255, 0.8); white-space: nowrap;">${ing}</span>`
+                        `<span style="font-size: 0.875rem; padding: 0.5rem 0.875rem; background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 0.5rem; color: rgba(255, 255, 255, 0.8); white-space: nowrap;">${ing}</span>`
                     ).join('');
                     ingredientsBadgesHtml = `<div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">${badges}</div>`;
                 }
@@ -1286,15 +1350,15 @@
                 if (nutritionItems.length > 0) {
                     nutritionHtml = `
                         <div style="display: flex; flex-direction: column; gap: 0.75rem;">
-                            <h3 style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: rgba(255, 255, 255, 0.4); display: flex; align-items: center; gap: 0.5rem;">
-                                <span style="font-size: 0.875rem;">ℹ️</span>
+                            <h3 style="font-size: 0.875rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: rgba(255, 255, 255, 0.4); display: flex; align-items: center; gap: 0.5rem;">
+                                <span style="font-size: 1rem;">ℹ️</span>
                                 <span>Nutrition Focus</span>
                             </h3>
                             <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem;">
                                 ${nutritionItems.map(item => `
                                     <div style="padding: 0.75rem; background: rgba(255, 255, 255, 0.05); border-radius: 0.75rem; border: 1px solid rgba(255, 255, 255, 0.05); text-align: center;">
-                                        <div style="font-size: 0.625rem; text-transform: uppercase; color: rgba(255, 255, 255, 0.3); font-weight: 700; margin-bottom: 0.25rem;">${item.key}</div>
-                                        <div style="font-size: 0.875rem; font-weight: 700; color: rgba(255, 255, 255, 0.9);">${item.val}</div>
+                                        <div style="font-size: 0.75rem; text-transform: uppercase; color: rgba(255, 255, 255, 0.3); font-weight: 700; margin-bottom: 0.25rem;">${item.key}</div>
+                                        <div style="font-size: 1rem; font-weight: 700; color: rgba(255, 255, 255, 0.9);">${item.val}</div>
                                     </div>
                                 `).join('')}
                             </div>
@@ -1308,7 +1372,7 @@
                 // Return complete meal card HTML matching zenith design EXACTLY
                 return {
                     html: `
-                        <div style="position: relative; overflow: hidden; background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 1.5rem; padding: 1.25rem; display: flex; flex-direction: column; gap: 1rem; transition: all 0.5s ease;">
+                        <div style="position: relative; overflow: hidden; background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 1.5rem; padding: 1.5rem; display: flex; flex-direction: column; gap: 1.25rem; transition: all 0.5s ease;">
                             <!-- Background Accent Blur (zenith: -top-24 -right-24 w-64 h-64 blur-[100px] opacity-20) -->
                             <div style="position: absolute; top: -96px; right: -96px; width: 256px; height: 256px; background: ${isAdult ? '#3B82F6' : '#F97316'}; opacity: 0.2; filter: blur(100px); pointer-events: none; border-radius: 50%; z-index: 0;"></div>
                             
@@ -1330,8 +1394,8 @@
                             <!-- Meal Type and Name (zenith: flex flex-col gap-4) -->
                             <div style="display: flex; flex-direction: column; gap: 1rem; position: relative; z-index: 1;">
                                 <div style="display: flex; flex-direction: column;">
-                                    <span style="font-size: 0.625rem; text-transform: uppercase; letter-spacing: 0.1em; color: rgba(255, 255, 255, 0.4); margin-bottom: 0.25rem;">${mealNames[mealType].es} / ${mealNames[mealType].en}</span>
-                                    <h2 style="font-family: 'Playfair Display', serif; font-size: 1.5rem; color: #FFFFFF; line-height: 1.2; margin: 0; transition: color 0.3s ease;">
+                                    <span style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; color: rgba(255, 255, 255, 0.4); margin-bottom: 0.25rem;">${mealNames[mealType].es} / ${mealNames[mealType].en}</span>
+                                    <h2 style="font-family: 'Playfair Display', serif; font-size: 2rem; color: #FFFFFF; line-height: 1.2; margin: 0; transition: color 0.3s ease;">
                                         ${mealName}
                                     </h2>
                                 </div>
@@ -1339,8 +1403,8 @@
                                 <!-- Description with sparkles (zenith: flex items-center gap-2 p-3 bg-white/5) -->
                                 ${porqueSeleccionada ? `
                                     <div style="display: flex; align-items: flex-start; gap: 0.5rem; padding: 0.75rem; background: rgba(255, 255, 255, 0.05); border-radius: 0.75rem; border: 1px solid rgba(255, 255, 255, 0.05);">
-                                        <span style="font-size: 0.875rem; color: #EAB308; flex-shrink: 0;">✨</span>
-                                        <p style="font-size: 0.75rem; color: rgba(255, 255, 255, 0.7); line-height: 1.6; font-style: italic; margin: 0;">
+                                        <span style="font-size: 1rem; color: #EAB308; flex-shrink: 0;">✨</span>
+                                        <p style="font-size: 0.875rem; color: rgba(255, 255, 255, 0.7); line-height: 1.6; font-style: italic; margin: 0;">
                                             ${porqueSeleccionada}
                                         </p>
                                     </div>
@@ -1352,19 +1416,19 @@
                                 ${prepTime ? `
                                     <div style="display: flex; align-items: center; gap: 0.5rem; color: rgba(255, 255, 255, 0.6);">
                                         <span style="font-size: 1rem; width: 1rem; height: 1rem; display: flex; align-items: center; justify-content: center;">⏱️</span>
-                                        <span style="font-size: 0.875rem; font-weight: 500;">${prepTime} min</span>
+                                        <span style="font-size: 1rem; font-weight: 500;">${prepTime} min</span>
                                     </div>
                                 ` : ''}
                                 ${calories ? `
                                     <div style="display: flex; align-items: center; gap: 0.5rem; color: rgba(255, 255, 255, 0.6);">
-                                        <span style="font-size: 1rem; width: 1rem; height: 1rem; display: flex; align-items: center; justify-content: center;">🔥</span>
-                                        <span style="font-size: 0.875rem; font-weight: 500;">${calories} kcal</span>
+                                        <span style="font-size: 1.2rem; width: 1.2rem; height: 1.2rem; display: flex; align-items: center; justify-content: center;">🔥</span>
+                                        <span style="font-size: 1rem; font-weight: 500;">${calories} kcal</span>
                                     </div>
                                 ` : ''}
                                 ${ingredients.length > 0 ? `
                                     <div style="display: flex; align-items: center; gap: 0.5rem; color: rgba(255, 255, 255, 0.6);">
-                                        <span style="font-size: 1rem; width: 1rem; height: 1rem; display: flex; align-items: center; justify-content: center;">🍴</span>
-                                        <span style="font-size: 0.875rem; font-weight: 500;">${ingredients.length} Items</span>
+                                        <span style="font-size: 1.2rem; width: 1.2rem; height: 1.2rem; display: flex; align-items: center; justify-content: center;">🍴</span>
+                                        <span style="font-size: 1rem; font-weight: 500;">${ingredients.length} Items</span>
                                     </div>
                                 ` : ''}
                             </div>
@@ -1372,7 +1436,7 @@
                             <!-- Ingredients Section (zenith: flex flex-col gap-6) -->
                             ${ingredientsBadgesHtml ? `
                                 <div style="position: relative; z-index: 1;">
-                                    <h3 style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: rgba(255, 255, 255, 0.4); margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem;">
+                                    <h3 style="font-size: 0.875rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: rgba(255, 255, 255, 0.4); margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem;">
                                         <span>✓</span>
                                         <span>Ingredients</span>
                                     </h3>
@@ -1383,11 +1447,11 @@
                             <!-- Instructions (moved up) -->
                             ${instrucciones ? `
                                 <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(255, 255, 255, 0.05); position: relative; z-index: 1;">
-                                    <div style="font-size: 0.75rem; color: rgba(255, 255, 255, 0.4); margin-bottom: 0.5rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; display: flex; align-items: center; gap: 0.5rem;">
+                                    <div style="font-size: 0.875rem; color: rgba(255, 255, 255, 0.4); margin-bottom: 0.5rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; display: flex; align-items: center; gap: 0.5rem;">
                                         <span>📖</span>
                                         <span>Preparation</span>
                                     </div>
-                                    <div style="font-size: 0.875rem; color: rgba(255, 255, 255, 0.7); line-height: 1.6; white-space: pre-wrap;">
+                                    <div style="font-size: 1rem; color: rgba(255, 255, 255, 0.7); line-height: 1.6; white-space: pre-wrap;">
                                         ${instrucciones}
                                     </div>
                                 </div>
@@ -1396,15 +1460,15 @@
                             <!-- Adaptations -->
                             ${adaptaciones ? `
                                 <div style="margin-top: 1rem; padding: 0.75rem; background: rgba(212, 175, 55, 0.1); border-radius: 0.75rem; border: 1px solid rgba(212, 175, 55, 0.2); position: relative; z-index: 1;">
-                                    <div style="font-size: 0.75rem; color: #D4AF37; font-weight: 600; margin-bottom: 0.25rem; text-transform: uppercase; letter-spacing: 0.1em;">✨ Adaptations</div>
-                                    <div style="font-size: 0.875rem; color: rgba(255, 255, 255, 0.7); line-height: 1.5;">${adaptaciones}</div>
+                                    <div style="font-size: 0.875rem; color: #D4AF37; font-weight: 600; margin-bottom: 0.25rem; text-transform: uppercase; letter-spacing: 0.1em;">✨ Adaptations</div>
+                                    <div style="font-size: 1rem; color: rgba(255, 255, 255, 0.7); line-height: 1.5;">${adaptaciones}</div>
                                 </div>
                             ` : ''}
                             
                             <!-- Notes -->
                             ${notas ? `
                                 <div style="margin-top: 1rem; padding: 0.75rem; background: rgba(138, 161, 147, 0.1); border-radius: 0.75rem; border: 1px solid rgba(138, 161, 147, 0.2); position: relative; z-index: 1;">
-                                    <div style="font-size: 0.875rem; color: #8AA193; line-height: 1.5;">
+                                    <div style="font-size: 1rem; color: #8AA193; line-height: 1.5;">
                                         💡 ${notas}
                                     </div>
                                 </div>
@@ -1441,11 +1505,11 @@
                             <div style="margin-bottom: 1.5rem; padding: 1rem; background: rgba(255, 255, 255, 0.05); border-radius: 1rem; border: 1px solid rgba(255, 255, 255, 0.1); position: relative; z-index: 10;">
                             <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
                                 <div style="flex: 1; min-width: 200px;">
-                                    <div style="font-size: 0.75rem; color: rgba(255, 255, 255, 0.5); margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.1em;">Califica este menú</div>
-                                    <div id="${adultRatingId}" style="display: flex; gap: 0.25rem; align-items: center;">
+                                    <div style="font-size: 0.875rem; color: rgba(255, 255, 255, 0.5); margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.1em;">Califica este menú</div>
+                                    <div id="${adultRatingId}" style="display: flex; gap: 0.5rem; align-items: center;">
                                         ${[1, 2, 3, 4, 5].map(star => {
                                             return '<button onclick="rateDayMenu(\'adultos\', ' + star + ')" ' +
-                                                'style="background: none; border: none; font-size: 1.5rem; cursor: pointer; padding: 0.25rem; transition: transform 0.2s;" ' +
+                                                'style="background: none; border: none; font-size: 2rem; cursor: pointer; padding: 0.5rem; transition: transform 0.2s;" ' +
                                                 'onmouseover="this.style.transform=\'scale(1.2)\'" ' +
                                                 'onmouseout="this.style.transform=\'scale(1)\'" ' +
                                                 'title="' + star + ' ' + (star === 1 ? 'estrella' : 'estrellas') + '">' +
@@ -1455,7 +1519,7 @@
                                     </div>
                                 </div>
                                 <button id="${adultRegenId}" onclick="regenerateDayMenu('adultos')" 
-                                    style="padding: 0.75rem 1.5rem; background: rgba(59, 130, 246, 0.2); border: 1px solid rgba(59, 130, 246, 0.4); border-radius: 0.75rem; color: #60A5FA; font-size: 0.875rem; font-weight: 600; cursor: pointer; transition: all 0.3s; text-transform: uppercase; letter-spacing: 0.05em;"
+                                    style="padding: 1rem 2rem; background: rgba(59, 130, 246, 0.2); border: 1px solid rgba(59, 130, 246, 0.4); border-radius: 0.75rem; color: #60A5FA; font-size: 1rem; font-weight: 600; cursor: pointer; transition: all 0.3s; text-transform: uppercase; letter-spacing: 0.05em;"
                                     onmouseover="this.style.background='rgba(59, 130, 246, 0.3)'; this.style.borderColor='rgba(59, 130, 246, 0.6)'"
                                     onmouseout="this.style.background='rgba(59, 130, 246, 0.2)'; this.style.borderColor='rgba(59, 130, 246, 0.4)'">
                                     🔄 Regenerar Menú Adultos
@@ -1516,11 +1580,11 @@
                             <div style="margin-bottom: 1.5rem; padding: 1rem; background: rgba(255, 255, 255, 0.05); border-radius: 1rem; border: 1px solid rgba(255, 255, 255, 0.1); position: relative; z-index: 10;">
                             <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
                                 <div style="flex: 1; min-width: 200px;">
-                                    <div style="font-size: 0.75rem; color: rgba(255, 255, 255, 0.5); margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.1em;">Califica este menú</div>
-                                    <div id="${childRatingId}" style="display: flex; gap: 0.25rem; align-items: center;">
+                                    <div style="font-size: 0.875rem; color: rgba(255, 255, 255, 0.5); margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.1em;">Califica este menú</div>
+                                    <div id="${childRatingId}" style="display: flex; gap: 0.5rem; align-items: center;">
                                         ${[1, 2, 3, 4, 5].map(star => {
                                             return '<button onclick="rateDayMenu(\'ninos\', ' + star + ')" ' +
-                                                'style="background: none; border: none; font-size: 1.5rem; cursor: pointer; padding: 0.25rem; transition: transform 0.2s;" ' +
+                                                'style="background: none; border: none; font-size: 2rem; cursor: pointer; padding: 0.5rem; transition: transform 0.2s;" ' +
                                                 'onmouseover="this.style.transform=\'scale(1.2)\'" ' +
                                                 'onmouseout="this.style.transform=\'scale(1)\'" ' +
                                                 'title="' + star + ' ' + (star === 1 ? 'estrella' : 'estrellas') + '">' +
@@ -1530,7 +1594,7 @@
                                     </div>
                                 </div>
                                 <button id="${childRegenId}" onclick="regenerateDayMenu('ninos')" 
-                                    style="padding: 0.75rem 1.5rem; background: rgba(249, 115, 22, 0.2); border: 1px solid rgba(249, 115, 22, 0.4); border-radius: 0.75rem; color: #FB923C; font-size: 0.875rem; font-weight: 600; cursor: pointer; transition: all 0.3s; text-transform: uppercase; letter-spacing: 0.05em;"
+                                    style="padding: 1rem 2rem; background: rgba(249, 115, 22, 0.2); border: 1px solid rgba(249, 115, 22, 0.4); border-radius: 0.75rem; color: #FB923C; font-size: 1rem; font-weight: 600; cursor: pointer; transition: all 0.3s; text-transform: uppercase; letter-spacing: 0.05em;"
                                     onmouseover="this.style.background='rgba(249, 115, 22, 0.3)'; this.style.borderColor='rgba(249, 115, 22, 0.6)'"
                                     onmouseout="this.style.background='rgba(249, 115, 22, 0.2)'; this.style.borderColor='rgba(249, 115, 22, 0.4)'">
                                     🔄 Regenerar Menú Niños
@@ -1668,7 +1732,7 @@
                             const starIcon = isFilled ? '⭐' : '☆';
                             const starText = star === 1 ? 'estrella' : 'estrellas';
                             return '<button onclick="rateDayMenu(\'' + menuType + '\', ' + star + ')" ' +
-                                'style="background: none; border: none; font-size: 1.5rem; cursor: pointer; padding: 0.25rem; transition: transform 0.2s;" ' +
+                                'style="background: none; border: none; font-size: 2rem; cursor: pointer; padding: 0.5rem; transition: transform 0.2s;" ' +
                                 'onmouseover="this.style.transform=\'scale(1.2)\'" ' +
                                 'onmouseout="this.style.transform=\'scale(1)\'" ' +
                                 'title="' + star + ' ' + starText + '">' +
@@ -1756,7 +1820,7 @@
                         ratingContainer.innerHTML = [1, 2, 3, 4, 5].map(star => {
                             const isFilled = rating >= star;
                             return '<button onclick="rateDayMenu(\'adultos\', ' + star + ')" ' +
-                                'style="background: none; border: none; font-size: 1.5rem; cursor: pointer; padding: 0.25rem; transition: transform 0.2s;" ' +
+                                'style="background: none; border: none; font-size: 2rem; cursor: pointer; padding: 0.5rem; transition: transform 0.2s;" ' +
                                 'onmouseover="this.style.transform=\'scale(1.2)\'" ' +
                                 'onmouseout="this.style.transform=\'scale(1)\'" ' +
                                 'title="' + star + ' ' + (star === 1 ? 'estrella' : 'estrellas') + '">' +
@@ -1777,7 +1841,7 @@
                         ratingContainer.innerHTML = [1, 2, 3, 4, 5].map(star => {
                             const isFilled = rating >= star;
                             return '<button onclick="rateDayMenu(\'ninos\', ' + star + ')" ' +
-                                'style="background: none; border: none; font-size: 1.5rem; cursor: pointer; padding: 0.25rem; transition: transform 0.2s;" ' +
+                                'style="background: none; border: none; font-size: 2rem; cursor: pointer; padding: 0.5rem; transition: transform 0.2s;" ' +
                                 'onmouseover="this.style.transform=\'scale(1.2)\'" ' +
                                 'onmouseout="this.style.transform=\'scale(1)\'" ' +
                                 'title="' + star + ' ' + (star === 1 ? 'estrella' : 'estrellas') + '">' +
