@@ -857,6 +857,23 @@
         // QR Code functions removed - using zenith style button instead
 
         // Get food image URL (placeholder - you can use Unsplash API)
+        // Generate QR Code for shopping list (zenith style - larger QR)
+        function generateZenithQRCode() {
+            const qrContainer = document.getElementById('zenithQrCode');
+            if (qrContainer && typeof QRCode !== 'undefined') {
+                const shoppingListUrl = `${window.location.origin}/?tab=shopping`;
+                qrContainer.innerHTML = '';
+                new QRCode(qrContainer, {
+                    text: shoppingListUrl,
+                    width: 104,
+                    height: 104,
+                    colorDark: '#000000',
+                    colorLight: '#ffffff',
+                    correctLevel: QRCode.CorrectLevel.H
+                });
+            }
+        }
+
         function getFoodImage(mealName) {
             // Placeholder - in production, use Unsplash API or similar
             const encodedName = encodeURIComponent(mealName);
