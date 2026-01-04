@@ -200,6 +200,49 @@
             font-size: 0.85rem;
         }
 
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--white);
+            border: 1px solid var(--glass-border);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: var(--gold);
+            transform: translateY(-2px);
+        }
+
+        /* Shopping List specific styles */
+        #shopping-tab .card > div:first-child {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        #shopping-tab .card > div:first-child > div:last-child {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: flex-end;
+            overflow: visible;
+            max-width: 100%;
+        }
+
+        @media (max-width: 768px) {
+            #shopping-tab .card > div:first-child {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            #shopping-tab .card > div:first-child > div:last-child {
+                justify-content: flex-start;
+                width: 100%;
+            }
+        }
+
         .form-group {
             margin-bottom: 2rem;
         }
@@ -1200,25 +1243,22 @@ https://example.com/recipe3"></textarea>
         <!-- SHOPPING LIST TAB -->
         <div class="tab-content" id="shopping-tab">
             <div class="card">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
-                    <div>
-                        <h2 style="margin: 0;">🛒 Shopping List</h2>
-                        <p style="color: var(--silver); margin-top: 0.5rem; font-size: 0.95rem;">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 2rem; gap: 1.5rem; flex-wrap: wrap;">
+                    <div style="flex: 1; min-width: 200px;">
+                        <h2 style="margin: 0; font-family: 'Playfair Display', serif; font-size: 2rem; color: var(--white);">🛒 Shopping List</h2>
+                        <p style="color: var(--silver); margin-top: 0.5rem; font-size: 0.9rem;">
                             Listas de compra de la semana actual y próxima semana
                         </p>
                     </div>
-                    <div style="display: flex; gap: 0.75rem; flex-wrap: nowrap; align-items: center; overflow-x: auto;">
-                        <button class="btn btn-primary" onclick="loadShoppingLists()" style="font-size: 0.9rem; padding: 0.75rem 1.5rem; white-space: nowrap; flex-shrink: 0;">
-                            📥 Cargar Listas
-                        </button>
-                        <button class="btn btn-secondary" onclick="exportToGoogle()" style="font-size: 0.9rem; padding: 0.75rem 1.5rem; white-space: nowrap; flex-shrink: 0;">
+                    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center; justify-content: flex-end;">
+                        <button class="btn btn-secondary" onclick="exportToGoogle()" style="font-size: 0.85rem; padding: 0.6rem 1.2rem; white-space: nowrap; flex-shrink: 0;">
                             📝 Export to Google
                         </button>
-                        <button class="btn btn-secondary" onclick="generateSimpleShoppingListText()" style="font-size: 0.9rem; padding: 0.75rem 1.5rem; white-space: nowrap; flex-shrink: 0;">
+                        <button class="btn btn-secondary" onclick="generateSimpleShoppingListText()" style="font-size: 0.85rem; padding: 0.6rem 1.2rem; white-space: nowrap; flex-shrink: 0;">
                             🖨️ Print
                         </button>
-                        <button class="btn btn-secondary" onclick="markAllAsPurchased()" style="font-size: 0.9rem; padding: 0.75rem 1.5rem; white-space: nowrap; flex-shrink: 0;">
-                            ✅ Mark All as Purchased
+                        <button class="btn btn-secondary" onclick="markAllAsPurchased()" style="font-size: 0.85rem; padding: 0.6rem 1.2rem; white-space: nowrap; flex-shrink: 0;">
+                            ✅ Mark All
                         </button>
                     </div>
                 </div>
