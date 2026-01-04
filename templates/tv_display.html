@@ -862,78 +862,7 @@
             document.getElementById('weatherText').textContent = '22°C Sunny';
         }
 
-        // Generate QR Code for shopping list
-        function generateQRCode() {
-            const qrContainer = document.getElementById('qrCode');
-            if (qrContainer && typeof QRCode !== 'undefined') {
-                const shoppingListUrl = `${window.location.origin}/?tab=shopping`;
-                qrContainer.innerHTML = '';
-                new QRCode(qrContainer, {
-                    text: shoppingListUrl,
-                    width: 120,
-                    height: 120,
-                    colorDark: '#000000',
-                    colorLight: '#ffffff',
-                    correctLevel: QRCode.CorrectLevel.H
-                });
-            }
-        }
-        
-        // Generate QR codes for recipes
-        function generateRecipeQRCodes(recipes) {
-            const container = document.getElementById('recipe-qr-container');
-            if (!container || !recipes || recipes.length === 0) {
-                container.innerHTML = '';
-                return;
-            }
-            
-            // Only show unique recipes
-            const uniqueRecipes = [...new Set(recipes.filter(r => r && r !== 'Original' && r !== ''))];
-            
-            if (uniqueRecipes.length === 0) {
-                container.innerHTML = '';
-                return;
-            }
-            
-            container.innerHTML = '';
-            container.style.display = 'flex';
-            container.style.gap = '1rem';
-            container.style.alignItems = 'flex-start';
-            container.style.flexWrap = 'nowrap';
-            
-            uniqueRecipes.forEach((recipeTitle, index) => {
-                const recipeViewUrl = `${window.location.origin}/recipe/view?title=${encodeURIComponent(recipeTitle)}`;
-                const qrId = `recipe-qr-${index}`;
-                
-                const qrWrapper = document.createElement('div');
-                qrWrapper.className = 'qr-container';
-                qrWrapper.style.display = 'flex';
-                qrWrapper.style.flexDirection = 'column';
-                qrWrapper.style.alignItems = 'center';
-                qrWrapper.style.gap = '0.5rem';
-                qrWrapper.style.flexShrink = '0';
-                qrWrapper.innerHTML = `
-                    <div class="qr-code" id="${qrId}"></div>
-                    <div class="qr-label">📖 ${recipeTitle.length > 15 ? recipeTitle.substring(0, 15) + '...' : recipeTitle}</div>
-                `;
-                container.appendChild(qrWrapper);
-                
-                // Generate QR code
-                setTimeout(() => {
-                    const qrElement = document.getElementById(qrId);
-                    if (qrElement && typeof QRCode !== 'undefined') {
-                        new QRCode(qrElement, {
-                            text: recipeViewUrl,
-                            width: 120,
-                            height: 120,
-                            colorDark: '#000000',
-                            colorLight: '#ffffff',
-                            correctLevel: QRCode.CorrectLevel.H
-                        });
-                    }
-                }, 100 * (index + 1));
-            });
-        }
+        // QR Code functions removed - using zenith style button instead
 
         // Get food image URL (placeholder - you can use Unsplash API)
         function getFoodImage(mealName) {
