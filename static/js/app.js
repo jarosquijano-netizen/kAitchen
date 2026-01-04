@@ -3459,7 +3459,9 @@ function calculateQuantityFromMeals(ingredientName, meals, mealCounts, numAdults
     } else if (ingLower.includes('pescado') || ingLower.includes('fish') || ingLower.includes('salmón') || ingLower.includes('salmon') || ingLower.includes('merluza') || ingLower.includes('hake') || ingLower.includes('bacalao') || ingLower.includes('cod') || ingLower.includes('gambas') || ingLower.includes('shrimp') || ingLower.includes('mejillones') || ingLower.includes('mussels')) {
         basePerPersonPerMeal = 130;
     } else if (ingLower.includes('huevo') || ingLower.includes('egg')) {
-        return `${Math.ceil((adultMealOccurrences * numAdults + childMealOccurrences * numChildren) * 1.5)} unidades`;
+        const totalEggs = Math.ceil((adultMealOccurrences * numAdults + childMealOccurrences * numChildren) * 1.5);
+        if (totalEggs === 0) return '';
+        return `${totalEggs} unidades`;
     }
     // Vegetables
     else if (ingLower.includes('tomate') || ingLower.includes('tomato') || ingLower.includes('cebolla') || ingLower.includes('onion') || ingLower.includes('ajo') || ingLower.includes('garlic') || ingLower.includes('pimiento') || ingLower.includes('pepper') || ingLower.includes('calabacín') || ingLower.includes('zucchini')) {
@@ -3471,7 +3473,9 @@ function calculateQuantityFromMeals(ingredientName, meals, mealCounts, numAdults
     }
     // Dairy
     else if (ingLower.includes('leche') || ingLower.includes('milk')) {
-        return `${Math.ceil((adultMealOccurrences * numAdults + childMealOccurrences * numChildren) * 0.2)} l`;
+        const totalLiters = Math.ceil((adultMealOccurrences * numAdults + childMealOccurrences * numChildren) * 0.2);
+        if (totalLiters === 0) return '';
+        return `${totalLiters} l`;
     } else if (ingLower.includes('queso') || ingLower.includes('cheese') || ingLower.includes('mantequilla') || ingLower.includes('butter')) {
         basePerPersonPerMeal = 30;
     }
@@ -3481,13 +3485,19 @@ function calculateQuantityFromMeals(ingredientName, meals, mealCounts, numAdults
     }
     // Oils and condiments
     else if (ingLower.includes('aceite') || ingLower.includes('oil')) {
-        return `${Math.ceil((adultMealOccurrences * numAdults + childMealOccurrences * numChildren) * 0.015)} l`;
+        const totalLiters = Math.ceil((adultMealOccurrences * numAdults + childMealOccurrences * numChildren) * 0.015);
+        if (totalLiters === 0) return '';
+        return `${totalLiters} l`;
     } else {
         basePerPersonPerMeal = 50; // Default
     }
     
     if (basePerPersonPerMeal > 0) {
         const totalGrams = Math.ceil((adultMealOccurrences * numAdults + childMealOccurrences * numChildren) * basePerPersonPerMeal);
+        // Don't return zero quantities
+        if (totalGrams === 0) {
+            return '';
+        }
         if (totalGrams >= 1000) {
             return `${(totalGrams / 1000).toFixed(2).replace(/\.?0+$/, '')} kg`;
         } else {
@@ -3495,7 +3505,12 @@ function calculateQuantityFromMeals(ingredientName, meals, mealCounts, numAdults
         }
     }
     
-    return `${adultMealOccurrences + childMealOccurrences} unidades`;
+    const totalOccurrences = adultMealOccurrences + childMealOccurrences;
+    // Don't return zero quantities
+    if (totalOccurrences === 0) {
+        return '';
+    }
+    return `${totalOccurrences} unidades`;
 }
 
 // Merge shopping lists from adults and children
@@ -3520,12 +3535,38 @@ function mergeShoppingLists(menuData) {
                 const existingKey = Object.keys(itemsMap).find(key => key.toLowerCase().trim() === normalizedName);
                 
                 if (existingKey) {
-                    itemsMap[existingKey].cantidad = combineQuantities(itemsMap[existingKey].cantidad, item.cantidad);
+                    const combinedQty = combineQuantities(itemsMap[existingKey].cantidad, item.cantidad);
+                    // Only update if combined quantity is not empty
+                    if (combinedQty && combinedQty.trim()) {
+                        itemsMap[existingKey].cantidad = combinedQty;
+                    } else {
+                        // If combined is empty, remove the item
+                        delete itemsMap[existingKey];
+                    }
                 } else {
-                    itemsMap[item.nombre] = item;
+                    // Only add if quantity is not empty or zero
+                    const cantidad = item.cantidad || '';
+                    if (cantidad && cantidad.trim()) {
+                        const cantidadLower = cantidad.toLowerCase().trim();
+                        if (cantidadLower !== '0' && cantidadLower !== '0g' && cantidadLower !== '0 g' &&
+                            cantidadLower !== '0kg' && cantidadLower !== '0 kg' && cantidadLower !== '0ml' &&
+                            cantidadLower !== '0 ml' && cantidadLower !== '0l' && cantidadLower !== '0 l' &&
+                            cantidadLower !== '0 unidades' && cantidadLower !== '0unidades') {
+                            itemsMap[item.nombre] = item;
+                        }
+                    }
                 }
             });
-            merged[category] = Object.values(itemsMap);
+            // Filter out items with empty quantities before adding to merged
+            merged[category] = Object.values(itemsMap).filter(item => {
+                const cantidad = item.cantidad || '';
+                if (!cantidad || !cantidad.trim()) return false;
+                const cantidadLower = cantidad.toLowerCase().trim();
+                return cantidadLower !== '0' && cantidadLower !== '0g' && cantidadLower !== '0 g' &&
+                       cantidadLower !== '0kg' && cantidadLower !== '0 kg' && cantidadLower !== '0ml' &&
+                       cantidadLower !== '0 ml' && cantidadLower !== '0l' && cantidadLower !== '0 l' &&
+                       cantidadLower !== '0 unidades' && cantidadLower !== '0unidades';
+            });
         });
         
         console.log('[ShoppingList] Merged result from extracted ingredients:', Object.keys(merged));
@@ -3618,15 +3659,34 @@ function mergeShoppingLists(menuData) {
                     itemsMap[existingKey].notas = itemNotes;
                 }
             } else {
-                itemsMap[itemName] = {
-                    nombre: itemName,
-                    cantidad: itemQuantity,
-                    notas: itemNotes
-                };
+                // Only add if quantity is not empty or zero
+                const cantidad = itemQuantity || '';
+                if (cantidad && cantidad.trim()) {
+                    const cantidadLower = cantidad.toLowerCase().trim();
+                    if (cantidadLower !== '0' && cantidadLower !== '0g' && cantidadLower !== '0 g' &&
+                        cantidadLower !== '0kg' && cantidadLower !== '0 kg' && cantidadLower !== '0ml' &&
+                        cantidadLower !== '0 ml' && cantidadLower !== '0l' && cantidadLower !== '0 l' &&
+                        cantidadLower !== '0 unidades' && cantidadLower !== '0unidades') {
+                        itemsMap[itemName] = {
+                            nombre: itemName,
+                            cantidad: itemQuantity,
+                            notas: itemNotes
+                        };
+                    }
+                }
             }
         });
         
-        merged[category] = Object.values(itemsMap);
+        // Filter out items with empty or zero quantities
+        merged[category] = Object.values(itemsMap).filter(item => {
+            const cantidad = item.cantidad || '';
+            if (!cantidad || !cantidad.trim()) return false;
+            const cantidadLower = cantidad.toLowerCase().trim();
+            return cantidadLower !== '0' && cantidadLower !== '0g' && cantidadLower !== '0 g' &&
+                   cantidadLower !== '0kg' && cantidadLower !== '0 kg' && cantidadLower !== '0ml' &&
+                   cantidadLower !== '0 ml' && cantidadLower !== '0l' && cantidadLower !== '0 l' &&
+                   cantidadLower !== '0 unidades' && cantidadLower !== '0unidades';
+        });
     });
     
     console.log('[ShoppingList] Merged result:', Object.keys(merged), 'with', Object.values(merged).reduce((sum, items) => sum + items.length, 0), 'total items');
@@ -3753,8 +3813,13 @@ function categorizeShoppingItems(items, numAdults = 0, numChildren = 0) {
 
 // Combine quantities by parsing and summing
 function combineQuantities(q1, q2) {
-    if (!q2 || !q2.trim()) return q1 || '';
-    if (!q1 || !q1.trim()) return q2 || '';
+    // Handle empty or zero quantities
+    if (!q2 || !q2.trim() || q2.trim() === '0' || q2.trim().toLowerCase() === '0g' || q2.trim().toLowerCase() === '0 g') {
+        return q1 || '';
+    }
+    if (!q1 || !q1.trim() || q1.trim() === '0' || q1.trim().toLowerCase() === '0g' || q1.trim().toLowerCase() === '0 g') {
+        return q2 || '';
+    }
     if (q1 === q2) return q1;
     
     // Parse quantities
@@ -3763,11 +3828,22 @@ function combineQuantities(q1, q2) {
         
         const qLower = q.toLowerCase().trim();
         
+        // Skip zero quantities
+        if (qLower === '0' || qLower === '0g' || qLower === '0 g' || qLower === '0kg' || qLower === '0 kg' || 
+            qLower === '0ml' || qLower === '0 ml' || qLower === '0l' || qLower === '0 l' || 
+            qLower === '0 unidades' || qLower === '0unidades') {
+            return null;
+        }
+        
         // Extract number and unit
         const match = qLower.match(/^([\d.]+)\s*(kg|g|ml|l|litro|litros|unidades?|unidad|piezas?|pieza|ud|uds)?/);
         if (!match) return null;
         
         let value = parseFloat(match[1]);
+        
+        // Skip zero values
+        if (value === 0) return null;
+        
         let unit = (match[2] || '').trim();
         
         // Normalize units
@@ -3790,11 +3866,12 @@ function combineQuantities(q1, q2) {
     const parsed1 = parseQuantity(q1);
     const parsed2 = parseQuantity(q2);
     
+    // If both are null (zero or invalid), return empty
     if (!parsed1 && !parsed2) {
-        // If neither can be parsed, concatenate
-        return `${q1} + ${q2}`;
+        return '';
     }
     
+    // If one is null (zero), return the other
     if (!parsed1) return q2;
     if (!parsed2) return q1;
     
@@ -3805,6 +3882,11 @@ function combineQuantities(q1, q2) {
     
     // Sum values
     const totalValue = parsed1.value + parsed2.value;
+    
+    // Don't return zero values
+    if (totalValue === 0) {
+        return '';
+    }
     
     // Format result based on unit
     if (parsed1.unit === 'unidades') {
@@ -3901,7 +3983,22 @@ function renderShoppingCategories(categories, display) {
     }
     
     Object.entries(categories).forEach(([category, items]) => {
-        if (items.length === 0) return;
+        // Filter out items with empty or zero quantities
+        const validItems = items.filter(item => {
+            const cantidad = item.cantidad || item.quantity || '';
+            if (!cantidad || !cantidad.trim()) return false;
+            const cantidadLower = cantidad.toLowerCase().trim();
+            // Filter out zero quantities
+            if (cantidadLower === '0' || cantidadLower === '0g' || cantidadLower === '0 g' || 
+                cantidadLower === '0kg' || cantidadLower === '0 kg' || cantidadLower === '0ml' || 
+                cantidadLower === '0 ml' || cantidadLower === '0l' || cantidadLower === '0 l' ||
+                cantidadLower === '0 unidades' || cantidadLower === '0unidades') {
+                return false;
+            }
+            return true;
+        });
+        
+        if (validItems.length === 0) return;
         
         const categoryName = shoppingCategoryNames[category] || category;
         const icon = shoppingCategoryIcons[category] || '📦';
@@ -3922,11 +4019,11 @@ function renderShoppingCategories(categories, display) {
                     ${categoryName}
                 </h3>
                 <span style="background: rgba(212, 175, 55, 0.2); padding: 0.5rem 1rem; border-radius: 50px; color: var(--gold); font-weight: 600; font-size: 0.9rem;">
-                    ${items.length} items
+                    ${validItems.length} items
                 </span>
             </div>
             <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem;">
-                ${items.map((item, index) => {
+                ${validItems.map((item, index) => {
                     const itemId = `${category}-${index}`;
                     const isChecked = shoppingCheckedItems.has(itemId);
                     return `
