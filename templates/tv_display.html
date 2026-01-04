@@ -1749,15 +1749,16 @@
                     const ratingId = `rating-adultos-${selectedDay}`;
                     const ratingContainer = document.getElementById(ratingId);
                     if (ratingContainer) {
-                        ratingContainer.innerHTML = [1, 2, 3, 4, 5].map(star => `
-                            <button onclick="rateDayMenu('adultos', ${star})" 
-                                style="background: none; border: none; font-size: 1.5rem; cursor: pointer; padding: 0.25rem; transition: transform 0.2s;"
-                                onmouseover="this.style.transform='scale(1.2)'"
-                                onmouseout="this.style.transform='scale(1)'"
-                                title="${star} ${star === 1 ? 'estrella' : 'estrellas'}">
-                                <span style="color: ${rating >= star ? '#D4AF37' : 'rgba(255, 255, 255, 0.3)';">${rating >= star ? '⭐' : '☆'}</span>
-                            </button>
-                        `).join('');
+                        ratingContainer.innerHTML = [1, 2, 3, 4, 5].map(star => {
+                            const isFilled = rating >= star;
+                            return '<button onclick="rateDayMenu(\'adultos\', ' + star + ')" ' +
+                                'style="background: none; border: none; font-size: 1.5rem; cursor: pointer; padding: 0.25rem; transition: transform 0.2s;" ' +
+                                'onmouseover="this.style.transform=\'scale(1.2)\'" ' +
+                                'onmouseout="this.style.transform=\'scale(1)\'" ' +
+                                'title="' + star + ' ' + (star === 1 ? 'estrella' : 'estrellas') + '">' +
+                                '<span style="color: ' + (isFilled ? '#D4AF37' : 'rgba(255, 255, 255, 0.3)') + ';">' + (isFilled ? '⭐' : '☆') + '</span>' +
+                                '</button>';
+                        }).join('');
                     }
                 }
                 
