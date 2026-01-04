@@ -705,7 +705,7 @@
             <div class="qr-containers-wrapper">
                 <div class="zenith-qr-container">
                     <div class="zenith-qr-code" id="zenithQrCode"></div>
-                    <div class="zenith-qr-label">Shopping List</div>
+                    <div class="zenith-qr-label">Today's Menu</div>
                 </div>
             </div>
         </div>
@@ -857,21 +857,87 @@
         // QR Code functions removed - using zenith style button instead
 
         // Get food image URL (placeholder - you can use Unsplash API)
-        // Generate QR Code for shopping list (zenith style - larger QR)
+        // Generate QR Code with menu information (ingredients and preparation)
         function generateZenithQRCode() {
             const qrContainer = document.getElementById('zenithQrCode');
-            if (qrContainer && typeof QRCode !== 'undefined') {
-                const shoppingListUrl = `${window.location.origin}/?tab=shopping`;
-                qrContainer.innerHTML = '';
-                new QRCode(qrContainer, {
-                    text: shoppingListUrl,
-                    width: 104,
-                    height: 104,
-                    colorDark: '#000000',
-                    colorLight: '#ffffff',
-                    correctLevel: QRCode.CorrectLevel.H
-                });
+            if (!qrContainer || typeof QRCode === 'undefined' || !currentMenu || !selectedDay) {
+                return;
             }
+            
+            // Build menu text with ingredients and preparation
+            let menuText = `🍽️ MENÚ DEL DÍA: ${selectedDay.toUpperCase()}\n\n`;
+            
+            // Adults menu
+            if (currentMenu.menu_adultos && currentMenu.menu_adultos.dias) {
+                const adultDayData = getDayDataFromMenu(currentMenu.menu_adultos.dias, selectedDay);
+                if (adultDayData) {
+                    menuText += `👨‍👩‍👧‍👦 ADULTOS\n`;
+                    menuText += `${'='.repeat(30)}\n\n`;
+                    
+                    ['desayuno', 'comida', 'cena'].forEach(mealType => {
+                        if (adultDayData[mealType]) {
+                            const meal = adultDayData[mealType];
+                            const mealName = typeof meal.nombre === 'string' ? meal.nombre : (meal.nombre?.name || 'N/A');
+                            menuText += `\n${mealType.toUpperCase()}: ${mealName}\n`;
+                            
+                            if (meal.ingredientes && Array.isArray(meal.ingredientes) && meal.ingredientes.length > 0) {
+                                menuText += `\n📋 Ingredientes:\n`;
+                                meal.ingredientes.forEach(ing => {
+                                    menuText += `  • ${ing}\n`;
+                                });
+                            }
+                            
+                            if (meal.instrucciones) {
+                                menuText += `\n👨‍🍳 Preparación:\n${meal.instrucciones}\n`;
+                            }
+                            
+                            menuText += `\n${'-'.repeat(30)}\n`;
+                        }
+                    });
+                }
+            }
+            
+            // Children menu
+            if (currentMenu.menu_ninos && currentMenu.menu_ninos.dias) {
+                const childDayData = getDayDataFromMenu(currentMenu.menu_ninos.dias, selectedDay);
+                if (childDayData) {
+                    menuText += `\n\n👶 NIÑOS\n`;
+                    menuText += `${'='.repeat(30)}\n\n`;
+                    
+                    ['desayuno', 'comida', 'merienda', 'cena'].forEach(mealType => {
+                        if (childDayData[mealType]) {
+                            const meal = childDayData[mealType];
+                            const mealName = typeof meal.nombre === 'string' ? meal.nombre : (meal.nombre?.name || 'N/A');
+                            menuText += `\n${mealType.toUpperCase()}: ${mealName}\n`;
+                            
+                            if (meal.ingredientes && Array.isArray(meal.ingredientes) && meal.ingredientes.length > 0) {
+                                menuText += `\n📋 Ingredientes:\n`;
+                                meal.ingredientes.forEach(ing => {
+                                    menuText += `  • ${ing}\n`;
+                                });
+                            }
+                            
+                            if (meal.instrucciones) {
+                                menuText += `\n👨‍🍳 Preparación:\n${meal.instrucciones}\n`;
+                            }
+                            
+                            menuText += `\n${'-'.repeat(30)}\n`;
+                        }
+                    });
+                }
+            }
+            
+            menuText += `\n\n📱 Escanea este código para ver el menú completo`;
+            
+            qrContainer.innerHTML = '';
+            new QRCode(qrContainer, {
+                text: menuText,
+                width: 104,
+                height: 104,
+                colorDark: '#000000',
+                colorLight: '#ffffff',
+                correctLevel: QRCode.CorrectLevel.H
+            });
         }
 
         function getFoodImage(mealName) {
