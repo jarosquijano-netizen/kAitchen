@@ -1495,8 +1495,7 @@
             // Collect all recipes from both menus (use the ones we already collected)
             const allRecipes = [...new Set([...adultRecipes, ...childRecipes])];
             
-            // Generate QR codes for recipes in top bar
-            generateRecipeQRCodes(allRecipes);
+            // QR codes removed - using zenith style button instead
             
             let finalHtml = `
                 ${adultosHtml}
