@@ -1290,13 +1290,13 @@
             // Helper function to render a meal card with zenith-style design
             // Returns { html: string, recipeBase: string }
             async function renderMealCard(meal, mealType, mealNames, isAdult) {
-                const mealName = typeof meal.nombre === 'string' ? meal.nombre : (meal.nombre?.name || 'N/A');
-                const prepTime = typeof meal.tiempo_prep === 'number' ? meal.tiempo_prep : (meal.tiempo_prep?.value || meal.tiempo_prep || '');
-                const calories = typeof meal.calorias === 'number' ? meal.calorias : (meal.calorias?.value || meal.calorias || '');
-                const ingredients = Array.isArray(meal.ingredientes) ? meal.ingredientes : [];
-                const recipeBase = typeof meal.receta_base === 'string' ? meal.receta_base : '';
-                const adaptaciones = typeof meal.adaptaciones === 'string' ? meal.adaptaciones : '';
-                const notas = typeof meal.notas === 'string' ? meal.notas : '';
+                            const mealName = typeof meal.nombre === 'string' ? meal.nombre : (meal.nombre?.name || 'N/A');
+                            const prepTime = typeof meal.tiempo_prep === 'number' ? meal.tiempo_prep : (meal.tiempo_prep?.value || meal.tiempo_prep || '');
+                            const calories = typeof meal.calorias === 'number' ? meal.calorias : (meal.calorias?.value || meal.calorias || '');
+                            const ingredients = Array.isArray(meal.ingredientes) ? meal.ingredientes : [];
+                            const recipeBase = typeof meal.receta_base === 'string' ? meal.receta_base : '';
+                            const adaptaciones = typeof meal.adaptaciones === 'string' ? meal.adaptaciones : '';
+                            const notas = typeof meal.notas === 'string' ? meal.notas : '';
                 const porqueSeleccionada = typeof meal.porque_seleccionada === 'string' ? meal.porque_seleccionada : '';
                 const instrucciones = typeof meal.instrucciones === 'string' ? meal.instrucciones : '';
                 
@@ -1336,9 +1336,9 @@
                                         <div style="font-size: 1.125rem; font-weight: 700; color: rgba(255, 255, 255, 0.95);">${item.val}</div>
                                     </div>
                                 `).join('')}
+                                </div>
                             </div>
-                        </div>
-                    `;
+                        `;
                 }
                 
                 // Get day name for header
@@ -1372,43 +1372,43 @@
                                     <span style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.15em; color: rgba(255, 255, 255, 0.5); margin-bottom: 0.5rem; font-weight: 600;">
                                         ${mealNames[mealType].es} / ${mealNames[mealType].en}
                                     </span>
-                                    <h2 class="meal-name" style="font-family: 'Playfair Display', serif; font-size: 3rem; font-weight: 700; color: #FFFFFF; line-height: 1.2; margin: 0; transition: color 0.3s ease; letter-spacing: -0.02em;">
+                                    <h2 style="font-family: 'Playfair Display', serif; font-size: 3rem; font-weight: 700; color: #FFFFFF; line-height: 1.2; margin: 0; transition: color 0.3s ease; letter-spacing: -0.02em;">
                                         ${mealName}
                                     </h2>
-                                </div>
+                                    </div>
                                 
                                 <!-- Description with sparkles -->
-                                ${porqueSeleccionada ? `
+                        ${porqueSeleccionada ? `
                                     <div style="display: flex; align-items: flex-start; gap: 0.75rem; padding: 1rem; background: rgba(255, 255, 255, 0.08); border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.1);">
                                         <span style="font-size: 1rem; color: #D4AF37; flex-shrink: 0;">✨</span>
                                         <p style="font-size: 0.875rem; color: rgba(255, 255, 255, 0.8); line-height: 1.7; font-style: italic; margin: 0;">
                                             ${porqueSeleccionada}
                                         </p>
-                                    </div>
-                                ` : ''}
+                            </div>
+                        ` : ''}
                             </div>
                             
                             <!-- Stats bar with borders -->
                             <div style="display: flex; flex-wrap: wrap; gap: 1.5rem; padding: 1.25rem 0; border-top: 1px solid rgba(255, 255, 255, 0.08); border-bottom: 1px solid rgba(255, 255, 255, 0.08); margin-bottom: 2rem; position: relative; z-index: 1;">
-                                ${prepTime ? `
+                                        ${prepTime ? `
                                     <div style="display: flex; align-items: center; gap: 0.75rem; color: rgba(255, 255, 255, 0.7);">
                                         <span style="font-size: 1.25rem;">⏱️</span>
                                         <span style="font-size: 1rem; font-weight: 600;">${prepTime} min</span>
-                                    </div>
-                                ` : ''}
+                                            </div>
+                                        ` : ''}
                                 ${calories ? `
                                     <div style="display: flex; align-items: center; gap: 0.75rem; color: rgba(255, 255, 255, 0.7);">
                                         <span style="font-size: 1.25rem;">🔥</span>
                                         <span style="font-size: 1rem; font-weight: 600;">${calories} kcal</span>
-                                    </div>
-                                ` : ''}
+                                </div>
+                            ` : ''}
                                 ${ingredients.length > 0 ? `
                                     <div style="display: flex; align-items: center; gap: 0.75rem; color: rgba(255, 255, 255, 0.7);">
                                         <span style="font-size: 1.25rem;">🍴</span>
                                         <span style="font-size: 1rem; font-weight: 600;">${ingredients.length} Items</span>
+                                            </div>
+                                        ` : ''}
                                     </div>
-                                ` : ''}
-                            </div>
                             
                             <!-- Ingredients Section -->
                             ${ingredientsBadgesHtml ? `
@@ -1425,36 +1425,36 @@
                             ${nutritionHtml}
                             
                             <!-- Instructions -->
-                            ${instrucciones ? `
+                        ${instrucciones ? `
                                 <div style="margin-top: 2rem; padding-top: 2rem; border-top: 1px solid rgba(255, 255, 255, 0.08); position: relative; z-index: 1;">
                                     <div style="font-size: 0.875rem; color: rgba(255, 255, 255, 0.5); margin-bottom: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; display: flex; align-items: center; gap: 0.5rem;">
                                         <span>📖</span>
                                         <span>Preparation</span>
                                     </div>
                                     <div style="font-size: 1rem; color: rgba(255, 255, 255, 0.85); line-height: 1.8;">
-                                        ${instrucciones}
-                                    </div>
+                                    ${instrucciones}
                                 </div>
-                            ` : ''}
+                                        </div>
+                                    ` : ''}
                             
                             <!-- Adaptations -->
-                            ${adaptaciones ? `
+                                    ${adaptaciones ? `
                                 <div style="margin-top: 1.5rem; padding: 1rem; background: rgba(212, 175, 55, 0.12); border-radius: 12px; border: 1px solid rgba(212, 175, 55, 0.25); position: relative; z-index: 1;">
                                     <div style="font-size: 0.875rem; color: #D4AF37; font-weight: 600; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.1em;">✨ Adaptations</div>
                                     <div style="font-size: 0.95rem; color: rgba(255, 255, 255, 0.8); line-height: 1.7;">${adaptaciones}</div>
-                                </div>
-                            ` : ''}
+                                        </div>
+                                    ` : ''}
                             
                             <!-- Notes -->
-                            ${notas ? `
+                                    ${notas ? `
                                 <div style="margin-top: 1.5rem; padding: 1rem; background: rgba(138, 161, 147, 0.12); border-radius: 12px; border: 1px solid rgba(138, 161, 147, 0.25); position: relative; z-index: 1;">
                                     <div style="font-size: 0.95rem; color: #8AA193; line-height: 1.7; font-weight: 500;">
-                                        💡 ${notas}
-                                    </div>
+                                            💡 ${notas}
                                 </div>
-                            ` : ''}
-                        </div>
-                    `,
+                                        </div>
+                                    ` : ''}
+                                </div>
+                `,
                     recipeBase: recipeBase
                 };
             }
@@ -1471,7 +1471,7 @@
                 console.log('[TV] menu_adultos.dias keys:', Object.keys(currentMenu.menu_adultos.dias));
                 try {
                     const adultDayData = getDayDataFromMenu(currentMenu.menu_adultos.dias, selectedDay);
-                    console.log('[TV] Adult day data for', selectedDay, ':', adultDayData);
+                console.log('[TV] Adult day data for', selectedDay, ':', adultDayData);
                     console.log('[TV] Available day keys in menu:', Object.keys(currentMenu.menu_adultos.dias));
                 if (adultDayData) {
                     adultosHtml += `
@@ -1519,7 +1519,7 @@
                 console.log('[TV] menu_ninos.dias keys:', Object.keys(currentMenu.menu_ninos.dias));
                 try {
                     const childDayData = getDayDataFromMenu(currentMenu.menu_ninos.dias, selectedDay);
-                    console.log('[TV] Child day data for', selectedDay, ':', childDayData);
+                console.log('[TV] Child day data for', selectedDay, ':', childDayData);
                     console.log('[TV] Available day keys in children menu:', Object.keys(currentMenu.menu_ninos.dias));
                 if (childDayData) {
                     ninosHtml += `
@@ -1531,7 +1531,7 @@
                     const childMeals = ['desayuno', 'comida', 'merienda', 'cena'].filter(mealType => childDayData[mealType]);
                     console.log('[TV] Child meals to render:', childMeals);
                     for (const mealType of childMeals) {
-                        const meal = childDayData[mealType];
+                            const meal = childDayData[mealType];
                         console.log('[TV] Rendering child meal:', mealType, meal);
                         const result = await renderMealCard(meal, mealType, mealNames, false);
                         console.log('[TV] Render result for', mealType, ':', result ? 'OK' : 'FAILED');
