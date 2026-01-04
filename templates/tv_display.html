@@ -289,6 +289,8 @@
             position: relative;
             -webkit-overflow-scrolling: touch;
             overscroll-behavior: contain;
+            /* Ensure content is scrollable */
+            flex: 1 1 auto;
         }
 
         /* All visual styling removed - using only inline styles in HTML */
@@ -304,6 +306,8 @@
             width: 100%;
             overflow: visible;
             position: relative;
+            /* Ensure content can overflow and scroll */
+            padding-bottom: 2rem;
         }
 
         /* ZENITH-STYLE MEAL CARD - All styles are inline in HTML, no CSS needed */
@@ -829,11 +833,11 @@
             document.getElementById('currentDate').textContent = 
                 `${diasES[dayName]} ${day} ${monthES} / ${diasEN[dayName]} ${day} ${monthEN} ${year}`;
             
-            // Always set selectedDay to today
-            const currentDayName = getCurrentDayName();
-            if (selectedDay !== currentDayName) {
-                selectedDay = currentDayName;
-                console.log('[TV] Setting selectedDay to today:', selectedDay);
+            // Don't auto-reset selectedDay - let user keep their selection
+            // Only set it initially if not already set
+            if (!selectedDay) {
+                selectedDay = getCurrentDayName();
+                console.log('[TV] Initial selectedDay set to today:', selectedDay);
                 // Update menu display if menu is already loaded
                 if (currentMenu) {
                     displayMenu();
@@ -1274,8 +1278,8 @@
                             <!-- Header (zenith: flex items-center justify-between) -->
                             <div style="display: flex; align-items: center; justify-content: space-between; position: relative; z-index: 1;">
                                 <div style="display: flex; align-items: center; gap: 0.75rem;">
-                                    <div style="padding: 0.625rem; border-radius: 0.75rem; background: ${isAdult ? 'rgba(59, 130, 246, 0.2)' : 'rgba(249, 115, 22, 0.2)'}; color: ${isAdult ? '#60A5FA' : '#FB923C'}; display: flex; align-items: center; justify-content: center; width: 1.25rem; height: 1.25rem; font-size: 1.25rem;">
-                                        ${isAdult ? '👨‍👩‍👧‍👦' : '👶'}
+                                    <div style="padding: 0.625rem; border-radius: 0.75rem; background: ${isAdult ? 'rgba(59, 130, 246, 0.2)' : 'rgba(249, 115, 22, 0.2)'}; color: ${isAdult ? '#60A5FA' : '#FB923C'}; display: flex; align-items: center; justify-content: center; width: 1.25rem; height: 1.25rem;">
+                                        ${isAdult ? `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 13V8a6 6 0 0 1 12 0v5"></path><path d="M4 10a2 2 0 0 1-2 2v4a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-4a2 2 0 0 1-2-2"></path><path d="M8 10V8a4 4 0 1 1 8 0v2"></path></svg>` : `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12h.01"></path><path d="M15 12h.01"></path><path d="M10 16c.5.3 1.2.5 2 .5s1.5-.2 2-.5"></path><path d="M19 6.3a9 9 0 0 1 1.8 3.9 2 2 0 0 1 0 3.6 9 9 0 0 1-17.6 0 2 2 0 0 1 0-3.6A9 9 0 0 1 12 3a9 9 0 0 1 7 3.3z"></path><path d="M7.5 13.5 7 15l-1.5 1"></path><path d="M16.5 13.5 17 15l1.5 1"></path></svg>`}
                                     </div>
                                     <span style="font-size: 0.875rem; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: ${isAdult ? '#60A5FA' : '#FB923C'};">
                                         ${isAdult ? 'Adults' : 'Children'}
