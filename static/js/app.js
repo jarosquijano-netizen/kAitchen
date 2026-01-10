@@ -2329,7 +2329,7 @@ ${contenido || 'No hay contenido disponible'}
                 </div>
                 
                 <!-- Day Navigation Buttons -->
-                <div style="display: flex; justify-content: flex-end; gap: 0.75rem; margin-bottom: 2.5rem; flex-wrap: wrap;">
+                <div style="display: flex; justify-content: center; gap: 0.75rem; margin-bottom: 2.5rem; flex-wrap: wrap;">
                     ${dias.map((dia, idx) => `
                         <button 
                             class="day-button"
@@ -2381,7 +2381,7 @@ ${contenido || 'No hay contenido disponible'}
                 </div>
                 
                 <!-- Day Navigation Buttons -->
-                <div style="display: flex; justify-content: flex-end; gap: 0.75rem; margin-bottom: 2.5rem; flex-wrap: wrap;">
+                <div style="display: flex; justify-content: center; gap: 0.75rem; margin-bottom: 2.5rem; flex-wrap: wrap;">
                     ${dias.map((dia, idx) => `
                         <button 
                             class="day-button"
