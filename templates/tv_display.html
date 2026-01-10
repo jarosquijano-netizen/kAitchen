@@ -266,7 +266,7 @@
         .main-content {
             flex: 1;
             display: grid;
-            grid-template-columns: 1fr 4px 1fr;
+            grid-template-columns: 1fr 1fr 4px;
             gap: 1rem;
             overflow: hidden;
             min-height: 0; /* Critical for flex children to allow scrolling */
@@ -1644,8 +1644,8 @@
             
             let finalHtml = `
                 ${adultosHtml}
-                <div class="divider"></div>
                 ${ninosHtml}
+                <div class="divider"></div>
             `;
             
             console.log('[TV] Final HTML length:', finalHtml.length);
