@@ -28,7 +28,15 @@ class Database:
             db_url: Database URL (sqlite:///path/to/db or postgresql://...)
                     If None, uses DATABASE_URL from environment or defaults to SQLite
         """
-        self.db_url = (db_url or os.getenv('DATABASE_URL', 'sqlite:///family_kitchen.db')).strip()
+        # Try individual PostgreSQL variables first (Railway compatibility)
+        if os.getenv('POSTGRES_USER') and os.getenv('POSTGRES_PASSWORD'):
+            self.db_url = (
+                f"postgresql://{os.getenv('POSTGRES_USER')}:{os.getenv('POSTGRES_PASSWORD')}"
+                f"@{os.getenv('PGHOST', 'postgres.railway.internal')}:{os.getenv('PGPORT', '5432')}"
+                f"/{os.getenv('POSTGRES_DB', 'railway')}"
+            )
+        else:
+            self.db_url = (db_url or os.getenv('DATABASE_URL', 'sqlite:///family_kitchen.db')).strip()
         
         # Debug: Print database URL (first 50 chars only for security)
         db_url_preview = self.db_url[:50] + '...' if len(self.db_url) > 50 else self.db_url
