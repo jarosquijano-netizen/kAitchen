@@ -89,21 +89,23 @@ Este script:
 python app.py
 ```
 
-El servidor se iniciará en http://localhost:5000
+El servidor se iniciará en http://localhost:7000
 
 ### Interfaces Disponibles
 
 #### 1. Panel de Administración
-**URL**: http://localhost:5000
+**URL**: http://localhost:7000
 
 Funciones:
 - ✅ Gestionar perfiles de adultos y niños
 - ✅ Extraer recetas desde URLs
 - ✅ Generar menús semanales con IA
 - ✅ Ver y gestionar menús generados
+- ✅ Calificar días del menú
+- ✅ Regenerar días específicos
 
 #### 2. Vista de TV
-**URL**: http://localhost:5000/tv
+**URL**: http://localhost:7000/tv
 
 Características:
 - 📺 Diseño optimizado para pantallas grandes
@@ -189,24 +191,42 @@ family-kitchen-menu/
 
 ## 🔧 API Endpoints
 
-### Perfiles de Adultos
+La aplicación expone una API REST completa. Para documentación detallada, consulta **[API_DOCUMENTATION.md](API_DOCUMENTATION.md)**.
+
+### Endpoints Principales
+
+**Perfiles de Adultos**
 - `GET /api/adults` - Obtener todos los adultos
 - `POST /api/adults` - Añadir adulto
 - `DELETE /api/adults/<id>` - Eliminar adulto
 
-### Perfiles de Niños
+**Perfiles de Niños**
 - `GET /api/children` - Obtener todos los niños
 - `POST /api/children` - Añadir niño
 - `DELETE /api/children/<id>` - Eliminar niño
 
-### Recetas
+**Recetas**
 - `GET /api/recipes` - Obtener todas las recetas
 - `POST /api/recipes/extract` - Extraer receta desde URL
 - `POST /api/recipes/batch` - Extraer múltiples recetas
+- `GET /api/recipes/search` - Buscar receta por título
+- `DELETE /api/recipes/<id>` - Eliminar receta
 
-### Menús
+**Menús**
 - `POST /api/menu/generate` - Generar menú semanal con IA
 - `GET /api/menu/latest` - Obtener último menú generado
+- `GET /api/menu/current-week` - Obtener menú de la semana actual
+- `GET /api/menu/week/<date>` - Obtener menú de semana específica
+- `GET /api/menu/all` - Obtener todos los menús
+- `POST /api/menu/rate-day` - Calificar un día del menú
+- `POST /api/menu/regenerate-day` - Regenerar un día específico
+
+**Configuración**
+- `GET /api/settings` - Obtener configuración actual
+- `POST /api/settings` - Guardar configuración
+- `POST /api/settings/test` - Probar API key
+
+Ver **[API_DOCUMENTATION.md](API_DOCUMENTATION.md)** para documentación completa con ejemplos.
 
 ## 🎨 Personalización
 
@@ -249,8 +269,9 @@ Edita `menu_generator.py`:
 **Solución**:
 1. Verifica que el servidor está corriendo
 2. Usa la IP local de tu ordenador en lugar de localhost
-   - Ejemplo: `http://192.168.1.100:5000/tv`
+   - Ejemplo: `http://192.168.1.100:7000/tv`
 3. Asegúrate de que la TV y el ordenador están en la misma red
+4. Verifica la configuración de CORS si accedes desde otro dispositivo
 
 ### Error de conexión a la base de datos
 **Solución**:
@@ -342,13 +363,32 @@ Este es un proyecto personalizado, pero si encuentras bugs o tienes sugerencias:
 
 Ver [CONTRIBUTING.md](CONTRIBUTING.md) para la guía completa de contribución.
 
-## 📚 Documentación Adicional
+## 📚 Documentación Completa
 
-- [TESTING.md](TESTING.md) - Guía completa del sistema de testing
-- [CONTRIBUTING.md](CONTRIBUTING.md) - Cómo contribuir al proyecto
-- [PROJECT_STRUCTURE.md](PROJECT_STRUCTURE.md) - Estructura detallada del proyecto
-- [START_HERE.md](START_HERE.md) - Guía de inicio rápido
-- [RAILWAY_DEPLOYMENT.md](RAILWAY_DEPLOYMENT.md) - Deploy en Railway
+### Documentación Principal
+
+- **[DOCS_INDEX.md](DOCS_INDEX.md)** - Índice completo de toda la documentación
+- **[API_DOCUMENTATION.md](API_DOCUMENTATION.md)** - Documentación completa de la API REST
+- **[ARCHITECTURE.md](ARCHITECTURE.md)** - Arquitectura técnica del sistema
+- **[DEVELOPER_GUIDE.md](DEVELOPER_GUIDE.md)** - Guía para desarrolladores
+- **[DEPLOYMENT.md](DEPLOYMENT.md)** - Guía completa de deployment
+
+### Guías de Inicio
+
+- **[START_HERE.md](START_HERE.md)** - Guía de inicio rápido paso a paso
+- **[GUIA_RAPIDA.md](GUIA_RAPIDA.md)** - Guía rápida en español
+- **[INICIO_RAPIDO.md](INICIO_RAPIDO.md)** - Inicio rápido alternativo
+
+### Testing y Contribución
+
+- **[TESTING.md](TESTING.md)** - Guía completa del sistema de testing
+- **[CONTRIBUTING.md](CONTRIBUTING.md)** - Cómo contribuir al proyecto
+- **[PROJECT_STRUCTURE.md](PROJECT_STRUCTURE.md)** - Estructura detallada del proyecto
+
+### Deployment
+
+- **[DEPLOYMENT.md](DEPLOYMENT.md)** - Guía completa de deployment (Railway, Heroku, Docker, etc.)
+- **[RAILWAY_DEPLOYMENT.md](RAILWAY_DEPLOYMENT.md)** - Guía específica de Railway
 
 ## 📞 Soporte
 
@@ -373,4 +413,16 @@ python init.py   # Inicializar
 python app.py    # Ejecutar
 ```
 
-Luego abre http://localhost:5000 en tu navegador.
+Luego abre http://localhost:7000 en tu navegador.
+
+---
+
+## 🗺️ Navegación Rápida
+
+- **Nuevo usuario?** → Empieza con [START_HERE.md](START_HERE.md)
+- **Quieres usar la API?** → Lee [API_DOCUMENTATION.md](API_DOCUMENTATION.md)
+- **Quieres desarrollar?** → Consulta [DEVELOPER_GUIDE.md](DEVELOPER_GUIDE.md)
+- **Quieres desplegar?** → Sigue [DEPLOYMENT.md](DEPLOYMENT.md)
+- **Quieres entender el sistema?** → Revisa [ARCHITECTURE.md](ARCHITECTURE.md)
+
+Ver **[DOCS_INDEX.md](DOCS_INDEX.md)** para el índice completo de documentación.
