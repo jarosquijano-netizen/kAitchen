@@ -94,20 +94,28 @@
             transform: translateY(-50%);
             z-index: 100;
             min-width: 150px;
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 1.5rem 1rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
         }
 
         .tab {
-            padding: 1rem 2rem;
-            background: var(--glass-bg);
+            padding: 0.75rem 1rem;
+            background: rgba(255, 255, 255, 0.05);
             backdrop-filter: blur(10px);
-            border: 1px solid var(--glass-border);
-            border-radius: 50px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
             cursor: pointer;
-            font-size: 0.95rem;
+            font-size: 0.9rem;
             font-weight: 500;
             color: var(--silver);
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            letter-spacing: 1px;
+            transition: all 0.3s ease;
+            text-align: center;
+            width: 100%;
+            letter-spacing: 0.5px;
             text-transform: uppercase;
         }
 
@@ -115,14 +123,23 @@
             background: rgba(255, 255, 255, 0.1);
             border-color: rgba(255, 255, 255, 0.2);
             color: var(--white);
-            transform: translateY(-2px);
         }
 
         .tab.active {
-            background: linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%);
+            background: linear-gradient(135deg, rgba(212, 175, 55, 0.2) 0%, rgba(212, 175, 55, 0.3) 100%);
             border-color: var(--gold);
-            color: var(--black);
-            box-shadow: 0 10px 30px rgba(212, 175, 55, 0.3);
+            color: var(--gold);
+            font-weight: 600;
+        }
+
+        /* Clock widget at bottom */
+        .clock-widget {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+            font-size: 0.85rem;
+            color: var(--silver);
         }
 
         .tab-content {
@@ -975,6 +992,12 @@
         <button class="tab" data-tab="shopping">Shopping List</button>
         <button class="tab" data-tab="tv">TV Display</button>
         <button class="tab" data-tab="settings">Settings</button>
+        
+        <!-- Clock Widget -->
+        <div class="clock-widget" id="sidebar-clock">
+            <div id="clock-time">00:00</div>
+            <div id="clock-date">Loading...</div>
+        </div>
     </div>
 
     <div class="container" style="padding-left: 200px;">
@@ -1513,6 +1536,30 @@ https://example.com/recipe3"></textarea>
             </div>
         </div>
     </div>
+
+    <script>
+        // Clock functionality for sidebar
+        function updateSidebarClock() {
+            const now = new Date();
+            const timeElement = document.getElementById('clock-time');
+            const dateElement = document.getElementById('clock-date');
+            
+            if (timeElement && dateElement) {
+                // Format time as HH:MM
+                const hours = String(now.getHours()).padStart(2, '0');
+                const minutes = String(now.getMinutes()).padStart(2, '0');
+                timeElement.textContent = `${hours}:${minutes}`;
+                
+                // Format date
+                const options = { weekday: 'short', month: 'short', day: 'numeric' };
+                dateElement.textContent = now.toLocaleDateString('en-US', options);
+            }
+        }
+        
+        // Update clock immediately and then every second
+        updateSidebarClock();
+        setInterval(updateSidebarClock, 1000);
+    </script>
 
     <script src="/static/js/app.js"></script>
 </body>
