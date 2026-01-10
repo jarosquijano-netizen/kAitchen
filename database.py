@@ -45,15 +45,30 @@ class Database:
         if self.is_postgres and not POSTGRES_AVAILABLE:
             raise ImportError("psycopg2 is required for PostgreSQL support")
         
-        # Initialize database tables
-        self.init_database()
+        # Initialize database tables with error handling
+        try:
+            print("[Database] Initializing database tables...")
+            self.init_database()
+            print("[Database] Database tables initialized successfully")
+        except Exception as e:
+            print(f"[Database] Error initializing database: {e}")
+            # Don't raise here - allow app to start and show error in web interface
     
     def get_connection(self):
         """Get database connection"""
         if self.is_postgres:
-            # PostgreSQL connection pool
+            # PostgreSQL connection pool with timeout
             if not hasattr(self, '_pool'):
-                self._pool = SimpleConnectionPool(1, 10, self.db_url)
+                try:
+                    self._pool = SimpleConnectionPool(
+                        1, 10, self.db_url,
+                        connect_timeout=10,
+                        options="-c statement_timeout=30000"
+                    )
+                    print("[Database] PostgreSQL connection pool created successfully")
+                except Exception as e:
+                    print(f"[Database] Error creating PostgreSQL pool: {e}")
+                    raise
             return self._pool.getconn()
         else:
             # SQLite connection
