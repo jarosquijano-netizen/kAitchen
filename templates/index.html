@@ -85,10 +85,15 @@
 
         .tabs {
             display: flex;
-            gap: 1rem;
+            flex-direction: column;
+            gap: 0.5rem;
             margin: 3rem 0;
-            justify-content: flex-end;
-            flex-wrap: wrap;
+            position: fixed;
+            right: 2rem;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 100;
+            min-width: 150px;
         }
 
         .tab {
@@ -962,17 +967,20 @@
         </div>
     </header>
 
-    <div class="container">
+    <!-- VERTICAL SIDEBAR NAVIGATION -->
+    <div class="tabs">
+        <button class="tab active" data-tab="family">Family</button>
+        <button class="tab" data-tab="recipes">Recipes</button>
+        <button class="tab" data-tab="menu">Weekly Menu</button>
+        <button class="tab" data-tab="shopping">Shopping List</button>
+        <button class="tab" data-tab="tv">TV Display</button>
+        <button class="tab" data-tab="settings">Settings</button>
+    </div>
+
+    <div class="container" style="padding-right: 200px;">
         <div id="alerts"></div>
 
-        <div class="tabs">
-            <button class="tab active" data-tab="family">Family</button>
-            <button class="tab" data-tab="recipes">Recipes</button>
-            <button class="tab" data-tab="menu">Weekly Menu</button>
-            <button class="tab" data-tab="shopping">Shopping List</button>
-            <button class="tab" data-tab="tv">TV Display</button>
-            <button class="tab" data-tab="settings">Settings</button>
-        </div>
+        <!-- TAB CONTENTS -->
 
         <!-- FAMILY TAB -->
         <div class="tab-content active" id="family-tab">
