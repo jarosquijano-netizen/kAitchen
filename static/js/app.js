@@ -1033,6 +1033,66 @@ async function regenerateIndividualMenu() {
     }
 }
 
+// Regenerate individual meal for specific day and meal type
+async function regenerateIndividualMeal(mealType, dayIndex) {
+    const loading = document.getElementById('menu-loading');
+    
+    // Check if there's a current menu and selected day
+    if (!window.currentMenuDataForDays || window.selectedDayIndex === undefined) {
+        showAlert('Por favor, primero genera o carga un menú semanal completo', 'warning');
+        return;
+    }
+    
+    const dias = ['lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado', 'domingo'];
+    const currentDay = dias[dayIndex];
+    
+    if (!currentDay || !mealType) {
+        showAlert('Parámetros inválidos', 'error');
+        return;
+    }
+    
+    loading.classList.add('show');
+    
+    try {
+        console.log(`[RegenerateMeal] Regenerating ${mealType} for day: ${currentDay} (index: ${dayIndex})`);
+        
+        const response = await fetch('/api/menu/regenerate-meal', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                week_start_date: currentViewingWeek || getCurrentWeekStart(),
+                day_index: dayIndex,
+                day_name: currentDay,
+                meal_type: mealType,
+                current_menu_data: window.currentMenuDataForDays
+            })
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            showAlert(`${mealType.charAt(0).toUpperCase() + mealType.slice(1)} regenerado exitosamente`, 'success');
+            
+            // Update the menu data with the regenerated meal
+            if (result.data && result.data.menu_data) {
+                window.currentMenuDataForDays = result.data.menu_data;
+                
+                // Re-render the menu to show the updated meal
+                displayMenu(result.data.menu_data);
+            }
+        } else {
+            showAlert('Error al regenerar la comida: ' + (result.error || 'Error desconocido'), 'error');
+        }
+    } catch (error) {
+        console.error('Error regenerating individual meal:', error);
+        showAlert('Error al regenerar la comida: ' + (error.message || 'Error de conexión'), 'error');
+    } finally {
+        loading.classList.remove('show');
+    }
+}
+
 // Load current week menu (default) - with fallback to latest
 async function loadCurrentWeekMenu() {
     const display = document.getElementById('menu-display');
@@ -2208,15 +2268,39 @@ ${contenido || 'No hay contenido disponible'}
         
         let mealHtml = `
             <div style="background: rgba(255, 255, 255, 0.03); border-left: 4px solid ${borderColor}; border-radius: 12px; padding: 1.5rem; margin-bottom: 1rem; transition: all 0.3s ease; backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1);">
-                <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem;">
-                    <span style="font-size: 1.8rem;">${mealInfo.emoji}</span>
-                    <h4 style="font-family: 'Playfair Display', serif; font-size: 1.3rem; color: var(--white); margin: 0; font-weight: 700;">
-                        ${mealInfo.name}
-                    </h4>
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
+                    <div style="flex: 1;">
+                        <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem;">
+                            <span style="font-size: 1.8rem;">${mealInfo.emoji}</span>
+                            <h4 style="font-family: 'Playfair Display', serif; font-size: 1.3rem; color: var(--white); margin: 0; font-weight: 700;">
+                                ${mealInfo.name}
+                            </h4>
+                        </div>
+                        <h5 style="font-size: 1.4rem; font-weight: 600; color: var(--white); margin-bottom: 1rem; line-height: 1.3;">
+                            ${meal.nombre || 'Plato por definir'}
+                        </h5>
+                    </div>
+                    <button 
+                        onclick="regenerateIndividualMeal('${comidaType}', ${dayIndex})"
+                        style="
+                            background: linear-gradient(135deg, rgba(212, 175, 55, 0.2) 0%, rgba(212, 175, 55, 0.3) 100%);
+                            border: 1px solid rgba(212, 175, 55, 0.4);
+                            color: var(--gold);
+                            padding: 0.5rem 1rem;
+                            border-radius: 8px;
+                            font-size: 0.8rem;
+                            cursor: pointer;
+                            transition: all 0.3s ease;
+                            white-space: nowrap;
+                            font-weight: 500;
+                        "
+                        onmouseover="this.style.background='linear-gradient(135deg, rgba(212, 175, 55, 0.3) 0%, rgba(212, 175, 55, 0.4) 100%)'; this.style.transform='scale(1.05)'"
+                        onmouseout="this.style.background='linear-gradient(135deg, rgba(212, 175, 55, 0.2) 0%, rgba(212, 175, 55, 0.3) 100%)'; this.style.transform='scale(1)'"
+                        title="Regenerar esta comida"
+                    >
+                        🔄 Regenerar
+                    </button>
                 </div>
-                <h5 style="font-size: 1.4rem; font-weight: 600; color: var(--white); margin-bottom: 1rem; line-height: 1.3;">
-                    ${meal.nombre || 'Plato por definir'}
-                </h5>
         `;
         
         // Recipe base
@@ -2310,11 +2394,11 @@ ${contenido || 'No hay contenido disponible'}
     }
     
     // Helper function to render a day's meals
-    function renderDayMeals(diaData, comidas) {
+    function renderDayMeals(diaData, comidas, dayIndex) {
         let dayHtml = '';
         comidas.forEach(comida => {
             if (diaData[comida]) {
-                dayHtml += renderMealCard(diaData[comida], comida);
+                dayHtml += renderMealCard(diaData[comida], comida, dayIndex);
             }
         });
         return dayHtml;
@@ -2340,7 +2424,7 @@ ${contenido || 'No hay contenido disponible'}
                         <div style="background: linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%); color: var(--black); padding: 0.75rem 1.25rem; border-radius: 12px 12px 0 0; margin: -2rem -2rem 1.5rem -2rem; font-family: 'Playfair Display', serif; font-size: 1.3rem; font-weight: 600; text-transform: capitalize;">
                             ${getDayWithDate(dia, 'es')}
                         </div>
-                        ${renderDayMeals(diaData, ['desayuno', 'comida', 'cena'])}
+                        ${renderDayMeals(diaData, ['desayuno', 'comida', 'cena'], dayIndex)}
                     </div>
                 </div>
             `;
@@ -2360,7 +2444,7 @@ ${contenido || 'No hay contenido disponible'}
                         <div style="background: linear-gradient(135deg, var(--sage) 0%, #7A9184 100%); color: var(--white); padding: 0.75rem 1.25rem; border-radius: 12px 12px 0 0; margin: -2rem -2rem 1.5rem -2rem; font-family: 'Playfair Display', serif; font-size: 1.3rem; font-weight: 600; text-transform: capitalize;">
                             ${getDayWithDate(dia, 'es')}
                         </div>
-                        ${renderDayMeals(diaData, ['desayuno', 'comida', 'merienda', 'cena'])}
+                        ${renderDayMeals(diaData, ['desayuno', 'comida', 'merienda', 'cena'], dayIndex)}
                     </div>
                 </div>
             `;

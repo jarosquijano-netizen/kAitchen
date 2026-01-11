@@ -754,6 +754,149 @@ def get_menu_day_rating():
             'error': str(e)
         }), 400
 
+@app.route('/api/menu/regenerate-meal', methods=['POST'])
+def regenerate_individual_meal():
+    """Regenerate a specific meal for a specific day"""
+    try:
+        data = request.json
+        week_start_date = data.get('week_start_date')
+        day_index = data.get('day_index')
+        day_name = data.get('day_name')
+        meal_type = data.get('meal_type')  # 'desayuno', 'comida', 'merienda', 'cena'
+        current_menu_data = data.get('current_menu_data')
+        
+        if not all([week_start_date, day_name is not None, day_index is not None, meal_type]):
+            return jsonify({
+                'success': False,
+                'error': 'Faltan parámetros requeridos'
+            }), 400
+        
+        # Get current menu
+        menu = db.get_menu_by_week_start(week_start_date)
+        if not menu:
+            return jsonify({
+                'success': False,
+                'error': 'Menú no encontrado'
+            }), 404
+        
+        # Get family profiles
+        adults = db.get_all_adults()
+        children = db.get_all_children()
+        
+        if not adults and not children:
+            return jsonify({
+                'success': False,
+                'error': 'Debes añadir al menos un perfil familiar primero'
+            }), 400
+        
+        # Get recipes
+        recipes = db.get_all_recipes()
+        
+        # Get menu preferences
+        menu_prefs = db.get_menu_preferences()
+        preferences = {
+            'include_weekend': menu_prefs.get('include_weekend', True),
+            'include_breakfast': menu_prefs.get('include_breakfast', True),
+            'include_lunch': menu_prefs.get('include_lunch', True),
+            'include_dinner': menu_prefs.get('include_dinner', True),
+            'excluded_days': menu_prefs.get('excluded_days', [])
+        }
+        
+        # Get historical ratings for learning
+        historical_ratings = db.get_all_menu_ratings(limit=30)
+        
+        # Generate menu for single meal
+        gen = get_menu_generator()
+        
+        # Start with existing menu data
+        menu_data = menu['menu_data'] if isinstance(menu['menu_data'], dict) else json.loads(menu['menu_data'])
+        
+        # Determine target group (adultos or ninos) based on current day data
+        target_group = None
+        if (menu_data.get('menu_adultos', {}).get('dias', {}).get(day_name, {}).get(meal_type)):
+            target_group = 'adultos'
+        elif (menu_data.get('menu_ninos', {}).get('dias', {}).get(day_name, {}).get(meal_type)):
+            target_group = 'ninos'
+        
+        if not target_group:
+            return jsonify({
+                'success': False,
+                'error': f'No se encontró la comida {meal_type} para el día {day_name}'
+            }), 404
+        
+        # Generate for the specific group
+        if target_group == 'adultos':
+            result = gen.generate_single_day_menu(
+                adults=adults,
+                children=[],
+                recipes=recipes,
+                preferences=preferences,
+                day_name=day_name,
+                menu_type='adultos',
+                specific_meal=meal_type,  # Only generate this specific meal
+                historical_ratings=historical_ratings
+            )
+            
+            if result['success'] and 'day_menu' in result and meal_type in result['day_menu']:
+                if 'menu_adultos' not in menu_data:
+                    menu_data['menu_adultos'] = {'dias': {}}
+                if 'dias' not in menu_data['menu_adultos']:
+                    menu_data['menu_adultos']['dias'] = {}
+                if day_name not in menu_data['menu_adultos']['dias']:
+                    menu_data['menu_adultos']['dias'][day_name] = {}
+                menu_data['menu_adultos']['dias'][day_name][meal_type] = result['day_menu'][meal_type]
+        
+        elif target_group == 'ninos':
+            result = gen.generate_single_day_menu(
+                adults=[],
+                children=children,
+                recipes=recipes,
+                preferences=preferences,
+                day_name=day_name,
+                menu_type='ninos',
+                specific_meal=meal_type,  # Only generate this specific meal
+                historical_ratings=historical_ratings
+            )
+            
+            if result['success'] and 'day_menu' in result and meal_type in result['day_menu']:
+                if 'menu_ninos' not in menu_data:
+                    menu_data['menu_ninos'] = {'dias': {}}
+                if 'dias' not in menu_data['menu_ninos']:
+                    menu_data['menu_ninos']['dias'] = {}
+                if day_name not in menu_data['menu_ninos']['dias']:
+                    menu_data['menu_ninos']['dias'][day_name] = {}
+                menu_data['menu_ninos']['dias'][day_name][meal_type] = result['day_menu'][meal_type]
+        
+        # Save updated menu
+        metadata = menu.get('metadata', {})
+        if isinstance(metadata, str):
+            try:
+                metadata = json.loads(metadata)
+            except:
+                metadata = {}
+        
+        # Update metadata
+        metadata['last_regenerated_meal'] = f'{day_name}_{meal_type}'
+        metadata['last_regenerated_date'] = datetime.now().isoformat()
+        
+        db.save_weekly_menu(week_start_date, menu_data, metadata)
+        
+        return jsonify({
+            'success': True,
+            'message': f'{meal_type} regenerado para {day_name}',
+            'data': {
+                'menu_data': menu_data
+            }
+        })
+        
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 400
+
 @app.route('/api/menu/regenerate-day', methods=['POST'])
 def regenerate_menu_day():
     """Regenerate menu for a specific day (both adults and children)"""

@@ -174,6 +174,7 @@ class MenuGenerator:
                                 preferences: Optional[Dict] = None,
                                 day_name: str = 'lunes',
                                 menu_type: str = 'adultos',
+                                specific_meal: Optional[str] = None,
                                 historical_ratings: Optional[List[Dict]] = None) -> Dict:
         """
         Generate menu for a single day (adults or children only)
@@ -185,13 +186,14 @@ class MenuGenerator:
             preferences: Optional additional preferences
             day_name: Day name (lunes, martes, etc.)
             menu_type: 'adultos' or 'ninos'
+            specific_meal: Optional specific meal to generate (desayuno, comida, merienda, cena)
             historical_ratings: Optional historical ratings for learning
         
         Returns:
             Dictionary with day menu
         """
         # Build prompt for single day
-        prompt = self._build_single_day_prompt(adults, children, recipes, preferences, day_name, menu_type, historical_ratings)
+        prompt = self._build_single_day_prompt(adults, children, recipes, preferences, day_name, menu_type, specific_meal, historical_ratings)
         
         try:
             print(f"[MenuGenerator] Generating single day menu for {day_name} ({menu_type})...")
@@ -238,42 +240,53 @@ class MenuGenerator:
                                 preferences: Optional[Dict],
                                 day_name: str,
                                 menu_type: str,
+                                specific_meal: Optional[str] = None,
                                 historical_ratings: Optional[List[Dict]] = None) -> str:
         """Build prompt for single day menu generation"""
         
-        prompt = f"""Eres un nutricionista y chef experto. Genera UN SOLO DÍA de menú para {menu_type}.
+        if specific_meal:
+            prompt = f"""Eres un nutricionista y chef experto. Genera UNA SOLA COMIDA para {menu_type}.
+
+**DÍA:** {day_name.capitalize()}
+**TIPO:** {menu_type.capitalize()}
+**COMIDA ESPECÍFICA:** {specific_meal.upper()}
+
+"""
+        else:
+            prompt = f"""Eres un nutricionista y chef experto. Genera UN SOLO DÍA de menú para {menu_type}.
 
 **DÍA:** {day_name.capitalize()}
 **TIPO:** {menu_type.capitalize()}
 
 """
         
-        # Add family profiles (simplified)
-        if menu_type == 'adultos' and adults:
-            prompt += "**PERFILES DE ADULTOS:**\n\n"
-            for adult in adults:
-                prompt += f"- {adult.get('nombre', 'Sin nombre')}: "
-                if adult.get('alergias'):
-                    prompt += f"ALERGIAS: {adult['alergias']}. "
-                if adult.get('ingredientes_favoritos'):
-                    prompt += f"Le gusta: {adult['ingredientes_favoritos']}. "
-                if adult.get('ingredientes_no_gustan'):
-                    prompt += f"No le gusta: {adult['ingredientes_no_gustan']}. "
-                prompt += "\n"
-        elif menu_type == 'ninos' and children:
-            prompt += "**PERFILES DE NIÑOS:**\n\n"
-            for child in children:
-                prompt += f"- {child.get('nombre', 'Sin nombre')}: "
-                if child.get('alergias'):
-                    prompt += f"ALERGIAS: {child['alergias']}. "
-                if child.get('ingredientes_favoritos'):
-                    prompt += f"Le encanta: {child['ingredientes_favoritos']}. "
-                if child.get('ingredientes_rechaza'):
-                    prompt += f"RECHAZA: {child['ingredientes_rechaza']}. "
-                prompt += "\n"
+        # Add family profiles (simplified) - only if not generating specific meal
+        if not specific_meal:
+            if menu_type == 'adultos' and adults:
+                prompt += "**PERFILES DE ADULTOS:**\n\n"
+                for adult in adults:
+                    prompt += f"- {adult.get('nombre', 'Sin nombre')}: "
+                    if adult.get('alergias'):
+                        prompt += f"ALERGIAS: {adult['alergias']}. "
+                    if adult.get('ingredientes_favoritos'):
+                        prompt += f"Le gusta: {adult['ingredientes_favoritos']}. "
+                    if adult.get('ingredientes_no_gustan'):
+                        prompt += f"No le gusta: {adult['ingredientes_no_gustan']}. "
+                    prompt += "\n"
+            elif menu_type == 'ninos' and children:
+                prompt += "**PERFILES DE NIÑOS:**\n\n"
+                for child in children:
+                    prompt += f"- {child.get('nombre', 'Sin nombre')}: "
+                    if child.get('alergias'):
+                        prompt += f"ALERGIAS: {child['alergias']}. "
+                    if child.get('ingredientes_favoritos'):
+                        prompt += f"Le encanta: {child['ingredientes_favoritos']}. "
+                    if child.get('ingredientes_rechaza'):
+                        prompt += f"RECHAZA: {child['ingredientes_rechaza']}. "
+                    prompt += "\n"
         
-        # Add historical ratings
-        if historical_ratings:
+        # Add historical ratings - only if not generating specific meal
+        if not specific_meal and historical_ratings:
             prompt += "\n**⭐ APRENDE DE ESTOS RATINGS:**\n\n"
             high_ratings = [r for r in historical_ratings if r.get('rating', 0) >= 4 and r.get('menu_type') == menu_type]
             low_ratings = [r for r in historical_ratings if r.get('rating', 0) <= 2 and r.get('menu_type') == menu_type]
@@ -309,19 +322,51 @@ class MenuGenerator:
                 prompt += "\n"
         
         # Add meal types
-        if menu_type == 'adultos':
-            prompt += "**GENERA estas comidas para este día:**\n"
-            prompt += "- desayuno\n"
-            prompt += "- comida\n"
-            prompt += "- cena\n\n"
+        if specific_meal:
+            prompt += f"""**GENERA SOLO esta comida:**\n
+- {specific_meal}
+
+**FORMATO JSON (solo la comida solicitada):**
+{{
+  "{specific_meal}": {{
+    "nombre": "Nombre del plato",
+    "ingredientes": ["ing1", "ing2"],
+    "tiempo_prep": 15,
+    "calorias": 350,
+    "nutrientes": {{
+      "proteinas": "20g",
+      "carbohidratos": "40g",
+      "grasas": "12g"
+    }},
+    "instrucciones": "Pasos de preparación",
+    "receta_base": "Nombre o 'Original'",
+    "porque_seleccionada": "Por qué es buena para esta familia"
+  }}
+}}
+
+**IMPORTANTE:**
+- Respeta TODAS las alergias e intolerancias
+- Usa ingredientes que les gustan
+- Evita ingredientes que rechazan
+- Genera SOLO la comida {specific_meal}, no otras comidas
+- Genera SOLO el JSON, sin texto adicional
+
+**GENERA LA COMIDA AHORA:**
+"""
         else:
-            prompt += "**GENERA estas comidas para este día:**\n"
-            prompt += "- desayuno\n"
-            prompt += "- comida\n"
-            prompt += "- merienda\n"
-            prompt += "- cena\n\n"
-        
-        prompt += """**FORMATO JSON (solo el día solicitado):**
+            if menu_type == 'adultos':
+                prompt += "**GENERA estas comidas para este día:**\n"
+                prompt += "- desayuno\n"
+                prompt += "- comida\n"
+                prompt += "- cena\n\n"
+            else:
+                prompt += "**GENERA estas comidas para este día:**\n"
+                prompt += "- desayuno\n"
+                prompt += "- comida\n"
+                prompt += "- merienda\n"
+                prompt += "- cena\n\n"
+            
+            prompt += """**FORMATO JSON (solo el día solicitado):**
 
 {
   "desayuno": {
