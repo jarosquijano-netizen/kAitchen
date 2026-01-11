@@ -627,6 +627,14 @@ function getMondayOfWeek(date) {
     return new Date(mondayYear, mondayMonth, mondayDate, 0, 0, 0, 0);
 }
 
+// Toggle sidebar collapse/expand
+function toggleSidebar() {
+    const sidebar = document.querySelector('.sidebar');
+    if (sidebar) {
+        sidebar.style.transform = sidebar.style.transform === 'translateX(-100%)' ? 'translateX(0)' : 'translateX(-100%)';
+    }
+}
+
 // Helper function to format week start date
 function formatWeekStart(date) {
     const d = new Date(date);
