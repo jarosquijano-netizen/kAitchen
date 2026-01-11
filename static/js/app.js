@@ -4625,6 +4625,12 @@ document.addEventListener('DOMContentLoaded', () => {
     try {
         loadFamilyProfiles();
         console.log('[Init] Family profiles loading initiated');
+        
+        // Since menu tab is active by default, load current week menu
+        setTimeout(() => {
+            console.log('[Init] Loading current week menu (menu tab is active by default)');
+            loadCurrentWeekMenu();
+        }, 1000); // Small delay to ensure family profiles are loaded first
     } catch (error) {
         console.error('[Init] Error loading family profiles:', error);
     }
