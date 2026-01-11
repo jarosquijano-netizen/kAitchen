@@ -2,7 +2,9 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=1920, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="description" content="k[AI]tchen TV Display - Weekly Menu View">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <title>k[AI]tchen · Weekly Menu</title>
     <!-- Version: Zenith Design v2.0 - Force cache refresh -->
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🍳</text></svg>">
@@ -280,7 +282,7 @@
         }
 
         .menu-panel {
-            /* Layout only - NO visual styling, all styles are inline in HTML */
+            /* Layout and visual styling */
             overflow-y: auto;
             overflow-x: hidden;
             min-height: 0;
@@ -291,13 +293,43 @@
             position: relative;
             -webkit-overflow-scrolling: touch;
             overscroll-behavior: contain;
-            /* Ensure content is scrollable */
             flex: 1 1 auto;
-            /* Smooth scrolling for TV */
             scroll-behavior: smooth;
+            padding: 1.5rem;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 16px;
         }
-
-        /* All visual styling removed - using only inline styles in HTML */
+        
+        /* Base font sizes for menu content */
+        .menu-panel h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem;
+            color: var(--white);
+            margin-bottom: 1.5rem;
+            font-weight: 700;
+        }
+        
+        .menu-panel h3 {
+            font-family: 'Inter', sans-serif;
+            font-size: 1.4rem;
+            color: var(--white);
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+        
+        .menu-panel p {
+            font-family: 'Inter', sans-serif;
+            font-size: 1.1rem;
+            color: var(--silver);
+            margin-bottom: 0.75rem;
+            line-height: 1.5;
+        }
+        
+        .menu-panel span {
+            font-family: 'Inter', sans-serif;
+            font-size: 1rem;
+            color: var(--silver);
+        }
 
         /* OLD STYLES REMOVED - All visual styling is now inline in HTML */
 
@@ -671,38 +703,66 @@
             .week-day-name {
                 font-size: 1.8rem;
             }
-
-            .week-day-date {
-                font-size: 2rem;
-            }
-
+            
             .main-content {
-                gap: 2rem;
-            }
-
-            .meal-grid {
-                gap: 1.5rem;
-            }
-
-            /* Increase font sizes in meal cards for better readability */
-            .menu-panel h2 {
-                font-size: 2.25rem !important;
+                gap: 1rem;
+                height: calc(100vh - 200px);
             }
             
             .menu-panel {
-                padding: 2rem;
-            }
-            
-            .week-day-card {
-                min-height: 280px;
-            }
-            
-            .meal-item {
+                padding: 2.5rem;
                 font-size: 1.1rem;
             }
             
+            .menu-panel h2 {
+                font-size: 2.5rem !important;
+            }
+            
+            .menu-panel h3 {
+                font-size: 1.8rem !important;
+            }
+            
+            .menu-panel p {
+                font-size: 1.2rem !important;
+            }
+            
+            .menu-panel span[style*="font-size"] {
+                font-size: 1.2rem !important;
+            }
+            
+            .week-day-card {
+                min-height: 320px;
+                padding: 1.5rem;
+            }
+            
+            .meal-item {
+                font-size: 1.3rem;
+                line-height: 1.4;
+                padding: 0.8rem;
+            }
+            
+            .meal-grid {
+                gap: 1.5rem;
+            }
+            
             .clock {
-                font-size: 3.5rem;
+                font-size: 4rem;
+            }
+            
+            .date-display {
+                font-size: 1.5rem;
+            }
+            
+            .weather {
+                font-size: 2rem;
+            }
+            
+            .week-day-name {
+                font-size: 2.2rem;
+            }
+            
+            .week-day-date {
+                font-size: 2.4rem;
             }
         }
         
@@ -713,23 +773,64 @@
             }
             
             .main-content {
-                gap: 1rem;
+                gap: 1.5rem;
+                height: calc(100vh - 220px);
             }
             
             .menu-panel {
-                padding: 2.5rem;
+                padding: 3rem;
+                font-size: 1.3rem;
+            }
+            
+            .menu-panel h2 {
+                font-size: 3rem !important;
+            }
+            
+            .menu-panel h3 {
+                font-size: 2.2rem !important;
+            }
+            
+            .menu-panel p {
+                font-size: 1.5rem !important;
+            }
+            
+            .menu-panel span[style*="font-size"] {
+                font-size: 1.5rem !important;
             }
             
             .week-day-card {
-                min-height: 320px;
+                min-height: 380px;
+                padding: 2rem;
             }
             
             .meal-item {
-                font-size: 1.2rem;
+                font-size: 1.5rem;
+                line-height: 1.5;
+                padding: 1rem;
+            }
+            
+            .meal-grid {
+                gap: 2rem;
             }
             
             .clock {
-                font-size: 4rem;
+                font-size: 5rem;
+            }
+            
+            .date-display {
+                font-size: 1.8rem;
+            }
+            
+            .weather {
+                font-size: 2.5rem;
+            }
+            
+            .week-day-name {
+                font-size: 2.8rem;
+            }
+            
+            .week-day-date {
+                font-size: 3rem;
             }
         }
 
