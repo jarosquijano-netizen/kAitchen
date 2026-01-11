@@ -2262,7 +2262,7 @@ ${contenido || 'No hay contenido disponible'}
     };
     
     // Helper function to render a beautiful meal card
-    function renderMealCard(meal, comidaType) {
+    function renderMealCard(meal, comidaType, dayIndex) {
         const mealInfo = mealIcons[comidaType] || { emoji: '🍽️', color: '#D4AF37', name: comidaType };
         const borderColor = mealInfo.color;
         
