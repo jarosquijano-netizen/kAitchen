@@ -4589,11 +4589,26 @@ function showNotification(message) {
 
 // Switch tab helper
 function switchTab(tabName) {
-    document.querySelectorAll('.tab').forEach(t => {
-        if (t.dataset.tab === tabName) {
-            t.click();
-        }
+    // Remove active class from all sidebar items
+    document.querySelectorAll('.sidebar-item').forEach(item => {
+        item.classList.remove('active');
     });
+    
+    // Add active class to clicked item
+    document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+    
+    // Hide all tab contents
+    document.querySelectorAll('.tab-content').forEach(content => {
+        content.classList.remove('active');
+    });
+    
+    // Show selected tab content
+    const targetTab = document.getElementById(`${tabName}-tab`);
+    if (targetTab) {
+        targetTab.classList.add('active');
+    }
+    
+    console.log(`[SwitchTab] Switched to ${tabName} tab`);
 }
 
 // Menu data storage (kept for potential future use, but no longer used for display)
