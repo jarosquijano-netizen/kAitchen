@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=1920, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>k[AI]tchen · Weekly Menu</title>
     <!-- Version: Zenith Design v2.0 - Force cache refresh -->
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🍳</text></svg>">
@@ -688,13 +688,48 @@
             .menu-panel h2 {
                 font-size: 2.25rem !important;
             }
-
-            .menu-panel p {
-                font-size: 1rem !important;
+            
+            .menu-panel {
+                padding: 2rem;
             }
-
-            .menu-panel span[style*="font-size"] {
-                font-size: 1rem !important;
+            
+            .week-day-card {
+                min-height: 280px;
+            }
+            
+            .meal-item {
+                font-size: 1.1rem;
+            }
+            
+            .clock {
+                font-size: 3.5rem;
+            }
+        }
+        
+        /* Extra large screens (TV/Monitor 27"+) */
+        @media (min-width: 2500px) {
+            .tv-container {
+                max-width: 2560px;
+            }
+            
+            .main-content {
+                gap: 1rem;
+            }
+            
+            .menu-panel {
+                padding: 2.5rem;
+            }
+            
+            .week-day-card {
+                min-height: 320px;
+            }
+            
+            .meal-item {
+                font-size: 1.2rem;
+            }
+            
+            .clock {
+                font-size: 4rem;
             }
         }
 
