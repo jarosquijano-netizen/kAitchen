@@ -98,6 +98,58 @@
             transition: transform 0.3s ease;
         }
         
+        .logo-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin: 2rem 0;
+            position: relative;
+        }
+        
+        .breathing-ring {
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            border: 3px solid rgba(212, 175, 55, 0.3);
+            border-radius: 50%;
+            animation: breathe 4s ease-in-out infinite;
+        }
+        
+        .logo-k {
+            font-family: 'Playfair Display', serif;
+            font-size: 3rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, rgba(212, 175, 55, 0.15) 0%, rgba(212, 175, 55, 0.25) 100%);
+            border: 1px solid rgba(212, 175, 55, 0.4);
+            color: var(--gold);
+            font-weight: 600;
+            transform: translateY(-1px);
+            box-shadow: 
+                0 0 20px rgba(212, 175, 55, 0.3),
+                0 0 40px rgba(212, 175, 55, 0.15),
+                0 8px 25px -8px rgba(212, 175, 55, 0.4);
+            position: relative;
+            z-index: 10;
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+        }
+        
+        @keyframes breathe {
+            0%, 100% {
+                transform: scale(1);
+                opacity: 0.3;
+            }
+            50% {
+                transform: scale(1.1);
+                opacity: 0.6;
+            }
+        }
+        
         .sidebar-header {
             background: rgba(255, 255, 255, 0.05);
             padding: 1.5rem;
@@ -250,6 +302,62 @@
             font-weight: 700;
             margin-bottom: 2rem;
             color: var(--white);
+        }
+
+        .sidebar-item {
+            display: flex;
+            align-items: center;
+            padding: 0.875rem 1rem;
+            margin: 0.25rem 0;
+            border-radius: 8px;
+            text-decoration: none;
+            color: rgba(255, 255, 255, 0.8);
+            transition: all 0.2s ease;
+            position: relative;
+            overflow: hidden;
+            font-size: 0.9rem;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            text-transform: capitalize;
+            width: 100%;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: transparent;
+        }
+        
+        .sidebar-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--white);
+            transform: translateX(4px);
+        }
+        
+        .sidebar-item.active {
+            background: linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%);
+            border: 1px solid rgba(212, 175, 55, 0.4);
+            color: var(--gold);
+            font-weight: 600;
+            transform: translateY(-1px);
+            box-shadow: 
+                0 0 20px rgba(212, 175, 55, 0.3),
+                0 0 0 1px rgba(255, 255, 255, 0.05),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            position: relative;
+        }
+        
+        .sidebar-item.active::after {
+            content: '';
+            position: absolute;
+            left: -8px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 4px;
+            height: 60%;
+            background: linear-gradient(180deg, 
+                transparent 0%, 
+                var(--gold) 20%, 
+                var(--gold) 80%, 
+                transparent 100%);
+            border-radius: 2px;
+            box-shadow: 0 0 10px rgba(212, 175, 55, 0.6);
         }
 
         .btn {
@@ -1062,25 +1170,16 @@
         </div>
     </header>
 
-    <!-- WEB APPLICATION SIDEBAR -->
-    <aside class="sidebar">
-        <!-- Header -->
-        <div class="sidebar-header">
-            <a href="#" class="sidebar-logo">
-                <span>K</span>
-                <span style="font-size: 1rem;">[AI]tchen</span>
-            </a>
-            <button style="background: none; border: none; color: rgba(255, 255, 255, 0.6); cursor: pointer;" onclick="toggleSidebar()">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M3 12h18m-9-9h18m-9-9v6m-9-9h18"/>
-                </svg>
-            </button>
+    <!-- VERTICAL SIDEBAR NAVIGATION -->
+    <div class="sidebar">
+        <!-- Logo "K" with breathing ring -->
+        <div class="logo-container">
+            <div class="breathing-ring"></div>
+            <div class="logo-k">K</div>
         </div>
         
-        <!-- Navigation -->
-        <nav class="sidebar-nav">
+        <div class="sidebar-nav">
             <div class="sidebar-section">
-                <div class="sidebar-section-title">Navigation</div>
                 <a href="#" class="sidebar-item active" data-tab="family" onclick="switchTab('family')">
                     <span>👨‍👩‍👧‍👦</span>
                     <span>Family</span>
@@ -1102,16 +1201,16 @@
                     <span>Settings</span>
                 </a>
             </div>
-        </nav>
+        </div>
         
-        <!-- Footer with Clock -->
+        <!-- Clock Widget -->
         <div class="sidebar-footer">
             <div class="clock-widget">
                 <div id="clock-time">00:00</div>
                 <div id="clock-date">Loading...</div>
             </div>
         </div>
-    </aside>
+    </div>
 
     <div class="container" style="padding-left: 300px; transition: padding-left 0.3s ease;">
         <div id="alerts"></div>
