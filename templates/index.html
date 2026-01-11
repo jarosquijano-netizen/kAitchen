@@ -307,6 +307,7 @@
         .sidebar-item {
             display: flex;
             align-items: center;
+            gap: 0.75rem;
             padding: 0.875rem 1rem;
             margin: 0.25rem 0;
             border-radius: 8px;
@@ -324,16 +325,28 @@
             background: transparent;
         }
         
+        .sidebar-item svg {
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+        }
+        
         .sidebar-item:hover {
             background: rgba(255, 255, 255, 0.1);
             color: var(--white);
             transform: translateX(4px);
         }
         
+        .sidebar-item:hover svg {
+            color: var(--gold);
+            stroke: var(--gold);
+            filter: drop-shadow(0 0 8px rgba(212, 175, 55, 0.6));
+            transform: scale(1.1);
+        }
+        
         .sidebar-item.active {
             background: linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%);
             border: 1px solid rgba(212, 175, 55, 0.4);
-            color: var(--gold);
+            color: var(--black);
             font-weight: 600;
             transform: translateY(-1px);
             box-shadow: 
@@ -341,6 +354,12 @@
                 0 0 0 1px rgba(255, 255, 255, 0.05),
                 inset 0 1px 0 rgba(255, 255, 255, 0.1);
             position: relative;
+        }
+        
+        .sidebar-item.active svg {
+            color: var(--black);
+            stroke: var(--black);
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
         }
         
         .sidebar-item.active::after {
@@ -1181,23 +1200,42 @@
         <div class="sidebar-nav">
             <div class="sidebar-section">
                 <a href="#" class="sidebar-item active" data-tab="family" onclick="switchTab('family')">
-                    <span>👨‍👩‍👧‍👦</span>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="9" cy="7" r="4"></circle>
+                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                    </svg>
                     <span>Family</span>
                 </a>
                 <a href="#" class="sidebar-item" data-tab="recipes" onclick="switchTab('recipes')">
-                    <span>📚</span>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
+                        <path d="M2 17l10 5 10-5M2 12l10 5 10-5"></path>
+                    </svg>
                     <span>Recipes</span>
                 </a>
                 <a href="#" class="sidebar-item" data-tab="menu" onclick="switchTab('menu')">
-                    <span>🍽️</span>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"></path>
+                        <path d="M7 2v20"></path>
+                        <path d="M21 15V2v0a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"></path>
+                    </svg>
                     <span>Weekly Menu</span>
                 </a>
                 <a href="#" class="sidebar-item" data-tab="shopping" onclick="switchTab('shopping')">
-                    <span>🛒</span>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="9" cy="21" r="1"></circle>
+                        <circle cx="20" cy="21" r="1"></circle>
+                        <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                    </svg>
                     <span>Shopping List</span>
                 </a>
                 <a href="#" class="sidebar-item" data-tab="settings" onclick="switchTab('settings')">
-                    <span>⚙️</span>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="3"></circle>
+                        <path d="M12 1v6m0 6v6m4.22-13.22l4.24 4.24M1.54 9.96l4.24 4.24M12 23v-6m0-6V1m-4.22 13.22l-4.24-4.24M18.46 14.04l-4.24-4.24"></path>
+                    </svg>
                     <span>Settings</span>
                 </a>
             </div>
