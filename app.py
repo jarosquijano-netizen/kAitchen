@@ -756,24 +756,18 @@ def get_menu_day_rating():
 
 @app.route('/api/menu/regenerate-day', methods=['POST'])
 def regenerate_menu_day():
-    """Regenerate menu for a specific day (adults or children)"""
+    """Regenerate menu for a specific day (both adults and children)"""
     try:
         data = request.json
-        menu_id = data.get('menu_id')
         week_start_date = data.get('week_start_date')
+        day_index = data.get('day_index')
         day_name = data.get('day_name')
-        menu_type = data.get('menu_type')  # 'adultos' or 'ninos'
+        current_menu_data = data.get('current_menu_data')
         
-        if not all([menu_id, week_start_date, day_name, menu_type]):
+        if not all([week_start_date, day_name is not None, day_index is not None]):
             return jsonify({
                 'success': False,
                 'error': 'Faltan parámetros requeridos'
-            }), 400
-        
-        if menu_type not in ['adultos', 'ninos']:
-            return jsonify({
-                'success': False,
-                'error': 'menu_type debe ser "adultos" o "ninos"'
             }), 400
         
         # Get current menu
@@ -810,35 +804,49 @@ def regenerate_menu_day():
         # Get historical ratings for learning
         historical_ratings = db.get_all_menu_ratings(limit=30)
         
-        # Generate menu for single day
+        # Generate menu for single day for both adults and children
         gen = get_menu_generator()
-        result = gen.generate_single_day_menu(
-            adults=adults,
-            children=children,
-            recipes=recipes,
-            preferences=preferences,
-            day_name=day_name,
-            menu_type=menu_type,
-            historical_ratings=historical_ratings
-        )
         
-        if not result['success']:
-            return jsonify(result), 400
+        # Start with existing menu data
+        menu_data = menu['menu_data'] if isinstance(menu['menu_data'], dict) else json.loads(menu['menu_data'])
         
-        # Update the menu in database
-        menu_data = menu['menu_data']
-        if menu_type == 'adultos':
-            if 'menu_adultos' not in menu_data:
-                menu_data['menu_adultos'] = {'dias': {}}
-            if 'dias' not in menu_data['menu_adultos']:
-                menu_data['menu_adultos']['dias'] = {}
-            menu_data['menu_adultos']['dias'][day_name] = result['day_menu']
-        else:  # ninos
-            if 'menu_ninos' not in menu_data:
-                menu_data['menu_ninos'] = {'dias': {}}
-            if 'dias' not in menu_data['menu_ninos']:
-                menu_data['menu_ninos']['dias'] = {}
-            menu_data['menu_ninos']['dias'][day_name] = result['day_menu']
+        # Generate for adults if they exist
+        if adults:
+            result_adults = gen.generate_single_day_menu(
+                adults=adults,
+                children=[],  # Only adults
+                recipes=recipes,
+                preferences=preferences,
+                day_name=day_name,
+                menu_type='adultos',
+                historical_ratings=historical_ratings
+            )
+            
+            if result_adults['success']:
+                if 'menu_adultos' not in menu_data:
+                    menu_data['menu_adultos'] = {'dias': {}}
+                if 'dias' not in menu_data['menu_adultos']:
+                    menu_data['menu_adultos']['dias'] = {}
+                menu_data['menu_adultos']['dias'][day_name] = result_adults['day_menu']
+        
+        # Generate for children if they exist
+        if children:
+            result_children = gen.generate_single_day_menu(
+                adults=[],  # Only children
+                children=children,
+                recipes=recipes,
+                preferences=preferences,
+                day_name=day_name,
+                menu_type='ninos',
+                historical_ratings=historical_ratings
+            )
+            
+            if result_children['success']:
+                if 'menu_ninos' not in menu_data:
+                    menu_data['menu_ninos'] = {'dias': {}}
+                if 'dias' not in menu_data['menu_ninos']:
+                    menu_data['menu_ninos']['dias'] = {}
+                menu_data['menu_ninos']['dias'][day_name] = result_children['day_menu']
         
         # Save updated menu
         metadata = menu.get('metadata', {})
@@ -848,12 +856,18 @@ def regenerate_menu_day():
             except:
                 metadata = {}
         
+        # Update metadata
+        metadata['last_regenerated_day'] = day_name
+        metadata['last_regenerated_date'] = datetime.now().isoformat()
+        
         db.save_weekly_menu(week_start_date, menu_data, metadata)
         
         return jsonify({
             'success': True,
-            'message': f'Menú regenerado para {day_name} ({menu_type})',
-            'data': result['day_menu']
+            'message': f'Menú regenerado para {day_name}',
+            'data': {
+                'menu_data': menu_data
+            }
         })
         
     except Exception as e:

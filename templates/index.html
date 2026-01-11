@@ -1377,9 +1377,14 @@ https://example.com/recipe3"></textarea>
             <div class="card">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
                     <h2 style="margin: 0;">AI Weekly Menu Generator</h2>
-                    <button class="btn btn-primary" onclick="generateMenu()" id="generate-menu-btn" style="font-size: 1.1rem; padding: 1.25rem 3rem;">
-                        Generate Menu with AI
-                    </button>
+                    <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                        <button class="btn btn-primary" onclick="generateMenu()" id="generate-menu-btn" style="font-size: 1.1rem; padding: 1.25rem 3rem;">
+                            Generate Menu with AI
+                        </button>
+                        <button class="btn btn-secondary" onclick="regenerateIndividualMenu()" id="regenerate-menu-btn" style="font-size: 1rem; padding: 1.25rem 2rem;" title="Regenerate current day's menu">
+                            🔄 Regenerate Day
+                        </button>
+                    </div>
                 </div>
                 
                 <!-- Week Navigation - Simplified -->

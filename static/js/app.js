@@ -955,6 +955,84 @@ async function generateMenu() {
     }
 }
 
+// Regenerate individual menu for current day only
+async function regenerateIndividualMenu() {
+    const loading = document.getElementById('menu-loading');
+    const display = document.getElementById('menu-display');
+    
+    // Check if there's a current menu and selected day
+    if (!window.currentMenuDataForDays || window.selectedDayIndex === undefined) {
+        showAlert('Por favor, primero genera o carga un menú semanal completo', 'warning');
+        return;
+    }
+    
+    const currentDayIndex = window.selectedDayIndex;
+    const dias = ['lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado', 'domingo'];
+    const currentDay = dias[currentDayIndex];
+    
+    if (!currentDay) {
+        showAlert('Día no válido seleccionado', 'error');
+        return;
+    }
+    
+    loading.classList.add('show');
+    
+    try {
+        console.log(`[RegenerateDay] Regenerating menu for day: ${currentDay} (index: ${currentDayIndex})`);
+        
+        const response = await fetch('/api/menu/regenerate-day', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                week_start_date: currentViewingWeek || getCurrentWeekStart(),
+                day_index: currentDayIndex,
+                day_name: currentDay,
+                current_menu_data: window.currentMenuDataForDays
+            })
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            showAlert(`Menú del día ${currentDay.charAt(0).toUpperCase() + currentDay.slice(1)} regenerado exitosamente`, 'success');
+            
+            // Update the menu data with the regenerated day
+            if (result.data && result.data.menu_data) {
+                // Merge the regenerated day into the existing menu data
+                const updatedMenuData = { ...window.currentMenuDataForDays };
+                
+                // Update both adults and children menus if they exist
+                if (result.data.menu_data.menu_adultos && result.data.menu_data.menu_adultos.dias && result.data.menu_data.menu_adultos.dias[currentDay]) {
+                    if (!updatedMenuData.menu_adultos) updatedMenuData.menu_adultos = { dias: {} };
+                    if (!updatedMenuData.menu_adultos.dias) updatedMenuData.menu_adultos.dias = {};
+                    updatedMenuData.menu_adultos.dias[currentDay] = result.data.menu_data.menu_adultos.dias[currentDay];
+                }
+                
+                if (result.data.menu_data.menu_ninos && result.data.menu_data.menu_ninos.dias && result.data.menu_data.menu_ninos.dias[currentDay]) {
+                    if (!updatedMenuData.menu_ninos) updatedMenuData.menu_ninos = { dias: {} };
+                    if (!updatedMenuData.menu_ninos.dias) updatedMenuData.menu_ninos.dias = {};
+                    updatedMenuData.menu_ninos.dias[currentDay] = result.data.menu_data.menu_ninos.dias[currentDay];
+                }
+                
+                // Update global menu data and re-render
+                window.currentMenuDataForDays = updatedMenuData;
+                
+                // Re-render the menu to show the updated day
+                displayMenu(updatedMenuData);
+            }
+        } else {
+            showAlert('Error al regenerar el menú del día: ' + (result.error || 'Error desconocido'), 'error');
+        }
+    } catch (error) {
+        console.error('Error regenerating individual menu:', error);
+        showAlert('Error al regenerar el menú del día: ' + (error.message || 'Error de conexión'), 'error');
+    } finally {
+        loading.classList.remove('show');
+    }
+}
+
 // Load current week menu (default) - with fallback to latest
 async function loadCurrentWeekMenu() {
     const display = document.getElementById('menu-display');
