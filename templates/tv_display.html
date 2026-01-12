@@ -436,9 +436,9 @@
         /* OLD STYLES REMOVED - All visual styling is now inline in HTML */
 
         .meal-grid {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
             flex: 1;
             min-height: 0;
             width: 100%;
@@ -1392,6 +1392,9 @@
             return `https://source.unsplash.com/400x300/?food,${encodedName}`;
         }
 
+        // Store last menu data to prevent unnecessary refreshes
+        let lastMenuData = null;
+
         async function loadMenu() {
             try {
                 // Always load current week menu
@@ -1467,6 +1470,14 @@
                     currentMenuId = result.data.id;
                     currentWeekStart = result.data.week_start_date;
                     console.log('[TV] Menu loaded successfully, ID:', currentMenuId, 'Week:', currentWeekStart);
+                    
+                    // Check if menu data has changed to prevent unnecessary refreshes
+                    const menuDataString = JSON.stringify(menuData);
+                    if (lastMenuData === menuDataString) {
+                        console.log('[TV] Menu data unchanged, skipping refresh');
+                        return;
+                    }
+                    lastMenuData = menuDataString;
                     
                     // Always set selectedDay to today if not already set
                     if (!selectedDay) {
@@ -2084,8 +2095,8 @@
             // Update clock every second
             setInterval(updateDateTime, 1000);
             
-            // Auto-refresh menu every 5 minutes
-            setInterval(loadMenu, 300000);
+            // Auto-refresh menu every 10 minutes (reduced flickering)
+            setInterval(loadMenu, 600000);
         }
 
         // Rating and regeneration functions
