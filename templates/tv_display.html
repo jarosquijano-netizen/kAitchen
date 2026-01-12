@@ -1038,14 +1038,6 @@
                     </div>
                 </div>
                 
-                <!-- QR Code Section -->
-                <div class="menu-section">
-                    <div class="zenith-qr-container">
-                        <div class="zenith-qr-code" id="zenithQrCode"></div>
-                        <div class="zenith-qr-label">Today's Menu</div>
-                    </div>
-                </div>
-                
                 <!-- Clock Section (Bottom) -->
                 <div class="menu-section">
                     <div class="clock-section">
@@ -1839,7 +1831,12 @@
                     adultosHtml += `</div></div>`;
                 } else {
                     console.log('[TV] No adult day data for', selectedDay);
-                    adultosHtml = `<div class="menu-panel adults"><div style="text-align: center; padding: 4rem; color: #CBD5E0; font-size: 2rem;">No menu available</div></div>`;
+                    adultosHtml = `<div class="menu-panel adults"><div style="text-align: center; padding: 4rem;">
+                        <div class="zenith-qr-container" style="margin: 0 auto;">
+                            <div class="zenith-qr-code" id="adults-qr-${selectedDay}"></div>
+                            <div class="zenith-qr-label">Adult Menu QR</div>
+                        </div>
+                    </div></div>`;
                 }
                 } catch (error) {
                     console.error('[TV] Error in getDayDataFromMenu for adults:', error);
@@ -1914,7 +1911,12 @@
                     ninosHtml += `</div></div>`;
                 } else {
                     console.log('[TV] No child day data for', selectedDay);
-                    ninosHtml = `<div class="menu-panel children"><div style="text-align: center; padding: 4rem; color: #CBD5E0; font-size: 2rem;">No menu available</div></div>`;
+                    ninosHtml = `<div class="menu-panel children"><div style="text-align: center; padding: 4rem;">
+                        <div class="zenith-qr-container" style="margin: 0 auto;">
+                            <div class="zenith-qr-code" id="children-qr-${selectedDay}"></div>
+                            <div class="zenith-qr-label">Children Menu QR</div>
+                        </div>
+                    </div></div>`;
                 }
                 } catch (error) {
                     console.error('[TV] Error in getDayDataFromMenu for children:', error);
@@ -1946,8 +1948,7 @@
             console.log('[TV] innerHTML set successfully');
             console.log('[TV] Container children count:', container.children.length);
             
-            // Update QR code with menu information
-            generateZenithQRCode();
+            // QR code generation removed - no sidebar QR container
             
             // Force a reflow to ensure rendering
             void container.offsetHeight;
@@ -1975,7 +1976,7 @@
             
             updateDateTime();
             updateWeather();
-            generateZenithQRCode();
+            // generateZenithQRCode(); // Removed - no sidebar QR container
             updateWeekNav();
             loadMenu();
             
