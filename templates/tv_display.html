@@ -2032,9 +2032,10 @@
             // QR codes removed - using zenith style button instead
             
             let finalHtml = `
-                ${adultosHtml}
-                <div class="divider"></div>
-                ${ninosHtml}
+                <div class="meal-grid">
+                    ${adultosHtml}
+                    ${ninosHtml}
+                </div>
             `;
             
             console.log('[TV] Final HTML length:', finalHtml.length);
