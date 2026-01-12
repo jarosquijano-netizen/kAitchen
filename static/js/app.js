@@ -4621,7 +4621,7 @@ function switchTab(tabName) {
         // Load content for specific tabs
         if (tabName === 'recipes') {
             console.log('[SwitchTab] Loading recipes...');
-            // Recipes content is already in HTML, no additional loading needed
+            loadRecipes(); // Load recipes when tab is opened
         } else if (tabName === 'shopping') {
             console.log('[SwitchTab] Loading shopping list...');
             loadShoppingLists(); // Load shopping list when tab is opened
