@@ -328,6 +328,32 @@
             letter-spacing: 0.3px;
         }
 
+        /* QR Code Section (New Simple) */
+        .qr-simple-container {
+            text-align: center;
+        }
+
+        .qr-simple-code {
+            width: 60px;
+            height: 60px;
+            margin: 0 auto 0.3rem;
+            background: white;
+            border-radius: 4px;
+            padding: 2px;
+        }
+
+        .qr-simple-code canvas {
+            width: 56px !important;
+            height: 56px !important;
+        }
+
+        .qr-simple-label {
+            font-size: 0.6rem;
+            color: var(--silver);
+            text-transform: uppercase;
+            letter-spacing: 0.2px;
+        }
+
         /* Clock Section (Bottom) */
         .clock-section {
             text-align: center;
@@ -1046,19 +1072,19 @@
                     </div>
                 </div>
                 
-                <!-- QR Code Section -->
-                <div class="menu-section">
-                    <div class="zenith-qr-container">
-                        <div class="zenith-qr-code" id="zenithQrCode"></div>
-                        <div class="zenith-qr-label">Today's Menu</div>
-                    </div>
-                </div>
-                
                 <!-- Clock Section (Bottom) -->
                 <div class="menu-section">
                     <div class="clock-section">
                         <div class="clock" id="currentTime"></div>
                         <div class="date-display" id="currentDate"></div>
+                    </div>
+                </div>
+                
+                <!-- QR Code Section (New - Below Clock) -->
+                <div class="menu-section">
+                    <div class="qr-simple-container">
+                        <div class="qr-simple-code" id="simpleQrCode"></div>
+                        <div class="qr-simple-label">Menu QR</div>
                     </div>
                 </div>
             </div>
@@ -1206,6 +1232,63 @@
         // QR Code functions removed - using zenith style button instead
 
         // Get food image URL (placeholder - you can use Unsplash API)
+        // Generate Simple QR Code (New - Clean without background)
+        function generateSimpleQRCode() {
+            const qrContainer = document.getElementById('simpleQrCode');
+            if (!qrContainer || typeof QRCode === 'undefined' || !currentMenu || !selectedDay) {
+                return;
+            }
+            
+            // Build simple menu text
+            let menuText = `MENU: ${selectedDay.toUpperCase()}\n\n`;
+            
+            // Adults menu - compact format
+            if (currentMenu.menu_adultos && currentMenu.menu_adultos.dias) {
+                const adultDayData = getDayDataFromMenu(currentMenu.menu_adultos.dias, selectedDay);
+                if (adultDayData) {
+                    menuText += 'ADULTOS:\n';
+                    ['desayuno', 'comida', 'cena'].forEach(mealType => {
+                        if (adultDayData[mealType] && adultDayData[mealType].nombre) {
+                            const mealName = typeof adultDayData[mealType].nombre === 'string' ? 
+                                adultDayData[mealType].nombre : 
+                                (adultDayData[mealType].nombre?.name || 'N/A');
+                            menuText += `• ${mealType.toUpperCase()}: ${mealName}\n`;
+                        }
+                    });
+                }
+            }
+            
+            // Limit text for QR code
+            if (menuText.length > 800) {
+                menuText = menuText.substring(0, 800) + '\n...';
+            }
+            
+            qrContainer.innerHTML = '';
+            try {
+                new QRCode(qrContainer, {
+                    text: menuText,
+                    width: 56,
+                    height: 56,
+                    colorDark: '#000000',
+                    colorLight: '#ffffff',
+                    correctLevel: QRCode.CorrectLevel.M
+                });
+            } catch (error) {
+                console.error('[TV] Error generating simple QR code:', error);
+                // Fallback to URL
+                const menuUrl = `${window.location.origin}/tv?day=${selectedDay}`;
+                qrContainer.innerHTML = '';
+                new QRCode(qrContainer, {
+                    text: menuUrl,
+                    width: 56,
+                    height: 56,
+                    colorDark: '#000000',
+                    colorLight: '#ffffff',
+                    correctLevel: QRCode.CorrectLevel.H
+                });
+            }
+        }
+
         // Generate QR Code with menu information (ingredients and preparation) - compact format
         function generateZenithQRCode() {
             const qrContainer = document.getElementById('zenithQrCode');
@@ -1965,7 +2048,7 @@
             console.log('[TV] Container children count:', container.children.length);
             
             // Update QR code with menu information
-            generateZenithQRCode();
+            generateSimpleQRCode();
             
             // Force a reflow to ensure rendering
             void container.offsetHeight;
@@ -1993,7 +2076,7 @@
             
             updateDateTime();
             updateWeather();
-            generateZenithQRCode();
+            generateSimpleQRCode();
             updateWeekNav();
             loadMenu();
             
