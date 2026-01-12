@@ -901,99 +901,107 @@
         @media (min-width: 1920px) {
             .tv-container {
                 max-width: 1920px;
-                padding: 1.5rem;
+                padding: 1rem;
             }
 
             .clock {
-                font-size: 4rem;
+                font-size: 2.5rem;
                 font-weight: 700;
             }
 
             .date-display {
-                font-size: 1.6rem;
+                font-size: 1rem;
                 font-weight: 500;
             }
 
             .weather {
-                font-size: 2.2rem;
+                font-size: 1.5rem;
                 font-weight: 600;
             }
 
             .week-day-name {
-                font-size: 2.4rem;
+                font-size: 1.8rem;
                 font-weight: 700;
             }
 
             .week-day-date {
-                font-size: 2.6rem;
+                font-size: 2rem;
                 font-weight: 600;
             }
 
             .main-content {
-                gap: 3rem;
-                height: calc(100vh - 220px);
+                gap: 2rem;
+                height: calc(100vh - 160px);
             }
 
             .meal-grid {
-                gap: 2.5rem;
+                gap: 1.5rem;
                 grid-template-columns: 1fr 1fr;
             }
 
             .menu-panel {
-                padding: 3rem;
-                font-size: 1.2rem;
-                min-height: 500px;
+                padding: 1.5rem;
+                font-size: 1rem;
+                min-height: 400px;
             }
 
             .menu-panel h2 {
-                font-size: 3rem !important;
-                margin-bottom: 2rem !important;
+                font-size: 2rem !important;
+                margin-bottom: 1rem !important;
             }
 
             .menu-panel h3 {
-                font-size: 2.2rem !important;
-                margin-bottom: 1.5rem !important;
+                font-size: 1.5rem !important;
+                margin-bottom: 1rem !important;
             }
 
             .menu-panel p {
-                font-size: 1.4rem !important;
-                margin-bottom: 1rem !important;
-                line-height: 1.6 !important;
+                font-size: 1.1rem !important;
+                margin-bottom: 0.8rem !important;
+                line-height: 1.4 !important;
             }
 
             .menu-panel span[style*="font-size"] {
-                font-size: 1.4rem !important;
+                font-size: 1.1rem !important;
             }
 
             .week-day-card {
-                min-height: 380px;
-                padding: 2rem;
-                border-radius: 20px;
+                min-height: 300px;
+                padding: 1.5rem;
+                border-radius: 16px;
             }
 
             .meal-item {
-                font-size: 1.5rem;
-                padding: 1.2rem;
-                margin-bottom: 1rem;
-                border-radius: 12px;
+                font-size: 1.2rem;
+                padding: 1rem;
+                margin-bottom: 0.8rem;
+                border-radius: 10px;
             }
 
             .meal-name {
-                font-size: 1.6rem;
+                font-size: 1.3rem;
                 font-weight: 600;
             }
 
             .meal-description {
-                font-size: 1.3rem;
-                margin-top: 0.5rem;
+                font-size: 1.1rem;
+                margin-top: 0.4rem;
             }
 
             .top-bar {
-                padding: 2rem;
-                margin-bottom: 2rem;
+                padding: 1.5rem;
+                margin-bottom: 1.5rem;
             }
 
-            /* Old qr-container styles removed from large screen media query */
+            .qr-container {
+                width: 100px;
+                height: 100px;
+            }
+
+            .qr-container canvas {
+                width: 100px !important;
+                height: 100px !important;
+            }
         }
 
         /* Scrollbar styling - Zenith style */
@@ -1035,6 +1043,14 @@
                     <div class="weather" id="weatherWidget">
                         <span>🌤️</span>
                         <span id="weatherText">Loading...</span>
+                    </div>
+                </div>
+                
+                <!-- QR Code Section -->
+                <div class="menu-section">
+                    <div class="zenith-qr-container">
+                        <div class="zenith-qr-code" id="zenithQrCode"></div>
+                        <div class="zenith-qr-label">Today's Menu</div>
                     </div>
                 </div>
                 
@@ -1782,15 +1798,15 @@
                     const adultRegenId = `regen-adultos-${selectedDay}`;
                     adultosHtml += `
                         <div class="menu-panel adults">
-                            <div style="margin-bottom: 1.5rem; padding: 1rem; background: rgba(255, 255, 255, 0.05); border-radius: 1rem; border: 1px solid rgba(255, 255, 255, 0.1); position: relative; z-index: 10;">
-                            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
-                                <div style="flex: 1; min-width: 200px;">
-                                    <div style="font-size: 0.875rem; color: rgba(255, 255, 255, 0.5); margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.1em;">Califica este menú</div>
-                                    <div id="${adultRatingId}" style="display: flex; gap: 0.5rem; align-items: center;">
+                            <div style="margin-bottom: 1rem; padding: 0.8rem; background: rgba(255, 255, 255, 0.05); border-radius: 0.8rem; border: 1px solid rgba(255, 255, 255, 0.1); position: relative; z-index: 10;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.8rem;">
+                                <div style="flex: 1; min-width: 150px;">
+                                    <div style="font-size: 0.7rem; color: rgba(255, 255, 255, 0.5); margin-bottom: 0.3rem; text-transform: uppercase; letter-spacing: 0.05em;">Califica este menú</div>
+                                    <div id="${adultRatingId}" style="display: flex; gap: 0.3rem; align-items: center;">
                                         ${[1, 2, 3, 4, 5].map(star => {
                                             return '<button onclick="rateDayMenu(\'adultos\', ' + star + ')" ' +
-                                                'style="background: none; border: none; font-size: 2rem; cursor: pointer; padding: 0.5rem; transition: transform 0.2s;" ' +
-                                                'onmouseover="this.style.transform=\'scale(1.2)\'" ' +
+                                                'style="background: none; border: none; font-size: 1.2rem; cursor: pointer; padding: 0.3rem; transition: transform 0.2s;" ' +
+                                                'onmouseover="this.style.transform=\'scale(1.1)\'" ' +
                                                 'onmouseout="this.style.transform=\'scale(1)\'" ' +
                                                 'title="' + star + ' ' + (star === 1 ? 'estrella' : 'estrellas') + '">' +
                                                 '<span class="star-' + star + '" style="color: rgba(255, 255, 255, 0.3);">☆</span>' +
@@ -1799,10 +1815,10 @@
                                     </div>
                                 </div>
                                 <button id="${adultRegenId}" onclick="regenerateDayMenu('adultos')" 
-                                    style="padding: 1rem 2rem; background: rgba(59, 130, 246, 0.2); border: 1px solid rgba(59, 130, 246, 0.4); border-radius: 0.75rem; color: #60A5FA; font-size: 1rem; font-weight: 600; cursor: pointer; transition: all 0.3s; text-transform: uppercase; letter-spacing: 0.05em;"
+                                    style="padding: 0.6rem 1.2rem; background: rgba(59, 130, 246, 0.2); border: 1px solid rgba(59, 130, 246, 0.4); border-radius: 0.6rem; color: #60A5FA; font-size: 0.8rem; font-weight: 600; cursor: pointer; transition: all 0.3s; text-transform: uppercase; letter-spacing: 0.03em;"
                                     onmouseover="this.style.background='rgba(59, 130, 246, 0.3)'; this.style.borderColor='rgba(59, 130, 246, 0.6)'"
                                     onmouseout="this.style.background='rgba(59, 130, 246, 0.2)'; this.style.borderColor='rgba(59, 130, 246, 0.4)'">
-                                    🔄 Regenerar Menú Adultos
+                                    🔄 Regenerar
                                 </button>
                             </div>
                         </div>
@@ -1862,15 +1878,15 @@
                     const childRegenId = `regen-ninos-${selectedDay}`;
                     ninosHtml += `
                         <div class="menu-panel children">
-                            <div style="margin-bottom: 1.5rem; padding: 1rem; background: rgba(255, 255, 255, 0.05); border-radius: 1rem; border: 1px solid rgba(255, 255, 255, 0.1); position: relative; z-index: 10;">
-                            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
-                                <div style="flex: 1; min-width: 200px;">
-                                    <div style="font-size: 0.875rem; color: rgba(255, 255, 255, 0.5); margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.1em;">Califica este menú</div>
-                                    <div id="${childRatingId}" style="display: flex; gap: 0.5rem; align-items: center;">
+                            <div style="margin-bottom: 1rem; padding: 0.8rem; background: rgba(255, 255, 255, 0.05); border-radius: 0.8rem; border: 1px solid rgba(255, 255, 255, 0.1); position: relative; z-index: 10;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.8rem;">
+                                <div style="flex: 1; min-width: 150px;">
+                                    <div style="font-size: 0.7rem; color: rgba(255, 255, 255, 0.5); margin-bottom: 0.3rem; text-transform: uppercase; letter-spacing: 0.05em;">Califica este menú</div>
+                                    <div id="${childRatingId}" style="display: flex; gap: 0.3rem; align-items: center;">
                                         ${[1, 2, 3, 4, 5].map(star => {
                                             return '<button onclick="rateDayMenu(\'ninos\', ' + star + ')" ' +
-                                                'style="background: none; border: none; font-size: 2rem; cursor: pointer; padding: 0.5rem; transition: transform 0.2s;" ' +
-                                                'onmouseover="this.style.transform=\'scale(1.2)\'" ' +
+                                                'style="background: none; border: none; font-size: 1.2rem; cursor: pointer; padding: 0.3rem; transition: transform 0.2s;" ' +
+                                                'onmouseover="this.style.transform=\'scale(1.1)\'" ' +
                                                 'onmouseout="this.style.transform=\'scale(1)\'" ' +
                                                 'title="' + star + ' ' + (star === 1 ? 'estrella' : 'estrellas') + '">' +
                                                 '<span class="star-' + star + '" style="color: rgba(255, 255, 255, 0.3);">☆</span>' +
@@ -1879,10 +1895,10 @@
                                     </div>
                                 </div>
                                 <button id="${childRegenId}" onclick="regenerateDayMenu('ninos')" 
-                                    style="padding: 1rem 2rem; background: rgba(249, 115, 22, 0.2); border: 1px solid rgba(249, 115, 22, 0.4); border-radius: 0.75rem; color: #FB923C; font-size: 1rem; font-weight: 600; cursor: pointer; transition: all 0.3s; text-transform: uppercase; letter-spacing: 0.05em;"
+                                    style="padding: 0.6rem 1.2rem; background: rgba(249, 115, 22, 0.2); border: 1px solid rgba(249, 115, 22, 0.4); border-radius: 0.6rem; color: #FB923C; font-size: 0.8rem; font-weight: 600; cursor: pointer; transition: all 0.3s; text-transform: uppercase; letter-spacing: 0.03em;"
                                     onmouseover="this.style.background='rgba(249, 115, 22, 0.3)'; this.style.borderColor='rgba(249, 115, 22, 0.6)'"
                                     onmouseout="this.style.background='rgba(249, 115, 22, 0.2)'; this.style.borderColor='rgba(249, 115, 22, 0.4)'">
-                                    🔄 Regenerar Menú Niños
+                                    🔄 Regenerar
                                 </button>
                             </div>
                         </div>
@@ -1948,7 +1964,8 @@
             console.log('[TV] innerHTML set successfully');
             console.log('[TV] Container children count:', container.children.length);
             
-            // QR code generation removed - no sidebar QR container
+            // Update QR code with menu information
+            generateZenithQRCode();
             
             // Force a reflow to ensure rendering
             void container.offsetHeight;
@@ -1976,7 +1993,7 @@
             
             updateDateTime();
             updateWeather();
-            // generateZenithQRCode(); // Removed - no sidebar QR container
+            generateZenithQRCode();
             updateWeekNav();
             loadMenu();
             
