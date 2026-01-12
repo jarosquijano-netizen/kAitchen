@@ -4589,26 +4589,48 @@ function showNotification(message) {
 
 // Switch tab helper
 function switchTab(tabName) {
+    console.log(`[SwitchTab] Attempting to switch to ${tabName} tab`);
+    
     // Remove active class from all sidebar items
     document.querySelectorAll('.sidebar-item').forEach(item => {
         item.classList.remove('active');
     });
     
     // Add active class to clicked item
-    document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+    const clickedItem = document.querySelector(`[data-tab="${tabName}"]`);
+    if (clickedItem) {
+        clickedItem.classList.add('active');
+        console.log(`[SwitchTab] Added active class to sidebar item for ${tabName}`);
+    } else {
+        console.error(`[SwitchTab] Could not find sidebar item with data-tab="${tabName}"`);
+        return;
+    }
     
     // Hide all tab contents
     document.querySelectorAll('.tab-content').forEach(content => {
         content.classList.remove('active');
+        console.log(`[SwitchTab] Hidden tab content: ${content.id}`);
     });
     
     // Show selected tab content
     const targetTab = document.getElementById(`${tabName}-tab`);
     if (targetTab) {
         targetTab.classList.add('active');
+        console.log(`[SwitchTab] Showing tab content: ${targetTab.id}`);
+        
+        // Load content for specific tabs
+        if (tabName === 'recipes') {
+            console.log('[SwitchTab] Loading recipes...');
+            // Recipes content is already in HTML, no additional loading needed
+        } else if (tabName === 'shopping') {
+            console.log('[SwitchTab] Loading shopping list...');
+            loadShoppingLists(); // Load shopping list when tab is opened
+        }
+    } else {
+        console.error(`[SwitchTab] Could not find tab content with id="${tabName}-tab"`);
     }
     
-    console.log(`[SwitchTab] Switched to ${tabName} tab`);
+    console.log(`[SwitchTab] Successfully switched to ${tabName} tab`);
 }
 
 // Menu data storage (kept for potential future use, but no longer used for display)
