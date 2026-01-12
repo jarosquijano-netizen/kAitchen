@@ -834,38 +834,110 @@
             }
         }
 
-        /* Extra large screens (TV/Monitor) - Zenith responsive */
+        /* Extra large screens (TV/Monitor) - Zenith responsive - Optimized for 24" 1920x1080 */
         @media (min-width: 1920px) {
             .tv-container {
                 max-width: 1920px;
+                padding: 1.5rem;
             }
 
             .clock {
-                font-size: 3.5rem;
+                font-size: 4rem;
+                font-weight: 700;
             }
 
             .date-display {
-                font-size: 1.4rem;
+                font-size: 1.6rem;
+                font-weight: 500;
             }
 
             .weather {
-                font-size: 2rem;
+                font-size: 2.2rem;
+                font-weight: 600;
             }
 
             .week-day-name {
-                font-size: 2rem;
+                font-size: 2.4rem;
+                font-weight: 700;
             }
 
             .week-day-date {
-                font-size: 2.2rem;
+                font-size: 2.6rem;
+                font-weight: 600;
             }
 
             .main-content {
                 gap: 3rem;
+                height: calc(100vh - 220px);
             }
 
             .meal-grid {
-                gap: 2rem;
+                gap: 2.5rem;
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .menu-panel {
+                padding: 3rem;
+                font-size: 1.2rem;
+                min-height: 500px;
+            }
+
+            .menu-panel h2 {
+                font-size: 3rem !important;
+                margin-bottom: 2rem !important;
+            }
+
+            .menu-panel h3 {
+                font-size: 2.2rem !important;
+                margin-bottom: 1.5rem !important;
+            }
+
+            .menu-panel p {
+                font-size: 1.4rem !important;
+                margin-bottom: 1rem !important;
+                line-height: 1.6 !important;
+            }
+
+            .menu-panel span[style*="font-size"] {
+                font-size: 1.4rem !important;
+            }
+
+            .week-day-card {
+                min-height: 380px;
+                padding: 2rem;
+                border-radius: 20px;
+            }
+
+            .meal-item {
+                font-size: 1.5rem;
+                padding: 1.2rem;
+                margin-bottom: 1rem;
+                border-radius: 12px;
+            }
+
+            .meal-name {
+                font-size: 1.6rem;
+                font-weight: 600;
+            }
+
+            .meal-description {
+                font-size: 1.3rem;
+                margin-top: 0.5rem;
+            }
+
+            .top-bar {
+                padding: 2rem;
+                margin-bottom: 2rem;
+            }
+
+            .qr-container {
+                width: 120px;
+                height: 120px;
+            }
+
+            .qr-container canvas {
+                width: 120px !important;
+                height: 120px !important;
             }
         }
 
