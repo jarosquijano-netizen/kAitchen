@@ -355,9 +355,205 @@ class CleaningManager:
         # If rotation constraint makes it impossible, use lightest load anyway
         return members_by_load[0] if members_by_load else None
     
-    def _clear_week_assignments(self, week_start: str):
-        """Clear all assignments for a specific week"""
-        # This would require a new method in database.py to delete assignments by week
+    def get_date_range(self, start_date: str, end_date: str) -> List[str]:
+        """
+        Generate list of dates between start_date and end_date inclusive
+        Returns: List of date strings in YYYY-MM-DD format
+        """
+        start = datetime.strptime(start_date, '%Y-%m-%d')
+        end = datetime.strptime(end_date, '%Y-%m-%d')
+        
+        dates = []
+        current = start
+        while current <= end:
+            dates.append(current.strftime('%Y-%m-%d'))
+            current += timedelta(days=1)
+        
+        return dates
+    
+    def assign_tasks_to_calendar_dates(self, start_date: str, end_date: str) -> Dict:
+        """
+        Assign cleaning tasks to specific calendar dates
+        Returns: Dict with success status and assignments
+        """
+        try:
+            # Get tasks and family members
+            tasks = self.db.get_all_cleaning_tasks()
+            members = self.get_family_members()
+            
+            if not tasks:
+                return {
+                    'success': False,
+                    'error': 'No hay tareas de limpieza configuradas'
+                }
+            
+            if not members:
+                return {
+                    'success': False,
+                    'error': 'No hay miembros de la familia disponibles para asignar tareas'
+                }
+            
+            # Get date range
+            dates = self.get_date_range(start_date, end_date)
+            
+            # Clear existing calendar assignments for this range
+            self._clear_calendar_assignments(start_date, end_date)
+            
+            # Generate assignments
+            all_assignments = []
+            member_rotation = {}  # Track which member was last assigned for each area
+            
+            for date_str in dates:
+                date_obj = datetime.strptime(date_str, '%Y-%m-%d')
+                day_name = self.dias_semana[date_obj.weekday()]
+                
+                # Filter tasks for this day
+                day_tasks = [task for task in tasks 
+                            if not task.get('dias_semana') or day_name in task.get('dias_semana', [])]
+                
+                # Sort tasks by difficulty (hardest first) for fair distribution
+                day_tasks.sort(key=lambda x: x.get('dificultad', 1), reverse=True)
+                
+                for task in day_tasks:
+                    # Find best member for this task
+                    best_member = self._find_best_member_for_calendar_task(
+                        task, members, all_assignments, member_rotation, date_str
+                    )
+                    
+                    if best_member:
+                        assignment = {
+                            'task_id': task['id'],
+                            'member_id': best_member['id'],
+                            'member_type': best_member['tipo'],
+                            'dia_semana': day_name,
+                            'week_start': self.get_week_start(date_str),
+                            'fecha_especifica': date_str,
+                            'tipo_asignacion': 'calendario',
+                            'semana_referencia': self.get_week_start(date_str),
+                            'completado': False,
+                            'notas': f'Asignado automáticamente a {best_member["nombre"]} para {date_str}'
+                        }
+                        
+                        # Save assignment
+                        assignment_id = self.db.save_cleaning_assignment(assignment)
+                        assignment['id'] = assignment_id
+                        assignment['task_nombre'] = task['nombre']
+                        assignment['area'] = task['area']
+                        assignment['dificultad'] = task['dificultad']
+                        assignment['tiempo_estimado'] = task['tiempo_estimado']
+                        assignment['member_name'] = best_member['nombre']
+                        assignment['fecha'] = date_str
+                        
+                        all_assignments.append(assignment)
+                        
+                        # Update rotation tracking
+                        area = task['area']
+                        member_rotation[area] = best_member['id']
+                        
+                        print(f"[CleaningManager] Assigned '{task['nombre']}' to {best_member['nombre']} on {date_str}")
+            
+            return {
+                'success': True,
+                'start_date': start_date,
+                'end_date': end_date,
+                'assignments': all_assignments,
+                'total_assignments': len(all_assignments),
+                'dates_covered': dates
+            }
+            
+        except Exception as e:
+            print(f"[CleaningManager] Error assigning calendar tasks: {e}")
+            return {
+                'success': False,
+                'error': f'Error al asignar tareas de calendario: {str(e)}'
+            }
+    
+    def get_calendar_schedule(self, start_date: str, end_date: str) -> Dict:
+        """
+        Get cleaning schedule for a specific date range
+        Returns: Dict with assignments organized by date
+        """
+        try:
+            dates = self.get_date_range(start_date, end_date)
+            schedule = {}
+            member_stats = {}
+            
+            for date_str in dates:
+                assignments = self.db.get_calendar_cleaning_assignments(date_str)
+                schedule[date_str] = assignments
+                
+                # Calculate member stats
+                for assignment in assignments:
+                    member_id = assignment['member_id']
+                    member_name = assignment.get('member_name', f'Miembro {member_id}')
+                    
+                    if member_id not in member_stats:
+                        member_stats[member_id] = {
+                            'nombre': member_name,
+                            'tipo': assignment['member_type'],
+                            'total_dificultad': 0,
+                            'total_tiempo': 0,
+                            'num_tasks': 0,
+                            'completed_tasks': 0
+                        }
+                    
+                    member_stats[member_id]['total_dificultad'] += assignment.get('dificultad', 1)
+                    member_stats[member_id]['total_tiempo'] += assignment.get('tiempo_estimado', 30)
+                    member_stats[member_id]['num_tasks'] += 1
+                    
+                    if assignment.get('completado', False):
+                        member_stats[member_id]['completed_tasks'] += 1
+            
+            total_assignments = sum(len(assignments) for assignments in schedule.values())
+            
+            return {
+                'success': True,
+                'start_date': start_date,
+                'end_date': end_date,
+                'schedule': schedule,
+                'member_stats': member_stats,
+                'total_assignments': total_assignments,
+                'completion_rate': sum(m['completed_tasks'] for m in member_stats.values()) / max(total_assignments, 1) * 100
+            }
+            
+        except Exception as e:
+            print(f"[CleaningManager] Error getting calendar schedule: {e}")
+            return {
+                'success': False,
+                'error': f'Error al obtener horario de calendario: {str(e)}'
+            }
+    
+    def _find_best_member_for_calendar_task(self, task: Dict, members: List[Dict], 
+                                          existing_assignments: List[Dict], 
+                                          member_rotation: Dict, 
+                                          date_str: str) -> Optional[Dict]:
+        """
+        Find the best member for a specific calendar task using rotation algorithm
+        Returns: Best member dict or None
+        """
+        # Filter assignments for the same date to calculate current daily load
+        daily_assignments = [a for a in existing_assignments if a.get('fecha') == date_str]
+        current_load = self.calculate_task_load(daily_assignments)
+        
+        # Sort members by current daily load (lightest first)
+        members_by_load = sorted(members, 
+                               key=lambda m: current_load.get(m['id'], {}).get('total_dificultad', 0))
+        
+        # Try to assign to member with lightest load, but consider rotation
+        area = task['area']
+        last_assigned_id = member_rotation.get(area)
+        
+        for member in members_by_load:
+            # Prefer not to assign same area to same person consecutively
+            if member['id'] != last_assigned_id:
+                return member
+        
+        # If rotation constraint makes it impossible, use lightest load anyway
+        return members_by_load[0] if members_by_load else None
+    
+    def _clear_calendar_assignments(self, start_date: str, end_date: str):
+        """Clear calendar assignments for a specific date range"""
+        # This would require a new method in database.py to delete calendar assignments by date range
         # For now, we'll rely on the ON CONFLICT clause to replace existing assignments
         pass
     

@@ -1364,27 +1364,130 @@ def test_api_key():
             'error': f'Error al validar la API key: {str(e)}'
         }), 400
 
+# ==================== CLEANING CAPACITY API ====================
+
+@app.route('/api/cleaning/capacity', methods=['GET'])
+def get_cleaning_capacity():
+    """Get cleaning capacity settings"""
+    try:
+        conn = db.get_connection()
+        cursor = conn.cursor()
+        cursor.execute('SELECT * FROM cleaning_capacity ORDER BY member_type')
+        capacities = cursor.fetchall()
+        conn.close()
+        
+        # Convert to dictionary format
+        capacity_dict = {}
+        for cap in capacities:
+            capacity_dict[cap[1]] = {  # member_type is index 1
+                'id': cap[0],
+                'member_type': cap[1],
+                'max_daily_percentage': cap[2],
+                'max_weekly_hours': cap[3],
+                'task_difficulty_max': cap[4],
+                'preferred_areas': json.loads(cap[5]) if cap[5] else [],
+                'can_do_complex_tasks': bool(cap[6]),
+                'created_at': cap[7],
+                'updated_at': cap[8]
+            }
+        
+        return jsonify({
+            'success': True,
+            'data': capacity_dict
+        })
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@app.route('/api/cleaning/capacity', methods=['POST'])
+def save_cleaning_capacity():
+    """Save cleaning capacity settings"""
+    try:
+        data = request.json
+        print(f"[CleaningCapacity] Received capacity settings: {data}")
+        
+        conn = db.get_connection()
+        cursor = conn.cursor()
+        
+        # Update each capacity type
+        for member_type, settings in data.items():
+            cursor.execute('''
+                UPDATE cleaning_capacity SET 
+                max_daily_percentage = ?, max_weekly_hours = ?, task_difficulty_max = ?,
+                preferred_areas = ?, can_do_complex_tasks = ?, updated_at = CURRENT_TIMESTAMP
+                WHERE member_type = ?
+            ''', (
+                settings.get('max_daily_percentage', 100),
+                settings.get('max_weekly_hours', 40),
+                settings.get('task_difficulty_max', 5),
+                json.dumps(settings.get('preferred_areas', [])),
+                1 if settings.get('can_do_complex_tasks') else 0,
+                member_type
+            ))
+        
+        conn.commit()
+        conn.close()
+        
+        return jsonify({
+            'success': True,
+            'message': 'Capacidades de limpieza guardadas correctamente'
+        })
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
 # ==================== HOUSE CONFIGURATION API ====================
 
 @app.route('/api/house/config', methods=['GET'])
 def get_house_config():
     """Get house configuration"""
     try:
-        # Return default configuration for now
-        return jsonify({
-            'success': True,
-            'data': {
-                'num_habitaciones': 3,
-                'num_banos': 2,
-                'num_salas': 2,
-                'num_cocinas': 1,
-                'superficie_total': 120,
-                'tipo_piso': 'apartamento',
-                'tiene_jardin': False,
-                'mascotas': 'no',
-                'notas_casa': ''
+        # Get configuration from database
+        conn = db.get_connection()
+        cursor = conn.cursor()
+        cursor.execute('SELECT * FROM house_config ORDER BY id DESC LIMIT 1')
+        config = cursor.fetchone()
+        conn.close()
+        
+        if config:
+            # Convert to dictionary with proper field names
+            config_dict = {
+                'id': config[0],
+                'num_habitaciones': config[1],
+                'num_banos': config[2],
+                'num_salas': config[3],
+                'num_cocinas': config[4],
+                'superficie_total': config[5],
+                'tipo_piso': config[6],
+                'tiene_jardin': bool(config[7]),
+                'mascotas': config[8],
+                'notas_casa': config[9],
+                'updated_at': config[10]
             }
-        })
+            return jsonify({
+                'success': True,
+                'data': config_dict
+            })
+        else:
+            # Return default configuration if no data found
+            return jsonify({
+                'success': True,
+                'data': {
+                    'num_habitaciones': 3,
+                    'num_banos': 2,
+                    'num_salas': 2,
+                    'num_cocinas': 1,
+                    'superficie_total': 120,
+                    'tipo_piso': 'apartamento',
+                    'tiene_jardin': False,
+                    'mascotas': 'no',
+                    'notas_casa': ''
+                }
+            })
     except Exception as e:
         return jsonify({
             'success': False,
@@ -1398,13 +1501,67 @@ def save_house_config():
         data = request.json
         print(f"[HouseConfig] Received configuration: {data}")
         
-        # For now, just return success (we'll implement full saving later)
+        # Get connection and save to database
+        conn = db.get_connection()
+        cursor = conn.cursor()
+        
+        # Check if there's already a record
+        cursor.execute('SELECT id FROM house_config ORDER BY id DESC LIMIT 1')
+        existing = cursor.fetchone()
+        
+        if existing:
+            # Update existing record
+            cursor.execute('''
+                UPDATE house_config SET 
+                num_habitaciones = ?, num_banos = ?, num_salas = ?, num_cocinas = ?,
+                superficie_total = ?, tipo_piso = ?, tiene_jardin = ?, mascotas = ?, notas_casa = ?,
+                updated_at = CURRENT_TIMESTAMP
+                WHERE id = ?
+            ''', (
+                data.get('num_habitaciones', 3),
+                data.get('num_banos', 2),
+                data.get('num_salas', 2),
+                data.get('num_cocinas', 1),
+                data.get('superficie_total', 120),
+                data.get('tipo_piso', 'apartamento'),
+                1 if data.get('tiene_jardin') else 0,
+                data.get('mascotas', 'no'),
+                data.get('notas_casa', ''),
+                existing[0]
+            ))
+            print(f"[HouseConfig] Updated {cursor.rowcount} rows")
+        else:
+            # Insert new record
+            cursor.execute('''
+                INSERT INTO house_config 
+                (num_habitaciones, num_banos, num_salas, num_cocinas, superficie_total, tipo_piso, tiene_jardin, mascotas, notas_casa)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ''', (
+                data.get('num_habitaciones', 3),
+                data.get('num_banos', 2),
+                data.get('num_salas', 2),
+                data.get('num_cocinas', 1),
+                data.get('superficie_total', 120),
+                data.get('tipo_piso', 'apartamento'),
+                1 if data.get('tiene_jardin') else 0,
+                data.get('mascotas', 'no'),
+                data.get('notas_casa', '')
+            ))
+            print(f"[HouseConfig] Inserted new record")
+        
+        # Commit changes
+        conn.commit()
+        
+        # Close connection
+        db._close_connection(conn)
+        
         return jsonify({
             'success': True,
-            'message': 'Configuración recibida correctamente'
+            'message': 'Configuración guardada correctamente en la base de datos'
         })
             
     except Exception as e:
+        print(f"[HouseConfig] Error: {str(e)}")
         return jsonify({
             'success': False,
             'error': str(e)
@@ -1417,57 +1574,262 @@ def generate_smart_cleaning_plan():
     basado en configuración de casa
     """
     try:
-        # Get house configuration (using default for now)
-        house_config = {
-            'num_habitaciones': 3,
-            'num_banos': 2,
-            'num_salas': 2,
-            'num_cocinas': 1,
-            'superficie_total': 120,
-            'tipo_piso': 'apartamento',
-            'tiene_jardin': False,
-            'mascotas': 'no',
-            'notas_casa': ''
-        }
+        # Get house configuration from database
+        conn = db.get_connection()
+        cursor = conn.cursor()
+        cursor.execute('SELECT * FROM house_config ORDER BY id DESC LIMIT 1')
+        house_config_record = cursor.fetchone()
+        conn.close()
         
-        # Get family members
-        family_members = db.get_all_adults() + db.get_all_children()
-        
-        # Generate mock smart plan for now
-        mock_plan = {
-            'success': True,
-            'plan': {
-                'tasks': [
-                    {
-                        'nombre': 'Limpiar cocina',
-                        'area': 'Cocina',
-                        'frecuencia': 'diaria',
-                        'tiempo_estimado': 30,
-                        'dificultad': 3,
-                        'asignado_a': 'adultos'
-                    },
-                    {
-                        'nombre': 'Limpiar baño principal',
-                        'area': 'Baño',
-                        'frecuencia': 'semanal',
-                        'tiempo_estimado': 45,
-                        'dificultad': 4,
-                        'asignado_a': 'adultos'
-                    }
-                ],
-                'distribution': {
-                    'adultos': ['Limpiar cocina', 'Limpiar baño principal'],
-                    'niña_12': ['Recoger habitaciones'],
-                    'niña_4': ['Ayudar en mesa']
-                }
+        if house_config_record:
+            house_config = {
+                'num_habitaciones': house_config_record[1],
+                'num_banos': house_config_record[2],
+                'num_salas': house_config_record[3],
+                'num_cocinas': house_config_record[4],
+                'superficie_total': house_config_record[5],
+                'tipo_piso': house_config_record[6],
+                'tiene_jardin': bool(house_config_record[7]),
+                'mascotas': house_config_record[8],
+                'notas_casa': house_config_record[9]
             }
-        }
+        else:
+            # Use defaults if no configuration found
+            house_config = {
+                'num_habitaciones': 3,
+                'num_banos': 2,
+                'num_salas': 2,
+                'num_cocinas': 1,
+                'superficie_total': 120,
+                'tipo_piso': 'apartamento',
+                'tiene_jardin': False,
+                'mascotas': 'no',
+                'notas_casa': ''
+            }
+        
+        # Get real family members with their capacities
+        adults = db.get_all_adults()
+        children = db.get_all_children()
+        
+        # Get cleaning capacities
+        conn = db.get_connection()
+        cursor = conn.cursor()
+        cursor.execute('SELECT member_type, max_daily_percentage, max_weekly_hours, task_difficulty_max, preferred_areas, can_do_complex_tasks FROM cleaning_capacity')
+        capacities = cursor.fetchall()
+        conn.close()
+        
+        # Convert capacities to dictionary
+        capacity_dict = {}
+        for cap in capacities:
+            capacity_dict[cap[0]] = {
+                'max_daily_percentage': cap[1],
+                'max_weekly_hours': cap[2],
+                'task_difficulty_max': cap[3],
+                'preferred_areas': json.loads(cap[4]) if cap[4] else [],
+                'can_do_complex_tasks': bool(cap[5])
+            }
+        
+        # Create enhanced family member objects
+        family_members = []
+        
+        # Add adults with capacities
+        for adult in adults:
+            member_data = {
+                'id': adult['id'],
+                'nombre': adult['nombre'],
+                'edad': adult['edad'],
+                'tipo': 'adulto',
+                'capacidad': capacity_dict.get('adulto', {}),
+                'available_hours': capacity_dict.get('adulto', {}).get('max_weekly_hours', 40),
+                'max_difficulty': capacity_dict.get('adulto', {}).get('task_difficulty_max', 5)
+            }
+            family_members.append(member_data)
+        
+        # Add children with capacities (adjust based on age)
+        for child in children:
+            child_capacity = capacity_dict.get('niño', {}).copy()
+            
+            # Adjust capacity based on age
+            if child['edad'] <= 6:
+                # Very young children - only basic tasks
+                child_capacity['task_difficulty_max'] = min(child_capacity.get('task_difficulty_max', 2), 1)
+                child_capacity['max_weekly_hours'] = min(child_capacity.get('max_weekly_hours', 10), 5)
+            elif child['edad'] <= 10:
+                # Young children - basic to intermediate tasks
+                child_capacity['task_difficulty_max'] = min(child_capacity.get('task_difficulty_max', 2), 2)
+                child_capacity['max_weekly_hours'] = min(child_capacity.get('max_weekly_hours', 10), 8)
+            elif child['edad'] <= 14:
+                # Pre-teens - intermediate tasks
+                child_capacity['task_difficulty_max'] = min(child_capacity.get('task_difficulty_max', 2), 3)
+                child_capacity['max_weekly_hours'] = min(child_capacity.get('max_weekly_hours', 10), 12)
+            
+            member_data = {
+                'id': child['id'],
+                'nombre': child['nombre'],
+                'edad': child['edad'],
+                'tipo': 'niño',
+                'capacidad': child_capacity,
+                'available_hours': child_capacity.get('max_weekly_hours', 10),
+                'max_difficulty': child_capacity.get('task_difficulty_max', 2)
+            }
+            family_members.append(member_data)
+        
+        print(f"[SmartPlan] Family members loaded: {len(family_members)} total")
+        for member in family_members:
+            print(f"  - {member['nombre']} ({member['edad']} años, {member['tipo']}): max_difficulty={member['max_difficulty']}, hours={member['available_hours']}")
+        
+        # Generate smart plan based on actual house configuration
+        tasks = []
+        
+        # Bathroom tasks based on actual number
+        for i in range(house_config['num_banos']):
+            tasks.append({
+                'nombre': f'Limpiar baño {"principal" if i == 0 else f"secundario {i+1}"}',
+                'area': 'Baño',
+                'frecuencia': 'semanal',
+                'dificultad': 4,
+                'tiempo_estimado': 30  # Reduced from 45 to 30 minutes
+            })
+        
+        # Kitchen tasks based on actual number
+        for i in range(house_config['num_cocinas']):
+            tasks.append({
+                'nombre': f'Limpiar cocina {"principal" if i == 0 else f"secundaria {i+1}"}',
+                'area': 'Cocina',
+                'frecuencia': 'diaria',
+                'dificultad': 3,
+                'tiempo_estimado': 30
+            })
+        
+        # Room tasks based on actual number
+        for i in range(house_config['num_habitaciones']):
+            tasks.append({
+                'nombre': f'Ordenar habitación {i+1}',
+                'area': 'Habitacion',
+                'frecuencia': 'diaria',
+                'dificultad': 1,
+                'tiempo_estimado': 15
+            })
+        
+        # Living room tasks
+        for i in range(house_config['num_salas']):
+            tasks.append({
+                'nombre': f'Limpiar sala {"principal" if i == 0 else f"secundaria {i+1}"}',
+                'area': 'Sala',
+                'frecuencia': 'semanal',
+                'dificultad': 2,
+                'tiempo_estimado': 60
+            })
+        
+        # Pet tasks if applicable
+        if house_config['mascotas'] and house_config['mascotas'].lower() != 'no':
+            tasks.append({
+                'nombre': f'Tareas de cuidado para {house_config["mascotas"]}',
+                'nombre': 'Mantenimiento de jardín',
+                'area': 'Exterior',
+                'frecuencia': 'quincenal',
+                'tiempo_estimado': 120,
+                'dificultad': 5,
+                'asignado_a': 'adultos'
+            })
+        
+        # Adjust frequency based on surface area
+        frequency_multiplier = 1.0
+        if house_config['superficie_total'] > 200:
+            frequency_multiplier = 1.3
+        elif house_config['superficie_total'] > 100:
+            frequency_multiplier = 1.1
+        
+        # Apply frequency multiplier
+        for task in tasks:
+            if task['frecuencia'] == 'semanal':
+                task['frecuencia'] = f'semanal (ajustada x{frequency_multiplier})'
+        
+        # Smart task assignment based on member capacities and age
+        assigned_tasks = []
+        
+        print(f"[SmartPlan] Starting assignment for {len(tasks)} tasks to {len(family_members)} members")
+        
+        for task in tasks:
+            print(f"[SmartPlan] Processing task: {task['nombre']} (area: {task['area']}, difficulty: {task['dificultad']})")
+            # Find suitable members for this task
+            suitable_members = []
+            
+            for member in family_members:
+                # Simple assignment logic
+                can_do_task = task['dificultad'] <= member['max_difficulty']
+                hours_used = sum(t['tiempo_estimado'] for t in assigned_tasks if t.get('asignado_a_id') == member['id']) / 60
+                has_hours = hours_used < member['available_hours']
+                
+                print(f"[SmartPlan] {member['nombre']} (edad: {member['edad']}, tipo: {member['tipo']}): can_do={can_do_task}, hours_used={hours_used:.1f}h, available={member['available_hours']}h, has_hours={has_hours}")
+                
+                if can_do_task and has_hours:
+                    suitable_members.append(member)
+            
+            print(f"[SmartPlan] Suitable members for {task['nombre']}: {[m['nombre'] for m in suitable_members]}")
+            
+            # Assign to the most suitable member (least loaded)
+            if suitable_members:
+                # Sort by current load (hours used)
+                suitable_members.sort(key=lambda m: sum(t['tiempo_estimado'] for t in assigned_tasks if t.get('asignado_a_id') == m['id']))
+                assigned_member = suitable_members[0]
+                
+                task_with_assignment = task.copy()
+                task_with_assignment['asignado_a'] = assigned_member['nombre']
+                task_with_assignment['asignado_a_id'] = assigned_member['id']
+                task_with_assignment['asignado_a_edad'] = assigned_member['edad']
+                task_with_assignment['asignado_a_tipo'] = assigned_member['tipo']
+                assigned_tasks.append(task_with_assignment)
+                
+                print(f"[SmartPlan] ✓ Task '{task['nombre']}' assigned to {assigned_member['nombre']} ({assigned_member['edad']} años)")
+            else:
+                # Unassigned task
+                task_with_assignment = task.copy()
+                task_with_assignment['asignado_a'] = 'Sin asignar'
+                task_with_assignment['asignado_a_id'] = None
+                assigned_tasks.append(task_with_assignment)
+                print(f"[SmartPlan] ✗ Task '{task['nombre']}' could not be assigned (no suitable member)")
+            
+            print(f"[SmartPlan] ---")
+        
+        # Create distribution summary by member
+        distribution_by_member = {}
+        for task in assigned_tasks:
+            if task['asignado_a'] != 'Sin asignar':
+                member_name = task['asignado_a']
+                if member_name not in distribution_by_member:
+                    distribution_by_member[member_name] = {
+                        'tasks': [],
+                        'total_hours': 0,
+                        'total_difficulty': 0,
+                        'edad': task['asignado_a_edad'],
+                        'tipo': task['asignado_a_tipo']
+                    }
+                
+                distribution_by_member[member_name]['tasks'].append(task['nombre'])
+                distribution_by_member[member_name]['total_hours'] += task.get('tiempo_estimado', 0) / 60  # Convert minutes to hours
+                distribution_by_member[member_name]['total_difficulty'] += task.get('dificultad', 0)
+        
+        # Calculate percentages
+        total_hours = sum(member['total_hours'] for member in distribution_by_member.values())
+        for member_name, member_data in distribution_by_member.items():
+            if total_hours > 0:
+                member_data['percentage'] = round((member_data['total_hours'] / total_hours) * 100, 1)
+            else:
+                member_data['percentage'] = 0
         
         return jsonify({
             'success': True,
-            'tasks_created': len(mock_plan['plan']['tasks']),
-            'plan': mock_plan,
-            'message': 'Plan de limpieza generado exitosamente (versión demo)'
+            'plan': {
+                'tasks': assigned_tasks,
+                'distribution': distribution_by_member,
+                'house_config_used': house_config,
+                'total_tasks': len(assigned_tasks),
+                'assigned_tasks': len([t for t in assigned_tasks if t['asignado_a'] != 'Sin asignar']),
+                'unassigned_tasks': len([t for t in assigned_tasks if t['asignado_a'] == 'Sin asignar']),
+                'estimated_weekly_hours': sum(task['tiempo_estimado'] for task in assigned_tasks) / 60,
+                'family_members': family_members
+            }
         })
             
     except Exception as e:
@@ -1584,6 +1946,60 @@ def save_cleaning_preferences():
         return jsonify({
             'success': False,
             'error': f'Error al guardar preferencias: {str(e)}'
+        }), 500
+
+@app.route('/api/cleaning/calendar/assign', methods=['POST'])
+def assign_calendar_cleaning():
+    """Assign cleaning tasks to calendar dates"""
+    try:
+        data = request.get_json()
+        start_date = data.get('start_date')
+        end_date = data.get('end_date')
+        
+        if not start_date or not end_date:
+            return jsonify({
+                'success': False,
+                'error': 'Se requieren fechas de inicio y fin'
+            }), 400
+        
+        result = cleaning_manager.assign_tasks_to_calendar_dates(start_date, end_date)
+        return jsonify(result)
+        
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': f'Error al asignar tareas de calendario: {str(e)}'
+        }), 500
+
+@app.route('/api/cleaning/calendar/<start_date>/<end_date>', methods=['GET'])
+def get_calendar_cleaning(start_date, end_date):
+    """Get cleaning schedule for a date range"""
+    try:
+        result = cleaning_manager.get_calendar_schedule(start_date, end_date)
+        return jsonify(result)
+        
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': f'Error al obtener horario de calendario: {str(e)}'
+        }), 500
+
+@app.route('/api/cleaning/calendar/day/<date_str>', methods=['GET'])
+def get_day_cleaning(date_str):
+    """Get cleaning tasks for a specific day"""
+    try:
+        assignments = db.get_calendar_cleaning_assignments(date_str)
+        return jsonify({
+            'success': True,
+            'date': date_str,
+            'assignments': assignments,
+            'total_tasks': len(assignments)
+        })
+        
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': f'Error al obtener tareas del día: {str(e)}'
         }), 500
 
 @app.route('/api/cleaning/initialize', methods=['POST'])

@@ -11,42 +11,69 @@ let houseConfig = {
     notas_casa: ''
 };
 
-// Load house configuration from localStorage
-function loadHouseConfig() {
-    const saved = localStorage.getItem('houseConfig');
-    if (saved) {
-        houseConfig = JSON.parse(saved);
-        
-        // Update form fields
-        Object.keys(houseConfig).forEach(key => {
-            const element = document.getElementById(key);
-            if (element) {
-                element.value = houseConfig[key];
-            }
-        });
-        
-        showHouseConfigStatus('Configuración de casa cargada correctamente', 'success');
+// Load house configuration from API
+async function loadHouseConfig() {
+    try {
+        const result = await API.get('/api/house/config');
+        if (result.success && result.data) {
+            houseConfig = result.data;
+            
+            // Update form fields
+            Object.keys(houseConfig).forEach(key => {
+                const element = document.getElementById(key);
+                if (element) {
+                    // Handle checkboxes differently
+                    if (element.type === 'checkbox') {
+                        element.checked = houseConfig[key] === true || houseConfig[key] === 1;
+                    } else {
+                        element.value = houseConfig[key];
+                    }
+                }
+            });
+            
+            showHouseConfigStatus('Configuración de casa cargada desde base de datos', 'success');
+        } else {
+            console.log('Using default house configuration');
+        }
+    } catch (error) {
+        console.error('Error loading house config:', error);
     }
 }
 
 // Save house configuration
-function saveHouseConfig() {
-    // Get values from form
-    const form = document.getElementById('houseConfigForm');
-    const formData = new FormData(form);
-    
-    // Update houseConfig object
-    for (let [key, value] of formData.entries()) {
-        houseConfig[key] = value;
+async function saveHouseConfig() {
+    try {
+        // Get values from form
+        const form = document.getElementById('houseConfigForm');
+        const formData = new FormData(form);
+        
+        // Convert to object
+        const configData = {};
+        for (let [key, value] of formData.entries()) {
+            // Handle checkboxes
+            const element = document.getElementById(key);
+            if (element && element.type === 'checkbox') {
+                configData[key] = element.checked;
+            } else {
+                configData[key] = value;
+            }
+        }
+        
+        // Save to API
+        const result = await API.post('/api/house/config', configData);
+        
+        if (result.success) {
+            showHouseConfigStatus('✅ Configuración guardada correctamente en la base de datos', 'success');
+            // Reload to get updated data
+            setTimeout(() => loadHouseConfig(), 500);
+        } else {
+            showHouseConfigStatus('Error: ' + (result.error || 'Error desconocido'), 'error');
+        }
+        
+    } catch (error) {
+        console.error('Error saving house config:', error);
+        showHouseConfigStatus('Error al guardar configuración', 'error');
     }
-    
-    // Save to localStorage
-    localStorage.setItem('houseConfig', JSON.stringify(houseConfig));
-    
-    showHouseConfigStatus('Configuración de casa guardada correctamente', 'success');
-    
-    // Apply configuration to cleaning system
-    applyHouseConfigToCleaning();
 }
 
 // Apply house configuration to cleaning system
@@ -60,35 +87,50 @@ function applyHouseConfigToCleaning() {
 }
 
 // Optimize cleaning tasks based on house configuration
-function optimizeCleaningTasks() {
+async function optimizeCleaningTasks() {
     console.log('[HouseConfig] Optimizing cleaning tasks based on house configuration...');
     
-    const optimizations = [];
-    
-    // Bathroom optimization
-    if (houseConfig.num_banos > 1) {
-        optimizations.push(`Añadidas tareas para ${houseConfig.num_banos} baños`);
+    try {
+        const result = await API.post('/api/cleaning/generate-smart-plan', {
+            house_config: houseConfig
+        });
+        
+        if (result.success) {
+            const optimizations = [];
+            
+            // Bathroom optimization
+            if (houseConfig.num_banos > 1) {
+                optimizations.push(`Añadidas tareas para ${houseConfig.num_banos} baños`);
+            }
+            
+            // Surface area optimization
+            if (houseConfig.superficie_total > 100) {
+                optimizations.push('Frecuencia de limpieza ajustada para superficie grande');
+            }
+            
+            // Pet optimization
+            if (houseConfig.mascotas !== 'no') {
+                optimizations.push('Añadidas tareas específicas para mascotas');
+            }
+            
+            // Garden/terrace optimization
+            if (houseConfig.tiene_jardin !== 'no') {
+                optimizations.push('Añadidas tareas de exterior');
+            }
+            
+            showHouseConfigStatus('✅ Optimizaciones aplicadas: ' + optimizations.join(', '), 'success');
+            
+            // Here you could update the cleaning UI with the new plan
+            if (result.data && result.data.plan) {
+                console.log('Smart cleaning plan generated:', result.data.plan);
+            }
+        } else {
+            showHouseConfigStatus('Error al generar plan de limpieza', 'error');
+        }
+    } catch (error) {
+        console.error('Error optimizing cleaning tasks:', error);
+        showHouseConfigStatus('Error al optimizar tareas', 'error');
     }
-    
-    // Surface area optimization
-    if (houseConfig.superficie_total > 100) {
-        optimizations.push('Frecuencia de limpieza ajustada para superficie grande');
-    }
-    
-    // Pet optimization
-    if (houseConfig.mascotas !== 'no') {
-        optimizations.push('Añadidas tareas específicas para mascotas');
-    }
-    
-    // Garden/terrace optimization
-    if (houseConfig.tiene_jardin !== 'no') {
-        optimizations.push('Añadidas tareas de exterior');
-    }
-    
-    showHouseConfigStatus('Optimizaciones aplicadas: ' + optimizations.join(', '), 'success');
-    
-    // Here you could call the API to update cleaning tasks
-    // For now, just show the optimization suggestions
 }
 
 // Show status messages for house configuration
@@ -125,7 +167,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // Load saved configuration
+    // Load saved configuration from API
     loadHouseConfig();
 });
 

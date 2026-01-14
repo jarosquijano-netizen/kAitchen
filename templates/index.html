@@ -1630,14 +1630,24 @@ https://example.com/recipe3"></textarea>
         <div class="tab-content" id="cleaning-tab">
             <div class="card">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
-                    <h2 style="margin: 0;">🧹 Sistema de Limpieza</h2>
+                    <h2 style="margin: 0;">🧹 Sistema de Limpieza Inteligente</h2>
                     <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
-                        <button class="btn btn-primary" onclick="initializeCleaningTasks()" id="init-cleaning-btn" style="font-size: 1rem; padding: 1rem 2rem;">
-                            🚀 Inicializar Tareas
+                        <button class="btn btn-primary" onclick="generateSmartCleaningPlan()" id="generate-smart-plan-btn" style="font-size: 1rem; padding: 1rem 2rem;">
+                            ⚡ Generar Plan Inteligente
                         </button>
-                        <button class="btn btn-success" onclick="assignCleaningTasks()" id="assign-cleaning-btn" style="font-size: 1rem; padding: 1rem 2rem;">
-                            ⚡ Asignar Semana
+                        <button class="btn btn-success" onclick="regenerateSmartPlan()" id="regenerate-plan-btn" style="font-size: 1rem; padding: 1rem 2rem;">
+                            🔄 Regenerar Plan
                         </button>
+                    </div>
+                </div>
+
+                <!-- Smart Plan Display -->
+                <div id="smart-plan-container" style="display: none;">
+                    <div style="background: rgba(34, 197, 94, 0.1); padding: 1.5rem; border-radius: 12px; border: 1px solid rgba(34, 197, 94, 0.2); margin-bottom: 2rem;">
+                        <h3 style="color: #22C55E; margin-bottom: 1rem;">📊 Plan de Limpieza Inteligente</h3>
+                        <div id="smart-plan-content">
+                            <!-- Plan content will be loaded here -->
+                        </div>
                     </div>
                 </div>
 
@@ -1660,119 +1670,167 @@ https://example.com/recipe3"></textarea>
                         <!-- Schedule will be loaded here -->
                     </div>
                 </div>
-
-                <!-- Quick Stats -->
-                <div style="margin-top: 2rem; padding-top: 2rem; border-top: 1px solid var(--glass-border);">
-                    <h3 style="color: var(--gold); margin-bottom: 1rem;">📊 Resumen Rápido</h3>
-                    <div id="cleaning-stats" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
-                        <!-- Stats will be loaded here -->
-                    </div>
-                </div>
-            </div>
-
-            <!-- Tasks Management Card -->
-            <div class="card" style="margin-top: 2rem;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-                    <h3 style="margin: 0; color: var(--gold);">📋 Gestión de Tareas</h3>
-                    <button class="btn btn-secondary" onclick="toggleTaskManagement()" id="toggle-tasks-btn">
-                        👁️ Ver Tareas
-                    </button>
-                </div>
-                
-                <div id="cleaning-tasks-container" style="display: none;">
-                    <div class="loading" id="cleaning-tasks-loading">
-                        <p>Cargando tareas...</p>
-                    </div>
-                    
-                    <div id="cleaning-tasks-list" style="display: none;">
-                        <!-- Tasks list will be loaded here -->
-                    </div>
-                </div>
-            </div>
-
-            <!-- Preferences Card -->
-            <div class="card" style="margin-top: 2rem;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-                    <h3 style="margin: 0; color: var(--gold);">⚙️ Preferencias</h3>
-                    <button class="btn btn-secondary" onclick="toggleCleaningPreferences()" id="toggle-prefs-btn">
-                        ⚙️ Configurar
-                    </button>
-                </div>
-                
-                <div id="cleaning-preferences-container" style="display: none;">
-                    <div class="loading" id="cleaning-prefs-loading">
-                        <p>Cargando preferencias...</p>
-                    </div>
-                    
-                    <div id="cleaning-preferences-form" style="display: none;">
-                        <!-- Preferences form will be loaded here -->
-                    </div>
-                </div>
             </div>
         </div>
 
         <!-- SETTINGS TAB -->
         <div class="tab-content" id="settings-tab">
+            <!-- ANTHROPIC API KEY CARD -->
             <div class="card">
-                <h2>⚙️ Settings</h2>
+                <h2>🔑 Anthropic API Key</h2>
                 <p style="color: var(--silver); margin-bottom: 30px;">
-                    Configure system options, including the Anthropic API key for AI menu generation.
+                    The Anthropic API key is required to generate weekly menus with AI. 
+                    Get your free key at: 
+                    <a href="https://console.anthropic.com/" target="_blank" style="color: #93C5FD; text-decoration: underline;">
+                        https://console.anthropic.com/
+                    </a>
                 </p>
 
-                <div style="background: rgba(59, 130, 246, 0.1); border-left: 4px solid rgba(59, 130, 246, 0.5); padding: 20px; margin-bottom: 30px; border-radius: 4px;">
-                    <h3 style="margin-bottom: 10px; color: #93C5FD;">🔑 Anthropic API Key</h3>
-                    <p style="color: var(--silver); margin-bottom: 15px;">
-                        The Anthropic API key is required to generate weekly menus with AI. 
-                        Get your free key at: 
-                        <a href="https://console.anthropic.com/" target="_blank" style="color: #93C5FD; text-decoration: underline;">
-                            https://console.anthropic.com/
-                        </a>
-                    </p>
-                    
-                    <form id="settingsForm">
-                        <div class="form-group">
-                            <label for="anthropic-api-key">
-                                <strong>ANTHROPIC_API_KEY</strong>
-                                <span style="color: var(--silver); font-weight: normal; font-size: 0.9rem;">
-                                    (will be partially hidden for security)
-                                </span>
-                            </label>
-                            <input 
-                                type="password" 
-                                id="anthropic-api-key" 
-                                name="anthropic_api_key" 
-                                placeholder="sk-ant-api03-..."
-                                style="font-family: monospace; font-size: 0.95rem;"
-                            >
-                            <small style="color: var(--silver); display: block; margin-top: 5px;">
-                                💡 The key will be saved securely in the .env file
+                <form id="settingsForm">
+                    <div class="form-group">
+                        <label for="anthropic-api-key">
+                            <strong>ANTHROPIC_API_KEY</strong>
+                            <span style="color: var(--silver); font-weight: normal; font-size: 0.9rem;">
+                                (will be partially hidden for security)
+                            </span>
+                        </label>
+                        <input 
+                            type="password" 
+                            id="anthropic-api-key" 
+                            name="anthropic_api_key" 
+                            placeholder="sk-ant-api03-..."
+                            style="font-family: monospace; font-size: 0.95rem;"
+                        >
+                        <small style="color: var(--silver); display: block; margin-top: 5px;">
+                            💡 The key will be saved securely in the .env file
+                        </small>
+                    </div>
+
+                    <div id="api-key-status" style="margin-bottom: 15px;"></div>
+
+                    <div style="display: flex; gap: 10px;">
+                        <button type="submit" class="btn btn-success">
+                            💾 Save Settings
+                        </button>
+                        <button type="button" class="btn btn-primary" onclick="testApiKey()">
+                            🧪 Test API Key
+                        </button>
+                        <button type="button" class="btn btn-danger" onclick="loadSettings()">
+                            🔄 Reload
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- MENU PREFERENCES CARD -->
+            <div class="card" style="margin-top: 2rem;">
+                <h2>📅 Menu Preferences</h2>
+                <p style="color: var(--silver); margin-bottom: 30px;">
+                    Configure which days and meals to include in your weekly menu.
+                </p>
+
+                <form id="menuPreferencesForm">
+                        <!-- Days Configuration -->
+                        <div style="background: rgba(255, 255, 255, 0.03); padding: 2rem; border-radius: 16px; margin-bottom: 2rem; border: 1px solid rgba(255, 255, 255, 0.1);">
+                            <h3 style="font-family: 'Playfair Display', serif; font-size: 1.5rem; color: var(--white); margin-bottom: 1.5rem;">Days Configuration</h3>
+                            
+                            <div class="form-group">
+                                <label style="display: flex; align-items: center; gap: 0.75rem; cursor: pointer;">
+                                    <input type="checkbox" id="include-weekend" name="include_weekend" style="width: 20px; height: 20px; cursor: pointer;">
+                                    <span>Include weekend (Saturday & Sunday)</span>
+                                </label>
+                                <small style="color: var(--silver); display: block; margin-top: 0.5rem; margin-left: 2rem;">
+                                    If unchecked, menu will only include Monday to Friday
+                                </small>
+                            </div>
+
+                            <div class="form-group" style="margin-top: 1.5rem;">
+                                <label>Exclude specific days (e.g., if you're not home)</label>
+                                <div style="display: flex; flex-wrap: wrap; gap: 1rem; margin-top: 1rem;">
+                                    <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; padding: 0.75rem 1rem; background: rgba(255, 255, 255, 0.03); border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.1);">
+                                        <input type="checkbox" class="excluded-day" value="lunes" style="width: 18px; height: 18px; cursor: pointer;">
+                                        <span>Monday</span>
+                                    </label>
+                                    <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; padding: 0.75rem 1rem; background: rgba(255, 255, 255, 0.03); border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.1);">
+                                        <input type="checkbox" class="excluded-day" value="martes" style="width: 18px; height: 18px; cursor: pointer;">
+                                        <span>Tuesday</span>
+                                    </label>
+                                    <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; padding: 0.75rem 1rem; background: rgba(255, 255, 255, 0.03); border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.1);">
+                                        <input type="checkbox" class="excluded-day" value="miércoles" style="width: 18px; height: 18px; cursor: pointer;">
+                                        <span>Wednesday</span>
+                                    </label>
+                                    <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; padding: 0.75rem 1rem; background: rgba(255, 255, 255, 0.03); border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.1);">
+                                        <input type="checkbox" class="excluded-day" value="jueves" style="width: 18px; height: 18px; cursor: pointer;">
+                                        <span>Thursday</span>
+                                    </label>
+                                    <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; padding: 0.75rem 1rem; background: rgba(255, 255, 255, 0.03); border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.1);">
+                                        <input type="checkbox" class="excluded-day" value="viernes" style="width: 18px; height: 18px; cursor: pointer;">
+                                        <span>Friday</span>
+                                    </label>
+                                    <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; padding: 0.75rem 1rem; background: rgba(255, 255, 255, 0.03); border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.1);">
+                                        <input type="checkbox" class="excluded-day" value="sábado" style="width: 18px; height: 18px; cursor: pointer;">
+                                        <span>Saturday</span>
+                                    </label>
+                                    <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; padding: 0.75rem 1rem; background: rgba(255, 255, 255, 0.03); border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.1);">
+                                        <input type="checkbox" class="excluded-day" value="domingo" style="width: 18px; height: 18px; cursor: pointer;">
+                                        <span>Sunday</span>
+                                    </label>
+                                </div>
+                                <small style="color: var(--silver); display: block; margin-top: 0.75rem;">
+                                    Check the days you want to exclude from the menu (e.g., if you're traveling or eating out)
+                                </small>
+                            </div>
+                        </div>
+
+                        <!-- Meals Configuration -->
+                        <div style="background: rgba(255, 255, 255, 0.03); padding: 2rem; border-radius: 16px; margin-bottom: 2rem; border: 1px solid rgba(255, 255, 255, 0.1);">
+                            <h3 style="font-family: 'Playfair Display', serif; font-size: 1.5rem; color: var(--white); margin-bottom: 1.5rem;">Meals Configuration</h3>
+                            
+                            <div class="form-group">
+                                <label style="display: flex; align-items: center; gap: 0.75rem; cursor: pointer; margin-bottom: 1rem;">
+                                    <input type="checkbox" id="include-breakfast" name="include_breakfast" style="width: 20px; height: 20px; cursor: pointer;">
+                                    <span style="font-size: 1.1rem;">🌅 Breakfast</span>
+                                </label>
+                            </div>
+
+                            <div class="form-group">
+                                <label style="display: flex; align-items: center; gap: 0.75rem; cursor: pointer; margin-bottom: 1rem;">
+                                    <input type="checkbox" id="include-lunch" name="include_lunch" style="width: 20px; height: 20px; cursor: pointer;">
+                                    <span style="font-size: 1.1rem;">🍽️ Lunch</span>
+                                </label>
+                            </div>
+
+                            <div class="form-group">
+                                <label style="display: flex; align-items: center; gap: 0.75rem; cursor: pointer; margin-bottom: 1rem;">
+                                    <input type="checkbox" id="include-dinner" name="include_dinner" style="width: 20px; height: 20px; cursor: pointer;">
+                                    <span style="font-size: 1.1rem;">🌙 Dinner</span>
+                                </label>
+                            </div>
+
+                            <small style="color: var(--silver); display: block; margin-top: 1rem;">
+                                Select which meals you want to include in your weekly menu. At least one meal must be selected.
                             </small>
                         </div>
 
-                        <div id="api-key-status" style="margin-bottom: 15px;"></div>
-
-                        <div style="display: flex; gap: 10px;">
+                        <div style="display: flex; gap: 1rem;">
                             <button type="submit" class="btn btn-success">
-                                💾 Save Settings
+                                💾 Save Menu Preferences
                             </button>
-                            <button type="button" class="btn btn-primary" onclick="testApiKey()">
-                                🧪 Test API Key
-                            </button>
-                            <button type="button" class="btn btn-danger" onclick="loadSettings()">
-                                🔄 Reload
+                            <button type="button" class="btn btn-danger" onclick="loadMenuPreferences()">
+                                🔄 Reset to Defaults
                             </button>
                         </div>
                     </form>
                 </div>
 
-                <!-- House Configuration Section -->
-                <div style="background: rgba(212, 175, 55, 0.1); border-left: 4px solid rgba(212, 175, 55, 0.5); padding: 20px; margin-bottom: 30px; border-radius: 4px;">
-                    <h3 style="margin-bottom: 10px; color: var(--gold);">🏠 Configuración de la Casa</h3>
-                    <p style="color: var(--silver); margin-bottom: 15px;">
-                        Configura las características de tu hogar para personalizar el sistema de limpieza.
-                    </p>
-                    
-                    <form id="houseConfigForm">
+            <!-- HOUSE CONFIGURATION CARD -->
+            <div class="card" style="margin-top: 2rem;">
+                <h2>🏠 Configuración de la Casa</h2>
+                <p style="color: var(--silver); margin-bottom: 30px;">
+                    Configura las características de tu hogar para personalizar el sistema de limpieza.
+                </p>
+                
+                <form id="houseConfigForm">
                         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px;">
                             <div class="form-group">
                                 <label for="num-habitaciones">
@@ -1952,118 +2010,217 @@ https://example.com/recipe3"></textarea>
                     </form>
                 </div>
 
-                <div style="background: rgba(251, 191, 36, 0.1); border-left: 4px solid rgba(251, 191, 36, 0.5); padding: 20px; margin-bottom: 30px; border-radius: 4px;">
-                    <h3 style="margin-bottom: 10px; color: #FCD34D;">ℹ️ System Information</h3>
-                    <div style="color: var(--silver);">
-                        <p><strong>Server Port:</strong> <code>7000</code></p>
-                        <p><strong>Database:</strong> <code>SQLite (family_kitchen.db)</code></p>
-                        <p><strong>Mode:</strong> <code id="system-mode">Development</code></p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- MENU PREFERENCES SECTION -->
+            <!-- CLEANING CAPACITY CARD -->
             <div class="card" style="margin-top: 2rem;">
-                <h2>📅 Menu Preferences</h2>
+                <h2>🧹 Capacidades de Limpieza</h2>
                 <p style="color: var(--silver); margin-bottom: 30px;">
-                    Configure which days and meals to include in your weekly menu.
+                    Configura la capacidad de limpieza de cada miembro de la familia.
+                    Los niños harán tareas simples y los adultos tareas más complejas.
                 </p>
 
-                <form id="menuPreferencesForm">
-                    <!-- Days Configuration -->
-                    <div style="background: rgba(255, 255, 255, 0.03); padding: 2rem; border-radius: 16px; margin-bottom: 2rem; border: 1px solid rgba(255, 255, 255, 0.1);">
-                        <h3 style="font-family: 'Playfair Display', serif; font-size: 1.5rem; color: var(--white); margin-bottom: 1.5rem;">Days Configuration</h3>
-                        
-                        <div class="form-group">
-                            <label style="display: flex; align-items: center; gap: 0.75rem; cursor: pointer;">
-                                <input type="checkbox" id="include-weekend" name="include_weekend" style="width: 20px; height: 20px; cursor: pointer;">
-                                <span>Include weekend (Saturday & Sunday)</span>
-                            </label>
-                            <small style="color: var(--silver); display: block; margin-top: 0.5rem; margin-left: 2rem;">
-                                If unchecked, menu will only include Monday to Friday
-                            </small>
-                        </div>
-
-                        <div class="form-group" style="margin-top: 1.5rem;">
-                            <label>Exclude specific days (e.g., if you're not home)</label>
-                            <div style="display: flex; flex-wrap: wrap; gap: 1rem; margin-top: 1rem;">
-                                <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; padding: 0.75rem 1rem; background: rgba(255, 255, 255, 0.03); border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.1);">
-                                    <input type="checkbox" class="excluded-day" value="lunes" style="width: 18px; height: 18px; cursor: pointer;">
-                                    <span>Monday</span>
+                <form id="cleaningCapacityForm">
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+                        <!-- Children Capacity -->
+                        <div style="background: rgba(255, 255, 255, 0.03); padding: 1.5rem; border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.1);">
+                            <h3 style="color: #60A5FA; margin-bottom: 1rem; font-family: 'Playfair Display', serif;">👶 Niños</h3>
+                            
+                            <div class="form-group">
+                                <label for="ninos-percentage">
+                                    <strong>Porcentaje Diario de Tareas</strong>
+                                    <span style="color: var(--silver); font-weight: normal; font-size: 0.9rem;">
+                                        (% del total de tareas que pueden hacer diariamente)
+                                    </span>
                                 </label>
-                                <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; padding: 0.75rem 1rem; background: rgba(255, 255, 255, 0.03); border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.1);">
-                                    <input type="checkbox" class="excluded-day" value="martes" style="width: 18px; height: 18px; cursor: pointer;">
-                                    <span>Tuesday</span>
-                                </label>
-                                <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; padding: 0.75rem 1rem; background: rgba(255, 255, 255, 0.03); border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.1);">
-                                    <input type="checkbox" class="excluded-day" value="miércoles" style="width: 18px; height: 18px; cursor: pointer;">
-                                    <span>Wednesday</span>
-                                </label>
-                                <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; padding: 0.75rem 1rem; background: rgba(255, 255, 255, 0.03); border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.1);">
-                                    <input type="checkbox" class="excluded-day" value="jueves" style="width: 18px; height: 18px; cursor: pointer;">
-                                    <span>Thursday</span>
-                                </label>
-                                <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; padding: 0.75rem 1rem; background: rgba(255, 255, 255, 0.03); border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.1);">
-                                    <input type="checkbox" class="excluded-day" value="viernes" style="width: 18px; height: 18px; cursor: pointer;">
-                                    <span>Friday</span>
-                                </label>
-                                <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; padding: 0.75rem 1rem; background: rgba(255, 255, 255, 0.03); border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.1);">
-                                    <input type="checkbox" class="excluded-day" value="sábado" style="width: 18px; height: 18px; cursor: pointer;">
-                                    <span>Saturday</span>
-                                </label>
-                                <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; padding: 0.75rem 1rem; background: rgba(255, 255, 255, 0.03); border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.1);">
-                                    <input type="checkbox" class="excluded-day" value="domingo" style="width: 18px; height: 18px; cursor: pointer;">
-                                    <span>Sunday</span>
-                                </label>
+                                <input 
+                                    type="number" 
+                                    id="ninos-percentage" 
+                                    name="ninos_percentage" 
+                                    min="0" 
+                                    max="50" 
+                                    value="10"
+                                    style="font-family: monospace; font-size: 0.95rem; width: 100%;"
+                                >
+                                <small style="color: var(--silver); display: block; margin-top: 5px;">
+                                    Recomendado: 10% para tareas básicas (recoger juguetes, arreglar cama)
+                                </small>
                             </div>
-                            <small style="color: var(--silver); display: block; margin-top: 0.75rem;">
-                                Check the days you want to exclude from the menu (e.g., if you're traveling or eating out)
-                            </small>
+
+                            <div class="form-group">
+                                <label for="ninos-max-hours">
+                                    <strong>Horas Semanales Máximas</strong>
+                                    <span style="color: var(--silver); font-weight: normal; font-size: 0.9rem;">
+                                        (límite de tiempo por semana)
+                                    </span>
+                                </label>
+                                <input 
+                                    type="number" 
+                                    id="ninos-max-hours" 
+                                    name="ninos_max_hours" 
+                                    min="1" 
+                                    max="20" 
+                                    value="10"
+                                    style="font-family: monospace; font-size: 0.95rem; width: 100%;"
+                                >
+                            </div>
+
+                            <div class="form-group">
+                                <label for="ninos-dificultad">
+                                    <strong>Dificultad Máxima de Tareas</strong>
+                                    <span style="color: var(--silver); font-weight: normal; font-size: 0.9rem;">
+                                        (1-2 para tareas simples, 3-5 para complejas)
+                                    </span>
+                                </label>
+                                <select 
+                                    id="ninos-dificultad" 
+                                    name="ninos_dificultad" 
+                                    style="font-family: monospace; font-size: 0.95rem; width: 100%; padding: 8px; background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 6px; color: var(--white);"
+                                >
+                                    <option value="1">Muy Básico (1)</option>
+                                    <option value="2" selected>Básico (2)</option>
+                                    <option value="3">Intermedio (3)</option>
+                                    <option value="4">Avanzado (4)</option>
+                                    <option value="5">Experto (5)</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="ninos-areas">
+                                    <strong>Áreas Preferidas</strong>
+                                    <span style="color: var(--silver); font-weight: normal; font-size: 0.9rem;">
+                                        (selecciona múltiples áreas)
+                                    </span>
+                                </label>
+                                <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px;">
+                                    <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; padding: 0.5rem 1rem; background: rgba(255, 255, 255, 0.03); border-radius: 6px; border: 1px solid rgba(255, 255, 255, 0.1);">
+                                        <input type="checkbox" name="ninos_areas" value="habitacion" style="width: 18px; height: 18px; cursor: pointer;">
+                                        <span>Habitación</span>
+                                    </label>
+                                    <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; padding: 0.5rem 1rem; background: rgba(255, 255, 255, 0.03); border-radius: 6px; border: 1px solid rgba(255, 255, 255, 0.1);">
+                                        <input type="checkbox" name="ninos_areas" value="juguetes" style="width: 18px; height: 18px; cursor: pointer;">
+                                        <span>Juguetes</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Adults Capacity -->
+                        <div style="background: rgba(59, 130, 246, 0.1); padding: 1.5rem; border-radius: 12px; border: 1px solid rgba(59, 130, 246, 0.2);">
+                            <h3 style="color: #3B82F6; margin-bottom: 1rem; font-family: 'Playfair Display', serif;">👨‍👩‍👧‍👦 Adultos</h3>
+                            
+                            <div class="form-group">
+                                <label for="adultos-percentage">
+                                    <strong>Porcentaje Diario de Tareas</strong>
+                                    <span style="color: var(--silver); font-weight: normal; font-size: 0.9rem;">
+                                        (% del total de tareas que pueden hacer diariamente)
+                                    </span>
+                                </label>
+                                <input 
+                                    type="number" 
+                                    id="adultos-percentage" 
+                                    name="adultos_percentage" 
+                                    min="0" 
+                                    max="100" 
+                                    value="90"
+                                    style="font-family: monospace; font-size: 0.95rem; width: 100%;"
+                                >
+                                <small style="color: var(--silver); display: block; margin-top: 5px;">
+                                    Recomendado: 90% para tareas completas (cocina, baños, limpieza profunda)
+                                </small>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="adultos-max-hours">
+                                    <strong>Horas Semanales Máximas</strong>
+                                    <span style="color: var(--silver); font-weight: normal; font-size: 0.9rem;">
+                                        (límite de tiempo por semana)
+                                    </span>
+                                </label>
+                                <input 
+                                    type="number" 
+                                    id="adultos-max-hours" 
+                                    name="adultos_max_hours" 
+                                    min="1" 
+                                    max="60" 
+                                    value="40"
+                                    style="font-family: monospace; font-size: 0.95rem; width: 100%;"
+                                >
+                            </div>
+
+                            <div class="form-group">
+                                <label for="adultos-dificultad">
+                                    <strong>Dificultad Máxima de Tareas</strong>
+                                    <span style="color: var(--silver); font-weight: normal; font-size: 0.9rem;">
+                                        (1-5 para todas las tareas)
+                                    </span>
+                                </label>
+                                <select 
+                                    id="adultos-dificultad" 
+                                    name="adultos_dificultad" 
+                                    style="font-family: monospace; font-size: 0.95rem; width: 100%; padding: 8px; background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 6px; color: var(--white);"
+                                >
+                                    <option value="1">Muy Básico (1)</option>
+                                    <option value="2">Básico (2)</option>
+                                    <option value="3">Intermedio (3)</option>
+                                    <option value="4">Avanzado (4)</option>
+                                    <option value="5" selected>Experto (5)</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="adultos-areas">
+                                    <strong>Áreas Preferidas</strong>
+                                    <span style="color: var(--silver); font-weight: normal; font-size: 0.9rem;">
+                                        (selecciona múltiples áreas)
+                                    </span>
+                                </label>
+                                <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px;">
+                                    <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; padding: 0.5rem 1rem; background: rgba(255, 255, 255, 0.03); border-radius: 6px; border: 1px solid rgba(255, 255, 255, 0.1);">
+                                        <input type="checkbox" name="adultos_areas" value="cocina" style="width: 18px; height: 18px; cursor: pointer;">
+                                        <span>Cocina</span>
+                                    </label>
+                                    <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; padding: 0.5rem 1rem; background: rgba(255, 255, 255, 0.03); border-radius: 6px; border: 1px solid rgba(255, 255, 255, 0.1);">
+                                        <input type="checkbox" name="adultos_areas" value="banos" style="width: 18px; height: 18px; cursor: pointer;">
+                                        <span>Baños</span>
+                                    </label>
+                                    <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; padding: 0.5rem 1rem; background: rgba(255, 255, 255, 0.03); border-radius: 6px; border: 1px solid rgba(255, 255, 255, 0.1);">
+                                        <input type="checkbox" name="adultos_areas" value="sala" style="width: 18px; height: 18px; cursor: pointer;">
+                                        <span>Sala</span>
+                                    </label>
+                                    <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; padding: 0.5rem 1rem; background: rgba(255, 255, 255, 0.03); border-radius: 6px; border: 1px solid rgba(255, 255, 255, 0.1);">
+                                        <input type="checkbox" name="adultos_areas" value="exterior" style="width: 18px; height: 18px; cursor: pointer;">
+                                        <span>Exterior</span>
+                                    </label>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
-                    <!-- Meals Configuration -->
-                    <div style="background: rgba(255, 255, 255, 0.03); padding: 2rem; border-radius: 16px; margin-bottom: 2rem; border: 1px solid rgba(255, 255, 255, 0.1);">
-                        <h3 style="font-family: 'Playfair Display', serif; font-size: 1.5rem; color: var(--white); margin-bottom: 1.5rem;">Meals Configuration</h3>
-                        
-                        <div class="form-group">
-                            <label style="display: flex; align-items: center; gap: 0.75rem; cursor: pointer; margin-bottom: 1rem;">
-                                <input type="checkbox" id="include-breakfast" name="include_breakfast" style="width: 20px; height: 20px; cursor: pointer;">
-                                <span style="font-size: 1.1rem;">🌅 Breakfast</span>
-                            </label>
-                        </div>
+                    <div id="cleaning-capacity-status" style="margin-top: 15px;"></div>
 
-                        <div class="form-group">
-                            <label style="display: flex; align-items: center; gap: 0.75rem; cursor: pointer; margin-bottom: 1rem;">
-                                <input type="checkbox" id="include-lunch" name="include_lunch" style="width: 20px; height: 20px; cursor: pointer;">
-                                <span style="font-size: 1.1rem;">🍽️ Lunch</span>
-                            </label>
-                        </div>
-
-                        <div class="form-group">
-                            <label style="display: flex; align-items: center; gap: 0.75rem; cursor: pointer; margin-bottom: 1rem;">
-                                <input type="checkbox" id="include-dinner" name="include_dinner" style="width: 20px; height: 20px; cursor: pointer;">
-                                <span style="font-size: 1.1rem;">🌙 Dinner</span>
-                            </label>
-                        </div>
-
-                        <small style="color: var(--silver); display: block; margin-top: 1rem;">
-                            Select which meals you want to include in your weekly menu. At least one meal must be selected.
-                        </small>
-                    </div>
-
-                    <div style="display: flex; gap: 1rem;">
+                    <div style="display: flex; gap: 10px; margin-top: 20px;">
                         <button type="submit" class="btn btn-success">
-                            💾 Save Menu Preferences
+                            💾 Guardar Capacidades
                         </button>
-                        <button type="button" class="btn btn-danger" onclick="loadMenuPreferences()">
-                            🔄 Reset to Defaults
+                        <button type="button" class="btn btn-primary" onclick="loadCleaningCapacity()">
+                            🔄 Cargar Capacidades
+                        </button>
+                        <button type="button" class="btn btn-secondary" onclick="testCapacityDistribution()">
+                            ⚡ Probar Distribución
                         </button>
                     </div>
                 </form>
             </div>
+
+            <!-- SYSTEM INFORMATION CARD -->
+            <div class="card" style="margin-top: 2rem;">
+                <h2>ℹ️ System Information</h2>
+                <div style="color: var(--silver);">
+                    <p><strong>Server Port:</strong> <code>7000</code></p>
+                    <p><strong>Database:</strong> <code>SQLite (family_kitchen.db)</code></p>
+                    <p><strong>Mode:</strong> <code id="system-mode">Development</code></p>
+                </div>
+            </div>
         </div>
-    </div>
 
     <script>
         // Clock functionality for sidebar
@@ -2089,6 +2246,7 @@ https://example.com/recipe3"></textarea>
         setInterval(updateSidebarClock, 1000);
     </script>
     <script src="/static/js/house_config.js"></script>
+    <script src="/static/js/cleaning_capacity.js"></script>
     <script src="/static/js/app.js"></script>
 </body>
 </html>

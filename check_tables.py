@@ -16,10 +16,20 @@ cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='clea
 cleaning_table = cursor.fetchall()
 print(f"\nCleaning tasks table exists: {len(cleaning_table) > 0}")
 
+# Check specifically for cleaning_assignments
+cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='cleaning_assignments'")
+assignments_table = cursor.fetchall()
+print(f"Cleaning assignments table exists: {len(assignments_table) > 0}")
+
+# Check specifically for cleaning_preferences
+cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='cleaning_preferences'")
+preferences_table = cursor.fetchall()
+print(f"Cleaning preferences table exists: {len(preferences_table) > 0}")
+
 if len(cleaning_table) == 0:
-    print("ERROR: cleaning_tasks table was not created!")
+    print("\nERROR: cleaning tables were not created!")
     print("Let's check what went wrong...")
 else:
-    print("SUCCESS: cleaning_tasks table exists")
+    print("\nSUCCESS: cleaning tables exist")
 
 conn.close()

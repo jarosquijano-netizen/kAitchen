@@ -303,6 +303,169 @@
             height: 18px;
         }
 
+        /* Calendar Styles */
+        .calendar-section {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        .date-range-selector {
+            display: flex;
+            gap: 16px;
+            align-items: end;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+
+        .date-input-group {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 8px;
+            margin: 24px 0;
+        }
+
+        .calendar-header {
+            text-align: center;
+            font-weight: 600;
+            color: var(--gold);
+            padding: 8px;
+            font-size: 0.875rem;
+        }
+
+        .calendar-day {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 8px;
+            padding: 8px;
+            min-height: 80px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .calendar-day:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: var(--gold);
+        }
+
+        .calendar-day.selected {
+            background: rgba(212, 175, 55, 0.2);
+            border-color: var(--gold);
+        }
+
+        .calendar-day.other-month {
+            opacity: 0.3;
+        }
+
+        .calendar-day-number {
+            font-weight: 600;
+            margin-bottom: 4px;
+            color: var(--white);
+        }
+
+        .calendar-day-tasks {
+            font-size: 0.75rem;
+            color: var(--silver);
+        }
+
+        .calendar-day-task-count {
+            background: var(--gold);
+            color: var(--black);
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: 600;
+            position: absolute;
+            top: 4px;
+            right: 4px;
+        }
+
+        .day-detail-panel {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 24px;
+            margin-top: 24px;
+        }
+
+        .day-detail-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .day-detail-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--gold);
+        }
+
+        .task-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .task-detail-item {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            border-radius: 8px;
+            padding: 16px;
+            border-left: 4px solid var(--sage);
+        }
+
+        .task-detail-item.completed {
+            border-left-color: #48bb78;
+            opacity: 0.7;
+        }
+
+        .task-detail-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 8px;
+        }
+
+        .task-detail-name {
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .task-detail-meta {
+            display: flex;
+            gap: 16px;
+            font-size: 0.875rem;
+            color: var(--silver);
+        }
+
+        .task-detail-assignee {
+            background: var(--sage);
+            color: var(--black);
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .task-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
         @media (max-width: 768px) {
             .container {
                 padding: 10px;
@@ -319,6 +482,19 @@
             .schedule-grid {
                 grid-template-columns: 1fr;
             }
+
+            .date-range-selector {
+                flex-direction: column;
+            }
+
+            .calendar-grid {
+                gap: 4px;
+            }
+
+            .calendar-day {
+                min-height: 60px;
+                padding: 4px;
+            }
         }
     </style>
 </head>
@@ -330,10 +506,52 @@
         </header>
 
         <div class="nav-tabs">
-            <div class="nav-tab active" onclick="showTab('schedule')">Horario Semanal</div>
+            <div class="nav-tab active" onclick="showTab('calendar')">Calendario</div>
+            <div class="nav-tab" onclick="showTab('schedule')">Horario Semanal</div>
             <div class="nav-tab" onclick="showTab('tasks')">Gestionar Tareas</div>
             <div class="nav-tab" onclick="showTab('preferences')">Preferencias</div>
             <div class="nav-tab" onclick="showTab('statistics')">Estadísticas</div>
+        </div>
+
+        <!-- Calendar Tab -->
+        <div id="calendar-tab" class="tab-content active">
+            <div class="calendar-section">
+                <div class="card-header">
+                    <h2 class="card-title">Calendario de Limpieza</h2>
+                </div>
+                
+                <!-- Date Range Selector -->
+                <div class="date-range-selector">
+                    <div class="date-input-group">
+                        <label for="start-date" class="form-label">Fecha de Inicio:</label>
+                        <input type="date" id="start-date" class="form-control">
+                    </div>
+                    <div class="date-input-group">
+                        <label for="end-date" class="form-label">Fecha de Fin:</label>
+                        <input type="date" id="end-date" class="form-control">
+                    </div>
+                    <div>
+                        <button class="btn btn-primary" onclick="generateCalendar()">Generar Calendario</button>
+                        <button class="btn btn-secondary" onclick="clearCalendar()">Limpiar</button>
+                    </div>
+                </div>
+
+                <!-- Calendar Grid -->
+                <div id="calendar-container">
+                    <div class="loading">Selecciona un rango de fechas para generar el calendario...</div>
+                </div>
+
+                <!-- Day Detail Panel -->
+                <div id="day-detail-panel" style="display: none;">
+                    <div class="day-detail-header">
+                        <h3 class="day-detail-title" id="selected-date-title">Tareas del Día</h3>
+                        <button class="btn btn-secondary btn-sm" onclick="closeDayDetail()">✕</button>
+                    </div>
+                    <div id="day-tasks-content">
+                        <div class="loading">Cargando tareas...</div>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- Schedule Tab -->
@@ -410,11 +628,49 @@
 
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
+            initializeCalendar();
             loadCurrentSchedule();
             loadTasks();
             loadPreferences();
             loadFamilyMembers();
+            
+            // Load saved calendar data if exists
+            loadSavedCalendarData();
         });
+
+        // Local storage functions
+        function saveCalendarData(startDate, endDate, calendarData) {
+            localStorage.setItem('cleaning-calendar-start', startDate);
+            localStorage.setItem('cleaning-calendar-end', endDate);
+            localStorage.setItem('cleaning-calendar-data', JSON.stringify(calendarData));
+        }
+
+        function loadSavedCalendarData() {
+            const savedStart = localStorage.getItem('cleaning-calendar-start');
+            const savedEnd = localStorage.getItem('cleaning-calendar-end');
+            const savedData = localStorage.getItem('cleaning-calendar-data');
+            
+            if (savedStart && savedEnd) {
+                document.getElementById('start-date').value = savedStart;
+                document.getElementById('end-date').value = savedEnd;
+                
+                if (savedData) {
+                    try {
+                        const calendarData = JSON.parse(savedData);
+                        currentCalendarData = calendarData;
+                        displayCalendar(calendarData);
+                    } catch (e) {
+                        console.error('Error loading saved calendar data:', e);
+                    }
+                }
+            }
+        }
+
+        function clearSavedCalendarData() {
+            localStorage.removeItem('cleaning-calendar-start');
+            localStorage.removeItem('cleaning-calendar-end');
+            localStorage.removeItem('cleaning-calendar-data');
+        }
 
         // Tab navigation
         function showTab(tabName) {
@@ -431,7 +687,14 @@
             event.target.classList.add('active');
 
             // Load content based on tab
-            if (tabName === 'schedule') {
+            if (tabName === 'calendar') {
+                // Load calendar with current date range
+                const startDate = document.getElementById('start-date').value;
+                const endDate = document.getElementById('end-date').value;
+                if (startDate && endDate) {
+                    loadCalendar(startDate, endDate);
+                }
+            } else if (tabName === 'schedule') {
                 loadCurrentSchedule();
             } else if (tabName === 'statistics') {
                 loadStatistics();
@@ -952,6 +1215,350 @@
             setTimeout(() => {
                 messageDiv.remove();
             }, 5000);
+        }
+
+        // Calendar Functions
+        let currentCalendarData = {};
+        let selectedDate = null;
+
+        function initializeCalendar() {
+            // Set default dates (current week) if not already saved
+            const savedStart = localStorage.getItem('cleaning-calendar-start');
+            const savedEnd = localStorage.getItem('cleaning-calendar-end');
+            
+            if (savedStart && savedEnd) {
+                // Use saved dates
+                document.getElementById('start-date').value = savedStart;
+                document.getElementById('end-date').value = savedEnd;
+            } else {
+                // Set default dates (current week)
+                const today = new Date();
+                const startOfWeek = new Date(today);
+                const day = startOfWeek.getDay();
+                const diff = startOfWeek.getDate() - day + (day === 0 ? -6 : 1);
+                startOfWeek.setDate(diff);
+                
+                const endOfWeek = new Date(startOfWeek);
+                endOfWeek.setDate(endOfWeek.getDate() + 6);
+                
+                document.getElementById('start-date').value = startOfWeek.toISOString().split('T')[0];
+                document.getElementById('end-date').value = endOfWeek.toISOString().split('T')[0];
+            }
+        }
+
+        function generateCalendar() {
+            const startDate = document.getElementById('start-date').value;
+            const endDate = document.getElementById('end-date').value;
+            
+            if (!startDate || !endDate) {
+                showMessage('Por favor selecciona fechas de inicio y fin', 'error');
+                return;
+            }
+            
+            if (new Date(startDate) > new Date(endDate)) {
+                showMessage('La fecha de inicio debe ser anterior a la fecha de fin', 'error');
+                return;
+            }
+            
+            // Show loading
+            document.getElementById('calendar-container').innerHTML = '<div class="loading">Generando calendario...</div>';
+            
+            // Call API to generate calendar
+            fetch('/api/cleaning/calendar/assign', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    start_date: startDate,
+                    end_date: endDate
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showMessage(`Calendario generado exitosamente: ${data.total_assignments} tareas asignadas`, 'success');
+                    
+                    // Save to localStorage for persistence
+                    saveCalendarData(startDate, endDate, data);
+                    
+                    loadCalendar(startDate, endDate);
+                } else {
+                    showMessage(`Error al generar calendario: ${data.error}`, 'error');
+                    document.getElementById('calendar-container').innerHTML = `<div class="error">${data.error}</div>`;
+                }
+            })
+            .catch(error => {
+                showMessage(`Error al generar calendario: ${error}`, 'error');
+                document.getElementById('calendar-container').innerHTML = `<div class="error">Error: ${error}</div>`;
+            });
+        }
+
+        function clearCalendar() {
+            if (confirm('¿Estás seguro de que quieres limpiar el calendario? Esto eliminará todas las asignaciones guardadas localmente.')) {
+                clearSavedCalendarData();
+                currentCalendarData = {};
+                selectedDate = null;
+                
+                // Reset form
+                initializeCalendar();
+                
+                // Clear display
+                document.getElementById('calendar-container').innerHTML = '<div class="loading">Selecciona un rango de fechas para generar el calendario...</div>';
+                document.getElementById('day-detail-panel').style.display = 'none';
+                
+                showMessage('Calendario limpiado exitosamente', 'success');
+            }
+        }
+
+        function loadCalendar(startDate, endDate) {
+            // Load calendar data from API
+            fetch(`/api/cleaning/calendar/${startDate}/${endDate}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        currentCalendarData = data;
+                        displayCalendar(data);
+                    } else {
+                        document.getElementById('calendar-container').innerHTML = `<div class="error">${data.error}</div>`;
+                    }
+                })
+                .catch(error => {
+                    document.getElementById('calendar-container').innerHTML = `<div class="error">Error: ${error}</div>`;
+                });
+        }
+
+        function displayCalendar(data) {
+            const startDate = new Date(data.start_date);
+            const endDate = new Date(data.end_date);
+            
+            // Generate calendar grid
+            let html = '<div class="calendar-grid">';
+            
+            // Add day headers
+            const dayHeaders = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+            dayHeaders.forEach(day => {
+                html += `<div class="calendar-header">${day}</div>`;
+            });
+            
+            // Calculate start of calendar (Sunday of first week)
+            const calendarStart = new Date(startDate);
+            const startDay = calendarStart.getDay();
+            calendarStart.setDate(calendarStart.getDate() - startDay);
+            
+            // Generate calendar days
+            const currentDate = new Date(calendarStart);
+            while (currentDate <= endDate || currentDate.getDay() !== 0) {
+                for (let i = 0; i < 7; i++) {
+                    const dateStr = currentDate.toISOString().split('T')[0];
+                    const isCurrentMonth = currentDate.getMonth() === startDate.getMonth();
+                    const isInRange = currentDate >= startDate && currentDate <= endDate;
+                    
+                    const dayTasks = data.schedule[dateStr] || [];
+                    const taskCount = dayTasks.length;
+                    
+                    html += `
+                        <div class="calendar-day ${!isCurrentMonth ? 'other-month' : ''} ${isInRange ? 'in-range' : ''}" 
+                             onclick="selectDay('${dateStr}')" 
+                             data-date="${dateStr}">
+                            <div class="calendar-day-number">${currentDate.getDate()}</div>
+                            ${taskCount > 0 ? `<div class="calendar-day-task-count">${taskCount}</div>` : ''}
+                            <div class="calendar-day-tasks">${taskCount} tarea${taskCount !== 1 ? 's' : ''}</div>
+                        </div>
+                    `;
+                    
+                    currentDate.setDate(currentDate.getDate() + 1);
+                    
+                    if (currentDate > endDate && currentDate.getDay() === 0) {
+                        break;
+                    }
+                }
+            }
+            
+            html += '</div>';
+            
+            // Add summary
+            html += `
+                <div style="margin-top: 24px; padding: 16px; background: var(--glass-bg); border-radius: 8px;">
+                    <h3 style="color: var(--gold); margin-bottom: 12px;">Resumen del Período</h3>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 16px;">
+                        <div>
+                            <strong>Total de Tareas:</strong> ${data.total_assignments}
+                        </div>
+                        <div>
+                            <strong>Tasa de Completación:</strong> ${Math.round(data.completion_rate)}%
+                        </div>
+                        <div>
+                            <strong>Período:</strong> ${formatDateRange(data.start_date, data.end_date)}
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('calendar-container').innerHTML = html;
+        }
+
+        function selectDay(dateStr) {
+            selectedDate = dateStr;
+            
+            // Remove previous selection
+            document.querySelectorAll('.calendar-day').forEach(day => {
+                day.classList.remove('selected');
+            });
+            
+            // Add selection to clicked day
+            document.querySelector(`[data-date="${dateStr}"]`).classList.add('selected');
+            
+            // Load day details
+            loadDayDetails(dateStr);
+        }
+
+        function loadDayDetails(dateStr) {
+            document.getElementById('selected-date-title').textContent = `Tareas del ${formatDate(dateStr)}`;
+            document.getElementById('day-detail-panel').style.display = 'block';
+            document.getElementById('day-tasks-content').innerHTML = '<div class="loading">Cargando tareas...</div>';
+            
+            fetch(`/api/cleaning/calendar/day/${dateStr}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        displayDayTasks(data);
+                    } else {
+                        document.getElementById('day-tasks-content').innerHTML = `<div class="error">${data.error}</div>`;
+                    }
+                })
+                .catch(error => {
+                    document.getElementById('day-tasks-content').innerHTML = `<div class="error">Error: ${error}</div>`;
+                });
+        }
+
+        function displayDayTasks(data) {
+            const tasks = data.assignments;
+            
+            if (tasks.length === 0) {
+                document.getElementById('day-tasks-content').innerHTML = `
+                    <div style="text-align: center; padding: 40px; color: var(--silver);">
+                        No hay tareas asignadas para este día
+                    </div>
+                `;
+                return;
+            }
+            
+            let html = '<div class="task-list">';
+            
+            tasks.forEach(task => {
+                html += `
+                    <div class="task-detail-item ${task.completado ? 'completed' : ''}">
+                        <div class="task-detail-header">
+                            <div>
+                                <div class="task-detail-name">${task.task_nombre}</div>
+                                <div class="task-detail-meta">
+                                    <span>Área: ${task.area}</span>
+                                    <span>Dificultad: ${task.dificultad}/5</span>
+                                    <span>Tiempo: ${task.tiempo_estimado}min</span>
+                                </div>
+                            </div>
+                            <div class="task-detail-assignee">${task.member_name}</div>
+                        </div>
+                        <div class="task-actions">
+                            ${!task.completado ? 
+                                `<button class="btn btn-success btn-sm" onclick="markTaskCompleted(${task.id})">Marcar Completada</button>` :
+                                `<button class="btn btn-secondary btn-sm" onclick="markTaskIncomplete(${task.id})">Desmarcar</button>`
+                            }
+                            <button class="btn btn-secondary btn-sm" onclick="editTaskNotes(${task.id})">Añadir Notas</button>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            html += '</div>';
+            document.getElementById('day-tasks-content').innerHTML = html;
+        }
+
+        function closeDayDetail() {
+            document.getElementById('day-detail-panel').style.display = 'none';
+            selectedDate = null;
+            
+            // Remove selection
+            document.querySelectorAll('.calendar-day').forEach(day => {
+                day.classList.remove('selected');
+            });
+        }
+
+        function markTaskCompleted(taskId) {
+            updateTaskStatus(taskId, true);
+        }
+
+        function markTaskIncomplete(taskId) {
+            updateTaskStatus(taskId, false);
+        }
+
+        function updateTaskStatus(taskId, completed) {
+            fetch(`/api/cleaning/complete/${taskId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    completado: completed
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showMessage(completed ? 'Tarea marcada como completada' : 'Tarea desmarcada', 'success');
+                    
+                    // Update local calendar data
+                    if (selectedDate && currentCalendarData.schedule) {
+                        const dayTasks = currentCalendarData.schedule[selectedDate] || [];
+                        const taskIndex = dayTasks.findIndex(task => task.id === taskId);
+                        if (taskIndex !== -1) {
+                            dayTasks[taskIndex].completado = completed;
+                            currentCalendarData.schedule[selectedDate] = dayTasks;
+                            
+                            // Recalculate completion rate
+                            let totalTasks = 0;
+                            let completedTasks = 0;
+                            Object.values(currentCalendarData.schedule).forEach(tasks => {
+                                tasks.forEach(task => {
+                                    totalTasks++;
+                                    if (task.completado) completedTasks++;
+                                });
+                            });
+                            currentCalendarData.completion_rate = totalTasks > 0 ? (completedTasks / totalTasks) * 100 : 0;
+                            
+                            // Save updated data
+                            const startDate = document.getElementById('start-date').value;
+                            const endDate = document.getElementById('end-date').value;
+                            saveCalendarData(startDate, endDate, currentCalendarData);
+                            
+                            // Refresh display
+                            displayCalendar(currentCalendarData);
+                            if (selectedDate) {
+                                loadDayDetails(selectedDate);
+                            }
+                        }
+                    }
+                } else {
+                    showMessage(`Error: ${data.error}`, 'error');
+                }
+            })
+            .catch(error => {
+                showMessage(`Error al actualizar tarea: ${error}`, 'error');
+            });
+        }
+
+        function formatDate(dateStr) {
+            const date = new Date(dateStr);
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            return date.toLocaleDateString('es-ES', options);
+        }
+
+        function formatDateRange(startDate, endDate) {
+            const start = new Date(startDate);
+            const end = new Date(endDate);
+            const options = { day: 'numeric', month: 'long', year: 'numeric' };
+            return `${start.toLocaleDateString('es-ES', options)} - ${end.toLocaleDateString('es-ES', options)}`;
         }
     </script>
 </body>

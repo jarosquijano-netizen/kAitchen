@@ -3113,10 +3113,10 @@ async function loadMenuPreferences(prefs = null) {
         const includeLunch = document.getElementById('include-lunch');
         const includeDinner = document.getElementById('include-dinner');
         
-        if (includeWeekend) includeWeekend.checked = prefs.include_weekend !== false;
-        if (includeBreakfast) includeBreakfast.checked = prefs.include_breakfast !== false;
-        if (includeLunch) includeLunch.checked = prefs.include_lunch !== false;
-        if (includeDinner) includeDinner.checked = prefs.include_dinner !== false;
+        if (includeWeekend) includeWeekend.checked = prefs.include_weekend === true || prefs.include_weekend === 1;
+        if (includeBreakfast) includeBreakfast.checked = prefs.include_breakfast === true || prefs.include_breakfast === 1;
+        if (includeLunch) includeLunch.checked = prefs.include_lunch === true || prefs.include_lunch === 1;
+        if (includeDinner) includeDinner.checked = prefs.include_dinner === true || prefs.include_dinner === 1;
         
         // Update excluded days
         const excludedDays = prefs.excluded_days || [];
@@ -4783,12 +4783,166 @@ let cleaningPreferences = {};
 // Main cleaning system loader
 function loadCleaningSystem() {
     console.log('[Cleaning] Loading cleaning system...');
-    loadCurrentCleaningWeek();
-    loadCleaningTasks();
-    loadCleaningPreferences();
+    // Solo mostrar mensaje, no cargar sistema antiguo
+    console.log('[Cleaning] Use "Generar Plan Inteligente" button to create cleaning plan');
 }
 
-// Week navigation functions
+// Smart Cleaning Plan Functions
+function generateSmartCleaningPlan() {
+    showLoading('cleaning-loading');
+    hideElement('smart-plan-container');
+    
+    fetch('/api/cleaning/generate-smart-plan', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({})
+    })
+    .then(response => response.json())
+    .then(data => {
+        hideLoading('cleaning-loading');
+        if (data.success) {
+            displaySmartPlan(data);
+            showStatus('Plan de limpieza inteligente generado exitosamente', 'success');
+        } else {
+            showStatus('Error al generar plan: ' + data.error, 'error');
+        }
+    })
+    .catch(error => {
+        hideLoading('cleaning-loading');
+        console.error('Error generating smart plan:', error);
+        showStatus('Error de conexión al generar plan', 'error');
+    });
+}
+
+function regenerateSmartPlan() {
+    generateSmartCleaningPlan(); // Same function, just different button
+}
+
+function displaySmartPlan(data) {
+    const plan = data.plan;
+    const container = document.getElementById('smart-plan-container');
+    const content = document.getElementById('smart-plan-content');
+    
+    if (!container || !content) return;
+    
+    let planHtml = `
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
+            <div style="text-align: center; padding: 1rem; background: rgba(255, 255, 255, 0.05); border-radius: 8px;">
+                <div style="font-size: 2rem; font-weight: bold; color: var(--gold);">${plan.total_tasks}</div>
+                <div style="color: var(--silver); font-size: 0.9rem;">Total Tareas</div>
+            </div>
+            <div style="text-align: center; padding: 1rem; background: rgba(255, 255, 255, 0.05); border-radius: 8px;">
+                <div style="font-size: 2rem; font-weight: bold; color: #22C55E;">${plan.assigned_tasks}</div>
+                <div style="color: var(--silver); font-size: 0.9rem;">Tareas Asignadas</div>
+            </div>
+            <div style="text-align: center; padding: 1rem; background: rgba(255, 255, 255, 0.05); border-radius: 8px;">
+                <div style="font-size: 2rem; font-weight: bold; color: #F59E0B;">${plan.unassigned_tasks || 0}</div>
+                <div style="color: var(--silver); font-size: 0.9rem;">Sin Asignar</div>
+            </div>
+            <div style="text-align: center; padding: 1rem; background: rgba(255, 255, 255, 0.05); border-radius: 8px;">
+                <div style="font-size: 2rem; font-weight: bold; color: #3B82F6;">${plan.estimated_weekly_hours.toFixed(1)}h</div>
+                <div style="color: var(--silver); font-size: 0.9rem;">Horas Semanales</div>
+            </div>
+        </div>
+        
+        <h4 style="color: var(--gold); margin-bottom: 1rem;">👥 Distribución por Miembro</h4>
+    `;
+    
+    // Add member distribution
+    for (const [memberName, memberData] of Object.entries(plan.distribution || {})) {
+        planHtml += `
+            <div style="background: rgba(255, 255, 255, 0.03); padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                    <strong style="color: var(--white);">${memberName} (${memberData.edad} años, ${memberData.tipo})</strong>
+                    <span style="color: var(--gold); font-weight: bold;">${memberData.percentage}%</span>
+                </div>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; font-size: 0.9rem;">
+                    <div>
+                        <span style="color: var(--silver);">Tareas:</span> 
+                        <span style="color: var(--white);">${memberData.tasks.length}</span>
+                    </div>
+                    <div>
+                        <span style="color: var(--silver);">Horas:</span> 
+                        <span style="color: var(--white);">${memberData.total_hours.toFixed(1)}h</span>
+                    </div>
+                    <div>
+                        <span style="color: var(--silver);">Dificultad:</span> 
+                        <span style="color: var(--white);">${memberData.total_difficulty}</span>
+                    </div>
+                </div>
+                <div style="margin-top: 0.5rem;">
+                    <span style="color: var(--silver); font-size: 0.85rem;">Tareas:</span>
+                    <div style="display: flex; flex-wrap: wrap; gap: 0.3rem; margin-top: 0.3rem;">
+                        ${memberData.tasks.slice(0, 3).map(task => 
+                            `<span style="background: rgba(59, 130, 246, 0.2); color: #60A5FA; padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.8rem;">${task}</span>`
+                        ).join('')}
+                        ${memberData.tasks.length > 3 ? `<span style="color: var(--silver); font-size: 0.8rem;">+${memberData.tasks.length - 3} más</span>` : ''}
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+    
+    planHtml += `
+        <h4 style="color: var(--gold); margin: 1.5rem 0 1rem 0;">📋 Lista Completa de Tareas</h4>
+        <div style="max-height: 400px; overflow-y: auto;">
+    `;
+    
+    // Add all tasks
+    plan.tasks.forEach((task, index) => {
+        const assignedColor = task.asignado_a === 'Sin asignar' ? '#EF4444' : '#22C55E';
+        planHtml += `
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem; background: rgba(255, 255, 255, 0.02); border-radius: 4px; margin-bottom: 0.3rem;">
+                <div>
+                    <span style="color: var(--white); font-weight: 500;">${task.nombre}</span>
+                    <span style="color: var(--silver); margin-left: 0.5rem; font-size: 0.85rem;">(${task.area})</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                    <span style="color: var(--silver); font-size: 0.8rem;">${task.dificultad}/5</span>
+                    <span style="color: var(--silver); font-size: 0.8rem;">${task.tiempo_estimado}min</span>
+                    <span style="color: ${assignedColor}; font-weight: bold; font-size: 0.85rem;">${task.asignado_a}</span>
+                </div>
+            </div>
+        `;
+    });
+    
+    planHtml += `
+        </div>
+    `;
+    
+    content.innerHTML = planHtml;
+    container.style.display = 'block';
+}
+
+// Helper functions
+function showLoading(elementId) {
+    const element = document.getElementById(elementId);
+    if (element) {
+        element.style.display = 'block';
+    }
+}
+
+function hideLoading(elementId) {
+    const element = document.getElementById(elementId);
+    if (element) {
+        element.style.display = 'none';
+    }
+}
+
+function hideElement(elementId) {
+    const element = document.getElementById(elementId);
+    if (element) {
+        element.style.display = 'none';
+    }
+}
+
+function showStatus(message, type) {
+    // You can reuse the existing showStatus function or create a new one
+    console.log(`[${type.toUpperCase()}] ${message}`);
+}
+
 function getCleaningWeekStart(date = new Date()) {
     const d = new Date(date);
     const day = d.getDay();
@@ -4811,6 +4965,8 @@ function formatCleaningWeekRange(weekStart) {
     return `${start.toLocaleDateString('es-ES', options)} - ${end.toLocaleDateString('es-ES', options)}`;
 }
 
+// Schedule functions - DESACTIVADAS (sistema antiguo)
+/*
 function previousCleaningWeek() {
     currentCleaningWeek = addCleaningWeeks(currentCleaningWeek, -1);
     loadCleaningSchedule(currentCleaningWeek);
@@ -4840,101 +4996,35 @@ async function loadCleaningSchedule(weekStart) {
     } finally {
         document.getElementById('cleaning-loading').style.display = 'none';
     }
-}
+}*/
 
-function displayCleaningSchedule(data) {
-    const schedule = data.schedule;
-    const memberStats = data.member_stats;
-    
-    let html = '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">';
-    
-    const daysOrder = ['lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado', 'domingo'];
-    
-    daysOrder.forEach(day => {
-        if (schedule[day] && schedule[day].length > 0) {
-            html += `
-                <div style="background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 8px; padding: 16px;">
-                    <h3 style="font-size: 1.2rem; font-weight: 600; color: var(--gold); margin-bottom: 12px; text-align: center;">${day.charAt(0).toUpperCase() + day.slice(1)}</h3>
-            `;
-            
-            schedule[day].forEach(task => {
-                const completedClass = task.completado ? 'completed' : '';
-                const completedText = task.completado ? '✅' : '⏳';
-                const assigneeName = memberStats[task.persona_id]?.nombre || `Miembro ${task.persona_id}`;
-                
-                html += `
-                    <div style="background: rgba(255, 255, 255, 0.05); border-radius: 6px; padding: 12px; margin-bottom: 8px; border-left: 4px solid var(--sage); ${completedClass ? 'opacity: 0.7; border-left-color: #48bb78;' : ''}">
-                        <div style="font-weight: 500; margin-bottom: 4px;">${completedText} ${task.task_nombre}</div>
-                        <div style="font-size: 0.875rem; color: var(--silver); margin-bottom: 4px;">👤 ${assigneeName}</div>
-                        <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--silver);">
-                            <span>📍 ${task.area}</span>
-                            <span>⏱️ ${task.tiempo_estimado}min</span>
-                            <span>💪 ${task.dificultad}/5</span>
-                        </div>
-                        <div style="margin-top: 8px;">
-                            <button class="btn btn-sm ${task.completado ? 'btn-secondary' : 'btn-success'}" 
-                                    onclick="toggleCleaningTaskCompletion(${task.id}, ${!task.completado})">
-                                ${task.completado ? 'Desmarcar' : 'Completar'}
-                            </button>
-                        </div>
-                    </div>
-                `;
-            });
-            
-            html += '</div>';
-        }
-    });
-    
-    if (html === '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">') {
-        html += '<p style="grid-column: 1/-1; text-align: center; color: var(--silver);">No hay tareas asignadas para esta semana. Haz clic en "Asignar Semana" para generar el horario.</p>';
-    }
-    
-    html += '</div>';
-    
-    // Add member statistics
-    if (Object.keys(memberStats).length > 0) {
-        html += '<div style="margin-top: 24px;"><h3 style="color: var(--gold); margin-bottom: 16px;">Resumen por Miembro</h3><div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">';
-        
-        Object.values(memberStats).forEach(member => {
-            const completionRate = member.num_tasks > 0 ? Math.round((member.completed_tasks / member.num_tasks) * 100) : 0;
-            html += `
-                <div style="background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 8px; padding: 16px; text-align: center;">
-                    <div style="font-size: 1.5rem; font-weight: 700; color: var(--gold);">${member.nombre}</div>
-                    <div style="font-size: 0.875rem; color: var(--silver);">${member.completed_tasks}/${member.num_tasks} tareas (${completionRate}%)</div>
-                    <div style="font-size: 0.875rem; color: var(--silver);">⏱️ ${member.total_tiempo}min</div>
-                </div>
-            `;
-        });
-        
-        html += '</div></div>';
-    }
-    
-    document.getElementById('cleaning-schedule').innerHTML = html;
-    document.getElementById('cleaning-schedule').style.display = 'block';
-    
-    // Update quick stats
-    updateCleaningQuickStats(data);
-}
-
-async function toggleCleaningTaskCompletion(assignmentId, completed) {
-    try {
-        const response = await API.post(`/api/cleaning/complete/${assignmentId}`, {
-            completado: completed
-        });
-        
-        if (response.success) {
-            showAlert('Tarea actualizada correctamente', 'success');
-            loadCleaningSchedule(currentCleaningWeek);
-        } else {
-            showAlert(`Error al actualizar tarea: ${response.error}`, 'error');
-        }
-    } catch (error) {
-        console.error('[Cleaning] Error updating task:', error);
-        showAlert('Error al actualizar tarea', 'error');
+// Ocultar loading antiguo al inicio
+function hideOldLoading() {
+    const loadingElement = document.getElementById('cleaning-loading');
+    if (loadingElement) {
+        loadingElement.style.display = 'none';
     }
 }
 
-// Task management functions
+// Ocultar navegación semanal antigua
+function hideOldWeekNavigation() {
+    const weekNav = document.querySelector('div[style*="justify-content: center"][style*="align-items: center"][style*="gap: 1rem"]');
+    if (weekNav && weekNav.innerHTML.includes('←') && weekNav.innerHTML.includes('→')) {
+        weekNav.style.display = 'none';
+    }
+}
+
+// Ejecutar limpieza al cargar la pestaña
+document.addEventListener('DOMContentLoaded', function() {
+    // Limpiar elementos antiguos cuando se cargue la página
+    setTimeout(() => {
+        hideOldLoading();
+        hideOldWeekNavigation();
+    }, 1000);
+});
+
+// Task management functions - DESACTIVADAS (sistema antiguo)
+/*
 async function loadCleaningTasks() {
     try {
         const response = await API.get('/api/cleaning/tasks');
@@ -4948,7 +5038,7 @@ async function loadCleaningTasks() {
     } catch (error) {
         console.error('[Cleaning] Error loading tasks:', error);
     }
-}
+}*/
 
 async function initializeCleaningTasks() {
     if (!confirm('¿Deseas inicializar las tareas de limpieza por defecto?')) {
@@ -4998,7 +5088,8 @@ async function assignCleaningTasks() {
     }
 }
 
-// Preferences functions
+// Preferences functions - DESACTIVADAS (sistema antiguo)
+/*
 async function loadCleaningPreferences() {
     try {
         const response = await API.get('/api/cleaning/preferences');
@@ -5012,7 +5103,7 @@ async function loadCleaningPreferences() {
     } catch (error) {
         console.error('[Cleaning] Error loading preferences:', error);
     }
-}
+}*/
 
 // UI toggle functions
 function toggleTaskManagement() {
@@ -5133,3 +5224,5 @@ function updateCleaningQuickStats(data) {
     
     document.getElementById('cleaning-stats').innerHTML = stats;
 }
+
+// ==================== END OF CLEANING SYSTEM ====================
