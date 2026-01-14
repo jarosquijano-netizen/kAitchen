@@ -7,10 +7,26 @@ from dotenv import load_dotenv
 from database import Database
 from recipe_extractor import RecipeExtractor
 from menu_generator import MenuGenerator
+from cleaning_manager import CleaningManager
 from datetime import datetime, timedelta
 
 # Load environment variables from .env file
-load_dotenv()
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+    print("✅ .env file loaded successfully")
+except Exception as e:
+    print(f"Warning: Error loading .env file with dotenv: {e}")
+    # Fallback: load manually
+    try:
+        with open('.env', 'r', encoding='utf-8') as f:
+            for line in f:
+                if '=' in line and not line.startswith('#'):
+                    key, value = line.strip().split('=', 1)
+                    os.environ[key.strip()] = value.strip()
+        print("✅ Environment variables loaded manually")
+    except Exception as e2:
+        print(f"Warning: Error manual loading .env: {e2}")
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', os.urandom(24))
@@ -41,7 +57,18 @@ def internal_error(error):
     return error
 
 # Initialize components with environment-aware database
-db = Database()  # Will use DATABASE_URL from environment
+db = Database()
+cleaning_manager = CleaningManager(db)
+
+# Force database initialization to ensure all tables exist
+print("Forzando inicializacion de base de datos...")
+try:
+    # This will create all tables if they don't exist
+    db.init_database()
+    print("Base de datos inicializada correctamente")
+except Exception as e:
+    print(f"Error inicializando base de datos: {str(e)}")
+
 extractor = RecipeExtractor()
 
 # Menu generator will be initialized when needed (requires API key)
@@ -88,12 +115,21 @@ def recover_api_key():
 @app.route('/api/adults', methods=['GET'])
 def get_adults():
     """Get all adult profiles"""
-    adults = db.get_all_adults()
-    return jsonify({
-        'success': True,
-        'data': adults,
-        'count': len(adults)
-    })
+    try:
+        adults = db.get_all_adults()
+        return jsonify({
+            'success': True,
+            'data': adults,
+            'count': len(adults)
+        })
+    except Exception as e:
+        import traceback
+        print(f"[ERROR] get_adults: {str(e)}")
+        traceback.print_exc()
+        return jsonify({
+            'success': False,
+            'error': f'Error al obtener adultos: {str(e)}'
+        }), 500
 
 @app.route('/api/adults', methods=['POST'])
 def add_adult():
@@ -106,6 +142,28 @@ def add_adult():
             'message': 'Perfil de adulto añadido correctamente',
             'id': adult_id
         }), 201
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 400
+
+@app.route('/api/adults/<int:adult_id>', methods=['PUT'])
+def update_adult(adult_id):
+    """Update an adult profile"""
+    try:
+        data = request.json
+        success = db.update_adult(adult_id, data)
+        if success:
+            return jsonify({
+                'success': True,
+                'message': 'Perfil de adulto actualizado correctamente'
+            })
+        else:
+            return jsonify({
+                'success': False,
+                'error': 'Perfil no encontrado'
+            }), 404
     except Exception as e:
         return jsonify({
             'success': False,
@@ -138,12 +196,21 @@ def delete_adult(adult_id):
 @app.route('/api/children', methods=['GET'])
 def get_children():
     """Get all children profiles"""
-    children = db.get_all_children()
-    return jsonify({
-        'success': True,
-        'data': children,
-        'count': len(children)
-    })
+    try:
+        children = db.get_all_children()
+        return jsonify({
+            'success': True,
+            'data': children,
+            'count': len(children)
+        })
+    except Exception as e:
+        import traceback
+        print(f"[ERROR] get_children: {str(e)}")
+        traceback.print_exc()
+        return jsonify({
+            'success': False,
+            'error': f'Error al obtener niños: {str(e)}'
+        }), 500
 
 @app.route('/api/children', methods=['POST'])
 def add_child():
@@ -156,6 +223,28 @@ def add_child():
             'message': 'Perfil de niño añadido correctamente',
             'id': child_id
         }), 201
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 400
+
+@app.route('/api/children/<int:child_id>', methods=['PUT'])
+def update_child(child_id):
+    """Update a child profile"""
+    try:
+        data = request.json
+        success = db.update_child(child_id, data)
+        if success:
+            return jsonify({
+                'success': True,
+                'message': 'Perfil de niño actualizado correctamente'
+            })
+        else:
+            return jsonify({
+                'success': False,
+                'error': 'Perfil no encontrado'
+            }), 404
     except Exception as e:
         return jsonify({
             'success': False,
@@ -658,6 +747,84 @@ def get_next_week_menu():
             'success': False,
             'error': str(e)
         }), 400
+
+@app.route('/api/shopping/list/<week_start>', methods=['GET'])
+def get_shopping_list(week_start):
+    """Get shopping list for a specific week"""
+    try:
+        # Get menu for week
+        menu = db.get_menu_by_week_start(week_start)
+        
+        if not menu:
+            return jsonify({
+                'success': False,
+                'error': 'No hay menú disponible para esta semana'
+            }), 404
+        
+        # Parse menu data
+        menu_data = menu['menu_data'] if isinstance(menu['menu_data'], dict) else json.loads(menu['menu_data'])
+        
+        # Get family profiles
+        adults = db.get_all_adults()
+        children = db.get_all_children()
+        
+        # Generate shopping list using menu data
+        # Extract ingredients from menu and create shopping list structure
+        shopping_list = {
+            'categories': {},
+            'total_items': 0,
+            'week_start': week_start
+        }
+        
+        # Simple shopping list generation from menu
+        all_ingredients = []
+        
+        # Extract ingredients from adult menu
+        if 'menu_adultos' in menu_data and 'dias' in menu_data['menu_adultos']:
+            for day_data in menu_data['menu_adultos']['dias'].values():
+                for meal_data in day_data.values():
+                    if isinstance(meal_data, dict) and 'ingredientes' in meal_data:
+                        all_ingredients.extend(meal_data['ingredientes'])
+        
+        # Extract ingredients from children menu
+        if 'menu_ninos' in menu_data and 'dias' in menu_data['menu_ninos']:
+            for day_data in menu_data['menu_ninos']['dias'].values():
+                for meal_data in day_data.values():
+                    if isinstance(meal_data, dict) and 'ingredientes' in meal_data:
+                        all_ingredients.extend(meal_data['ingredientes'])
+        
+        # Group ingredients by category
+        categories = {}
+        for ingredient in all_ingredients:
+            if isinstance(ingredient, dict):
+                category = ingredient.get('categoria', 'Otros')
+                name = ingredient.get('nombre', 'Ingrediente')
+                quantity = ingredient.get('cantidad', '1')
+                
+                if category not in categories:
+                    categories[category] = []
+                
+                categories[category].append({
+                    'name': name,
+                    'quantity': quantity,
+                    'unit': ingredient.get('unidad', 'unidades')
+                })
+        
+        shopping_list['categories'] = categories
+        shopping_list['total_items'] = sum(len(items) for items in categories.values())
+        
+        return jsonify({
+            'success': True,
+            'data': shopping_list
+        })
+            
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return jsonify({
+            'success': False,
+            'error': f'Error al obtener lista de compras: {str(e)}'
+        }), 500
 
 @app.route('/api/menu/all', methods=['GET'])
 def get_all_menus():
@@ -1197,6 +1364,243 @@ def test_api_key():
             'error': f'Error al validar la API key: {str(e)}'
         }), 400
 
+# ==================== HOUSE CONFIGURATION API ====================
+
+@app.route('/api/house/config', methods=['GET'])
+def get_house_config():
+    """Get house configuration"""
+    try:
+        # Return default configuration for now
+        return jsonify({
+            'success': True,
+            'data': {
+                'num_habitaciones': 3,
+                'num_banos': 2,
+                'num_salas': 2,
+                'num_cocinas': 1,
+                'superficie_total': 120,
+                'tipo_piso': 'apartamento',
+                'tiene_jardin': False,
+                'mascotas': 'no',
+                'notas_casa': ''
+            }
+        })
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@app.route('/api/house/config', methods=['POST'])
+def save_house_config():
+    """Save house configuration"""
+    try:
+        data = request.json
+        print(f"[HouseConfig] Received configuration: {data}")
+        
+        # For now, just return success (we'll implement full saving later)
+        return jsonify({
+            'success': True,
+            'message': 'Configuración recibida correctamente'
+        })
+            
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@app.route('/api/cleaning/generate-smart-plan', methods=['POST'])
+def generate_smart_cleaning_plan():
+    """
+    Genera plan de limpieza personalizado con IA
+    basado en configuración de casa
+    """
+    try:
+        # Get house configuration (using default for now)
+        house_config = {
+            'num_habitaciones': 3,
+            'num_banos': 2,
+            'num_salas': 2,
+            'num_cocinas': 1,
+            'superficie_total': 120,
+            'tipo_piso': 'apartamento',
+            'tiene_jardin': False,
+            'mascotas': 'no',
+            'notas_casa': ''
+        }
+        
+        # Get family members
+        family_members = db.get_all_adults() + db.get_all_children()
+        
+        # Generate mock smart plan for now
+        mock_plan = {
+            'success': True,
+            'plan': {
+                'tasks': [
+                    {
+                        'nombre': 'Limpiar cocina',
+                        'area': 'Cocina',
+                        'frecuencia': 'diaria',
+                        'tiempo_estimado': 30,
+                        'dificultad': 3,
+                        'asignado_a': 'adultos'
+                    },
+                    {
+                        'nombre': 'Limpiar baño principal',
+                        'area': 'Baño',
+                        'frecuencia': 'semanal',
+                        'tiempo_estimado': 45,
+                        'dificultad': 4,
+                        'asignado_a': 'adultos'
+                    }
+                ],
+                'distribution': {
+                    'adultos': ['Limpiar cocina', 'Limpiar baño principal'],
+                    'niña_12': ['Recoger habitaciones'],
+                    'niña_4': ['Ayudar en mesa']
+                }
+            }
+        }
+        
+        return jsonify({
+            'success': True,
+            'tasks_created': len(mock_plan['plan']['tasks']),
+            'plan': mock_plan,
+            'message': 'Plan de limpieza generado exitosamente (versión demo)'
+        })
+            
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+# ==================== CLEANING API ====================
+
+@app.route('/api/cleaning/tasks', methods=['GET'])
+def get_cleaning_tasks():
+    """Get all cleaning tasks"""
+    try:
+        tasks = db.get_all_cleaning_tasks()
+        return jsonify({
+            'success': True,
+            'data': tasks,
+            'count': len(tasks)
+        })
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': f'Error al obtener tareas: {str(e)}'
+        }), 500
+
+@app.route('/api/cleaning/tasks', methods=['POST'])
+def add_cleaning_task():
+    """Add a new cleaning task"""
+    try:
+        task_data = request.get_json()
+        task_id = db.add_cleaning_task(task_data)
+        return jsonify({
+            'success': True,
+            'task_id': task_id,
+            'message': 'Tarea creada exitosamente'
+        })
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 400
+
+@app.route('/api/cleaning/schedule/<week_start>', methods=['GET'])
+def get_cleaning_schedule(week_start):
+    """Get cleaning schedule for a specific week"""
+    try:
+        schedule_result = cleaning_manager.get_weekly_schedule(week_start)
+        return jsonify(schedule_result)
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': f'Error al obtener horario: {str(e)}'
+        }), 500
+
+@app.route('/api/cleaning/assign', methods=['POST'])
+def assign_cleaning_tasks():
+    """Assign cleaning tasks for a week"""
+    try:
+        data = request.get_json()
+        week_start = data.get('week_start')
+        result = cleaning_manager.assign_tasks_for_week(week_start)
+        return jsonify(result)
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': f'Error al asignar tareas: {str(e)}'
+        }), 500
+
+@app.route('/api/cleaning/complete/<int:assignment_id>', methods=['POST'])
+def complete_cleaning_task(assignment_id):
+    """Mark a cleaning task as completed"""
+    try:
+        data = request.get_json()
+        completado = data.get('completado', True)
+        notas = data.get('notas')
+        success = cleaning_manager.update_task_completion(assignment_id, completado, notas)
+        return jsonify({
+            'success': success,
+            'message': 'Tarea actualizada exitosamente' if success else 'Error al actualizar tarea'
+        })
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': f'Error al actualizar tarea: {str(e)}'
+        }), 500
+
+@app.route('/api/cleaning/preferences', methods=['GET'])
+def get_cleaning_preferences():
+    """Get cleaning preferences"""
+    try:
+        preferences = db.get_cleaning_preferences()
+        return jsonify({
+            'success': True,
+            'preferences': preferences
+        })
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': f'Error al obtener preferencias: {str(e)}'
+        }), 500
+
+@app.route('/api/cleaning/preferences', methods=['POST'])
+def save_cleaning_preferences():
+    """Save cleaning preferences"""
+    try:
+        preferences = request.get_json()
+        success = db.save_cleaning_preferences(preferences)
+        return jsonify({
+            'success': success,
+            'message': 'Preferencias guardadas exitosamente' if success else 'Error al guardar preferencias'
+        })
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': f'Error al guardar preferencias: {str(e)}'
+        }), 500
+
+@app.route('/api/cleaning/initialize', methods=['POST'])
+def initialize_cleaning_tasks():
+    """Initialize default cleaning tasks"""
+    try:
+        success = cleaning_manager.initialize_default_tasks()
+        return jsonify({
+            'success': success,
+            'message': 'Tareas inicializadas exitosamente' if success else 'Error al inicializar tareas'
+        })
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': f'Error al inicializar tareas: {str(e)}'
+        }), 500
+
 # ==================== HEALTH CHECK ====================
 
 @app.route('/health')
@@ -1330,7 +1734,7 @@ if __name__ == '__main__':
         print("="*60 + "\n")
         
         app.run(
-            debug=not is_production,
+            debug=False,  
             host='0.0.0.0',
             port=port,
             use_reloader=False  # Disable reloader to prevent crashes

@@ -1174,6 +1174,14 @@ Devuelve SOLO JSON válido (sin markdown, sin ```json```), con esta estructura E
                 
                 print(f"[MenuGenerator] Successfully parsed JSON menu")
                 print(f"[MenuGenerator] Menu keys: {list(menu_data.keys())}")
+                
+                # VALIDATION: Check if this is a single recipe instead of weekly menu
+                if self._is_single_recipe(menu_data):
+                    print(f"[MenuGenerator] WARNING: Claude returned single recipe instead of weekly menu")
+                    print(f"[MenuGenerator] Attempting to convert to weekly menu structure...")
+                    menu_data = self._convert_recipe_to_weekly_menu(menu_data, adults, children)
+                    print(f"[MenuGenerator] Converted to weekly menu with keys: {list(menu_data.keys())}")
+                
                 # Normalize shopping lists after parsing
                 menu_data = self._normalize_shopping_lists(menu_data, len(adults) if adults else 0, len(children) if children else 0)
                 return menu_data
@@ -1230,5 +1238,168 @@ Sé breve y práctico."""
             
         except Exception as e:
             return f"Error al generar sugerencias: {str(e)}"
+    
+    def _is_single_recipe(self, menu_data: Dict) -> bool:
+        """Check if parsed data is a single recipe instead of weekly menu"""
+        recipe_indicators = ['nombre', 'ingredientes', 'instrucciones', 'tiempo_prep', 'calorias']
+        weekly_menu_indicators = ['menu_adultos', 'menu_ninos', 'dias']
+        
+        has_recipe_structure = sum(1 for key in recipe_indicators if key in menu_data) >= 3
+        has_weekly_structure = any(key in menu_data for key in weekly_menu_indicators)
+        
+        return has_recipe_structure and not has_weekly_structure
+    
+    def _convert_recipe_to_weekly_menu(self, recipe: Dict, adults: List[Dict] = None, children: List[Dict] = None) -> Dict:
+        """Convert a single recipe to a complete weekly menu structure"""
+        days = ['lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado', 'domingo']
+        meals = ['desayuno', 'comida', 'cena']
+        
+        # Create base recipe structure
+        base_recipe = {
+            "nombre": recipe.get('nombre', 'Receta'),
+            "ingredientes": recipe.get('ingredientes', []),
+            "tiempo_prep": recipe.get('tiempo_prep', 30),
+            "calorias": recipe.get('calorias', 400),
+            "nutrientes": recipe.get('nutrientes', {}),
+            "instrucciones": recipe.get('instrucciones', ''),
+            "notas": recipe.get('notas', ''),
+            "receta_base": recipe.get('receta_base', 'Original'),
+            "porque_seleccionada": recipe.get('porque_seleccionada', 'Adecuada para la familia')
+        }
+        
+        # Generate varied meals for the week
+        meal_variations = []
+        protein_variations = ['pollo', 'pescado', 'carne', 'legumbres', 'huevos']
+        cooking_methods = ['horno', 'plancha', 'sofrito', 'hervido', 'asado']
+        
+        for i in range(21):  # 7 days * 3 meals
+            variation = base_recipe.copy()
+            
+            if i < len(protein_variations):
+                protein = protein_variations[i % len(protein_variations)]
+                variation['nombre'] = f"{base_recipe['nombre']} con {protein}"
+                variation['notas'] = f"Variación con {protein}, preparado al {cooking_methods[i % len(cooking_methods)]}"
+                variation['calorias'] = base_recipe['calorias'] + (i * 10)
+            
+            meal_variations.append(variation)
+        
+        # Build weekly menu structure
+        weekly_menu = {
+            "semana": datetime.now().strftime('%Y-%m-%d'),
+            "recomendaciones_generales": f"Menú semanal variado basado en {base_recipe['nombre']}. Diferentes preparaciones durante la semana.",
+            
+            "menu_adultos": {
+                "dias": {}
+            },
+            "resumen_semanal": {
+                "total_calorias_promedio_dia": 2000,
+                "distribucion_macronutrientes": {
+                    "proteinas_pct": 25,
+                    "carbohidratos_pct": 50,
+                    "grasas_pct": 25
+                }
+            }
+        }
+        
+        # Fill days with meal variations
+        day_idx = 0
+        for day in days:
+            weekly_menu["menu_adultos"]["dias"][day] = {}
+            for meal in meals:
+                if day_idx < len(meal_variations):
+                    weekly_menu["menu_adultos"]["dias"][day][meal] = meal_variations[day_idx]
+                    day_idx += 1
+                else:
+                    # Fallback to base recipe
+                    weekly_menu["menu_adultos"]["dias"][day][meal] = base_recipe.copy()
+        
+        # Add children's menu if children exist
+        if children:
+            weekly_menu["menu_ninos"] = {
+                "dias": {}
+            }
+            
+            for day in days:
+                weekly_menu["menu_ninos"]["dias"][day] = {}
+                for meal in meals:
+                    if meal == 'merienda':
+                        # Special snack for kids
+                        weekly_menu["menu_ninos"]["dias"][day][meal] = {
+                            "nombre": "Fruta fresca con yogur",
+                            "ingredientes": ["manzana", "plátano", "yogur natural"],
+                            "tiempo_prep": 5,
+                            "calorias": 150,
+                            "nutrientes": {"proteinas": "5g", "carbohidratos": "25g", "grasas": "3g"},
+                            "instrucciones": "Servir fruta troceada con yogur",
+                            "notas": "Usar frutas de temporada",
+                            "receta_base": "Original",
+                            "porque_seleccionada": "Snack saludable y nutritivo"
+                        }
+                    else:
+                        # Adapt adult recipe for kids
+                        kids_meal = base_recipe.copy()
+                        kids_meal["nombre"] = f"Versión infantil de {kids_meal['nombre']}"
+                        kids_meal["calorias"] = int(kids_meal.get('calorias', 400) * 0.7)
+                        kids_meal["notas"] = "Porción adaptada para niños, presentación divertida"
+                        weekly_menu["menu_ninos"]["dias"][day][meal] = kids_meal
+        
+        # Add shopping lists
+        weekly_menu["menu_adultos"]["lista_compras"] = self._generate_shopping_list_from_ingredients(base_recipe['ingredientes'], len(adults) if adults else 2)
+        
+        if children:
+            weekly_menu["menu_ninos"]["lista_compras"] = self._generate_shopping_list_from_ingredients(base_recipe['ingredientes'], len(children), is_kids=True)
+        
+        return weekly_menu
+    
+    def _generate_shopping_list_from_ingredients(self, ingredients: list, num_people: int, is_kids: bool = False) -> Dict:
+        """Generate shopping list from ingredients list"""
+        multiplier = num_people * (0.7 if is_kids else 1.0)
+        
+        categorized = {
+            "frutas_verduras": [],
+            "carnes_pescados": [],
+            "lacteos_huevos": [],
+            "cereales_legumbres": [],
+            "despensa": [],
+            "congelados": [],
+            "otros": []
+        }
+        
+        # Categorize ingredients
+        for ingredient in ingredients:
+            ingredient_lower = ingredient.lower()
+            category = "otros"
+            
+            if any(word in ingredient_lower for word in ['tomate', 'cebolla', 'pimiento', 'ajo', 'lechuga', 'espinaca', 'aguacate']):
+                category = "frutas_verduras"
+            elif any(word in ingredient_lower for word in ['pollo', 'carne', 'ternera', 'cerdo', 'pescado', 'merluza']):
+                category = "carnes_pescados"
+            elif any(word in ingredient_lower for word in ['leche', 'yogur', 'queso', 'huevo']):
+                category = "lacteos_huevos"
+            elif any(word in ingredient_lower for word in ['arroz', 'pasta', 'lenteja', 'garbanzo', 'pan']):
+                category = "cereales_legumbres"
+            elif any(word in ingredient_lower for word in ['aceite', 'sal', 'pimienta', 'orégano']):
+                category = "despensa"
+            
+            # Calculate quantity
+            base_qty = "200g" if category == "carnes_pescados" else "100g"
+            if category == "lacteos_huevos":
+                base_qty = f"{max(6, num_people * 2)} unidades"
+            elif category == "cereales_legumbres":
+                base_qty = f"{max(200, num_people * 100)}g"
+            
+            categorized[category].append({
+                "nombre": ingredient,
+                "cantidad": base_qty,
+                "notas": "Para toda la semana" if not is_kids else "Porción infantil"
+            })
+        
+        return {
+            "por_categoria": categorized,
+            "resumen_cantidades": {
+                "total_items": len(ingredients),
+                "por_categoria": {k: len(v) for k, v in categorized.items() if v}
+            }
+        }
 
 import re

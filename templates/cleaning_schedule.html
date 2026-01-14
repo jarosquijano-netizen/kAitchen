@@ -1,0 +1,958 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>k[AI]tchen · Sistema de Limpieza</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --black: #0A0A0A;
+            --charcoal: #1A1A1A;
+            --slate: #2D3748;
+            --silver: #CBD5E0;
+            --white: #FFFFFF;
+            --gold: #D4AF37;
+            --gold-dark: #C9A227;
+            --sage: #8AA193;
+            --glass-bg: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--black);
+            color: var(--white);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .title {
+            font-family: 'Playfair Display', serif;
+            font-size: 3.5rem;
+            font-weight: 900;
+            color: var(--gold);
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            color: var(--silver);
+            font-weight: 300;
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            border-bottom: 1px solid var(--glass-border);
+            padding-bottom: 10px;
+        }
+
+        .nav-tab {
+            padding: 12px 24px;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 8px 8px 0 0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .nav-tab:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .nav-tab.active {
+            background: var(--gold);
+            color: var(--black);
+            border-color: var(--gold);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .card {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+            backdrop-filter: blur(10px);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .card-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--gold);
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: var(--gold);
+            color: var(--black);
+        }
+
+        .btn-primary:hover {
+            background: var(--gold-dark);
+        }
+
+        .btn-secondary {
+            background: var(--slate);
+            color: var(--white);
+        }
+
+        .btn-secondary:hover {
+            background: #4a5568;
+        }
+
+        .btn-success {
+            background: #48bb78;
+            color: white;
+        }
+
+        .btn-danger {
+            background: #f56565;
+            color: white;
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 0.875rem;
+        }
+
+        .schedule-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .day-card {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 8px;
+            padding: 16px;
+        }
+
+        .day-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--gold);
+            margin-bottom: 12px;
+            text-align: center;
+        }
+
+        .task-item {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 6px;
+            padding: 12px;
+            margin-bottom: 8px;
+            border-left: 4px solid var(--sage);
+        }
+
+        .task-item.completed {
+            border-left-color: #48bb78;
+            opacity: 0.7;
+        }
+
+        .task-name {
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+
+        .task-assignee {
+            font-size: 0.875rem;
+            color: var(--silver);
+            margin-bottom: 4px;
+        }
+
+        .task-meta {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.75rem;
+            color: var(--silver);
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 8px 12px;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 6px;
+            color: var(--white);
+            font-size: 1rem;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--gold);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 8px;
+            padding: 16px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--gold);
+        }
+
+        .stat-label {
+            font-size: 0.875rem;
+            color: var(--silver);
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: var(--silver);
+        }
+
+        .error {
+            background: rgba(245, 101, 101, 0.1);
+            border: 1px solid #f56565;
+            color: #f56565;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 16px;
+        }
+
+        .success {
+            background: rgba(72, 187, 120, 0.1);
+            border: 1px solid #48bb78;
+            color: #48bb78;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 16px;
+        }
+
+        .checkbox-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .checkbox-wrapper input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .title {
+                font-size: 2.5rem;
+            }
+            
+            .nav-tabs {
+                flex-wrap: wrap;
+            }
+            
+            .schedule-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1 class="title">Sistema de Limpieza</h1>
+            <p class="subtitle">Gestión y rotación automática de tareas familiares</p>
+        </header>
+
+        <div class="nav-tabs">
+            <div class="nav-tab active" onclick="showTab('schedule')">Horario Semanal</div>
+            <div class="nav-tab" onclick="showTab('tasks')">Gestionar Tareas</div>
+            <div class="nav-tab" onclick="showTab('preferences')">Preferencias</div>
+            <div class="nav-tab" onclick="showTab('statistics')">Estadísticas</div>
+        </div>
+
+        <!-- Schedule Tab -->
+        <div id="schedule-tab" class="tab-content active">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Horario de Limpieza</h2>
+                    <div>
+                        <button class="btn btn-secondary" onclick="previousWeek()">← Semana Anterior</button>
+                        <button class="btn btn-secondary" onclick="currentWeek()">Semana Actual</button>
+                        <button class="btn btn-secondary" onclick="nextWeek()">Siguiente Semana →</button>
+                        <button class="btn btn-primary" onclick="assignTasks()">Asignar Tareas</button>
+                    </div>
+                </div>
+                <div id="current-week-display" style="text-align: center; margin-bottom: 20px; font-size: 1.1rem;"></div>
+                <div id="schedule-content" class="loading">
+                    Cargando horario...
+                </div>
+            </div>
+        </div>
+
+        <!-- Tasks Tab -->
+        <div id="tasks-tab" class="tab-content">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Tareas de Limpieza</h2>
+                    <div>
+                        <button class="btn btn-primary" onclick="initializeDefaultTasks()">Inicializar Tareas</button>
+                        <button class="btn btn-success" onclick="showAddTaskForm()">Añadir Tarea</button>
+                    </div>
+                </div>
+                <div id="tasks-content" class="loading">
+                    Cargando tareas...
+                </div>
+            </div>
+        </div>
+
+        <!-- Preferences Tab -->
+        <div id="preferences-tab" class="tab-content">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Preferencias del Sistema</h2>
+                    <button class="btn btn-primary" onclick="savePreferences()">Guardar Preferencias</button>
+                </div>
+                <div id="preferences-content" class="loading">
+                    Cargando preferencias...
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistics Tab -->
+        <div id="statistics-tab" class="tab-content">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Estadísticas de Limpieza</h2>
+                    <select id="weeks-selector" class="form-control" style="width: 150px;" onchange="loadStatistics()">
+                        <option value="2">Últimas 2 semanas</option>
+                        <option value="4" selected>Últimas 4 semanas</option>
+                        <option value="8">Últimas 8 semanas</option>
+                        <option value="12">Últimas 12 semanas</option>
+                    </select>
+                </div>
+                <div id="statistics-content" class="loading">
+                    Cargando estadísticas...
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentWeekStart = '';
+        let allTasks = [];
+        let familyMembers = [];
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            loadCurrentSchedule();
+            loadTasks();
+            loadPreferences();
+            loadFamilyMembers();
+        });
+
+        // Tab navigation
+        function showTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+
+            // Show selected tab
+            document.getElementById(tabName + '-tab').classList.add('active');
+            event.target.classList.add('active');
+
+            // Load content based on tab
+            if (tabName === 'schedule') {
+                loadCurrentSchedule();
+            } else if (tabName === 'statistics') {
+                loadStatistics();
+            }
+        }
+
+        // Week navigation
+        function getWeekStart(date = new Date()) {
+            const d = new Date(date);
+            const day = d.getDay();
+            const diff = d.getDate() - day + (day === 0 ? -6 : 1); // Adjust when day is Sunday
+            return new Date(d.setDate(diff)).toISOString().split('T')[0];
+        }
+
+        function addWeeks(dateStr, weeks) {
+            const date = new Date(dateStr);
+            date.setDate(date.getDate() + (weeks * 7));
+            return date.toISOString().split('T')[0];
+        }
+
+        function formatDateRange(weekStart) {
+            const start = new Date(weekStart);
+            const end = new Date(start);
+            end.setDate(end.getDate() + 6);
+            
+            const options = { day: 'numeric', month: 'long', year: 'numeric' };
+            return `${start.toLocaleDateString('es-ES', options)} - ${end.toLocaleDateString('es-ES', options)}`;
+        }
+
+        function previousWeek() {
+            currentWeekStart = addWeeks(currentWeekStart, -1);
+            loadSchedule(currentWeekStart);
+        }
+
+        function currentWeek() {
+            currentWeekStart = getWeekStart();
+            loadSchedule(currentWeekStart);
+        }
+
+        function nextWeek() {
+            currentWeekStart = addWeeks(currentWeekStart, 1);
+            loadSchedule(currentWeekStart);
+        }
+
+        // Schedule functions
+        function loadCurrentSchedule() {
+            currentWeekStart = getWeekStart();
+            loadSchedule(currentWeekStart);
+        }
+
+        function loadSchedule(weekStart) {
+            document.getElementById('current-week-display').textContent = formatDateRange(weekStart);
+            document.getElementById('schedule-content').innerHTML = '<div class="loading">Cargando horario...</div>';
+
+            fetch(`/api/cleaning/schedule/${weekStart}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        displaySchedule(data);
+                    } else {
+                        document.getElementById('schedule-content').innerHTML = `<div class="error">${data.error}</div>`;
+                    }
+                })
+                .catch(error => {
+                    document.getElementById('schedule-content').innerHTML = `<div class="error">Error al cargar horario: ${error}</div>`;
+                });
+        }
+
+        function displaySchedule(data) {
+            const schedule = data.schedule;
+            const memberStats = data.member_stats;
+            
+            let html = '<div class="schedule-grid">';
+            
+            const daysOrder = ['lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado', 'domingo'];
+            
+            daysOrder.forEach(day => {
+                if (schedule[day] && schedule[day].length > 0) {
+                    html += `
+                        <div class="day-card">
+                            <h3 class="day-title">${day.charAt(0).toUpperCase() + day.slice(1)}</h3>
+                    `;
+                    
+                    schedule[day].forEach(task => {
+                        const completedClass = task.completado ? 'completed' : '';
+                        const completedText = task.completado ? '✓' : '';
+                        const assigneeName = memberStats[task.persona_id]?.nombre || `Miembro ${task.persona_id}`;
+                        
+                        html += `
+                            <div class="task-item ${completedClass}">
+                                <div class="task-name">${completedText} ${task.task_nombre}</div>
+                                <div class="task-assignee">👤 ${assigneeName}</div>
+                                <div class="task-meta">
+                                    <span>📍 ${task.area}</span>
+                                    <span>⏱️ ${task.tiempo_estimado}min</span>
+                                    <span>💪 ${task.dificultad}/5</span>
+                                </div>
+                                <div style="margin-top: 8px;">
+                                    <button class="btn btn-sm ${task.completado ? 'btn-secondary' : 'btn-success'}" 
+                                            onclick="toggleTaskCompletion(${task.id}, ${!task.completado})">
+                                        ${task.completado ? 'Desmarcar' : 'Completar'}
+                                    </button>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    
+                    html += '</div>';
+                }
+            });
+            
+            if (html === '<div class="schedule-grid">') {
+                html += '<p style="grid-column: 1/-1; text-align: center; color: var(--silver);">No hay tareas asignadas para esta semana. Haz clic en "Asignar Tareas" para generar el horario.</p>';
+            }
+            
+            html += '</div>';
+            
+            // Add member statistics
+            if (Object.keys(memberStats).length > 0) {
+                html += '<div style="margin-top: 24px;"><h3 style="color: var(--gold); margin-bottom: 16px;">Resumen por Miembro</h3><div class="stats-grid">';
+                
+                Object.values(memberStats).forEach(member => {
+                    const completionRate = member.num_tasks > 0 ? Math.round((member.completed_tasks / member.num_tasks) * 100) : 0;
+                    html += `
+                        <div class="stat-card">
+                            <div class="stat-value">${member.nombre}</div>
+                            <div class="stat-label">${member.completed_tasks}/${member.num_tasks} tareas (${completionRate}%)</div>
+                            <div class="stat-label">⏱️ ${member.total_tiempo}min</div>
+                        </div>
+                    `;
+                });
+                
+                html += '</div></div>';
+            }
+            
+            document.getElementById('schedule-content').innerHTML = html;
+        }
+
+        function assignTasks() {
+            if (confirm('¿Deseas generar automáticamente las asignaciones de limpieza para esta semana? Esto reemplazará las asignaciones existentes.')) {
+                document.getElementById('schedule-content').innerHTML = '<div class="loading">Asignando tareas...</div>';
+                
+                fetch('/api/cleaning/assign', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        week_start: currentWeekStart
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showMessage('Tareas asignadas correctamente', 'success');
+                        loadSchedule(currentWeekStart);
+                    } else {
+                        showMessage(`Error al asignar tareas: ${data.error}`, 'error');
+                    }
+                })
+                .catch(error => {
+                    showMessage(`Error al asignar tareas: ${error}`, 'error');
+                });
+            }
+        }
+
+        function toggleTaskCompletion(assignmentId, completed) {
+            fetch(`/api/cleaning/assignments/${assignmentId}/complete`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    completado: completed
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    loadSchedule(currentWeekStart);
+                } else {
+                    showMessage(`Error al actualizar tarea: ${data.error}`, 'error');
+                }
+            })
+            .catch(error => {
+                showMessage(`Error al actualizar tarea: ${error}`, 'error');
+            });
+        }
+
+        // Tasks management
+        function loadTasks() {
+            fetch('/api/cleaning/tasks')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        allTasks = data.data;
+                        displayTasks();
+                    } else {
+                        document.getElementById('tasks-content').innerHTML = `<div class="error">${data.error}</div>`;
+                    }
+                })
+                .catch(error => {
+                    document.getElementById('tasks-content').innerHTML = `<div class="error">Error al cargar tareas: ${error}</div>`;
+                });
+        }
+
+        function displayTasks() {
+            let html = '<div style="overflow-x: auto;"><table style="width: 100%; border-collapse: collapse;">';
+            html += '<thead><tr style="background: var(--glass-bg);"><th style="padding: 12px; text-align: left; border-bottom: 1px solid var(--glass-border);">Tarea</th><th style="padding: 12px; text-align: left; border-bottom: 1px solid var(--glass-border);">Área</th><th style="padding: 12px; text-align: left; border-bottom: 1px solid var(--glass-border);">Dificultad</th><th style="padding: 12px; text-align: left; border-bottom: 1px solid var(--glass-border);">Tiempo</th><th style="padding: 12px; text-align: left; border-bottom: 1px solid var(--glass-border);">Frecuencia</th><th style="padding: 12px; text-align: left; border-bottom: 1px solid var(--glass-border);">Acciones</th></tr></thead><tbody>';
+            
+            allTasks.forEach(task => {
+                html += `
+                    <tr style="border-bottom: 1px solid var(--glass-border);">
+                        <td style="padding: 12px;">${task.nombre}</td>
+                        <td style="padding: 12px;">${task.area}</td>
+                        <td style="padding: 12px;">${'⭐'.repeat(task.dificultad)}</td>
+                        <td style="padding: 12px;">${task.tiempo_estimado}min</td>
+                        <td style="padding: 12px;">${task.frecuencia}</td>
+                        <td style="padding: 12px;">
+                            <button class="btn btn-sm btn-secondary" onclick="editTask(${task.id})">Editar</button>
+                            <button class="btn btn-sm btn-danger" onclick="deleteTask(${task.id})">Eliminar</button>
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            html += '</tbody></table></div>';
+            
+            if (allTasks.length === 0) {
+                html = '<p style="text-align: center; color: var(--silver);">No hay tareas configuradas. Haz clic en "Inicializar Tareas" para crear las tareas por defecto.</p>';
+            }
+            
+            document.getElementById('tasks-content').innerHTML = html;
+        }
+
+        function initializeDefaultTasks() {
+            if (confirm('¿Deseas inicializar las tareas de limpieza por defecto?')) {
+                fetch('/api/cleaning/initialize', {
+                    method: 'POST'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showMessage('Tareas inicializadas correctamente', 'success');
+                        loadTasks();
+                    } else {
+                        showMessage(`Error al inicializar tareas: ${data.error}`, 'error');
+                    }
+                })
+                .catch(error => {
+                    showMessage(`Error al inicializar tareas: ${error}`, 'error');
+                });
+            }
+        }
+
+        function showAddTaskForm() {
+            // Simple implementation - in production, you'd want a modal
+            const name = prompt('Nombre de la tarea:');
+            if (!name) return;
+            
+            const area = prompt('Área (Cocina, Baño, General, etc.):');
+            if (!area) return;
+            
+            const difficulty = parseInt(prompt('Dificultad (1-5):') || '3');
+            const time = parseInt(prompt('Tiempo estimado (minutos):') || '30');
+            const frequency = prompt('Frecuencia (diaria, semanal, quincenal, mensual):') || 'semanal';
+            
+            fetch('/api/cleaning/tasks', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    nombre: name,
+                    area: area,
+                    dificultad: difficulty,
+                    tiempo_estimado: time,
+                    frecuencia: frequency,
+                    activo: true
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showMessage('Tarea añadida correctamente', 'success');
+                    loadTasks();
+                } else {
+                    showMessage(`Error al añadir tarea: ${data.error}`, 'error');
+                }
+            })
+            .catch(error => {
+                showMessage(`Error al añadir tarea: ${error}`, 'error');
+            });
+        }
+
+        function deleteTask(taskId) {
+            if (confirm('¿Deseas eliminar esta tarea?')) {
+                fetch(`/api/cleaning/tasks/${taskId}`, {
+                    method: 'DELETE'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showMessage('Tarea eliminada correctamente', 'success');
+                        loadTasks();
+                    } else {
+                        showMessage(`Error al eliminar tarea: ${data.error}`, 'error');
+                    }
+                })
+                .catch(error => {
+                    showMessage(`Error al eliminar tarea: ${error}`, 'error');
+                });
+            }
+        }
+
+        // Preferences
+        function loadPreferences() {
+            fetch('/api/cleaning/preferences')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        displayPreferences(data.data);
+                    } else {
+                        document.getElementById('preferences-content').innerHTML = `<div class="error">${data.error}</div>`;
+                    }
+                })
+                .catch(error => {
+                    document.getElementById('preferences-content').innerHTML = `<div class="error">Error al cargar preferencias: ${error}</div>`;
+                });
+        }
+
+        function displayPreferences(preferences) {
+            const html = `
+                <div style="max-width: 600px;">
+                    <div class="form-group">
+                        <div class="checkbox-wrapper">
+                            <input type="checkbox" id="rotacion-activa" ${preferences.rotacion_activa ? 'checked' : ''}>
+                            <label for="rotacion-activa" class="form-label">Activar rotación automática de tareas</label>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <div class="checkbox-wrapper">
+                            <input type="checkbox" id="asignacion-automatica" ${preferences.asignacion_automatica ? 'checked' : ''}>
+                            <label for="asignacion-automatica" class="form-label">Asignación automática de tareas</label>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <div class="checkbox-wrapper">
+                            <input type="checkbox" id="balancear-cargas" ${preferences.balancear_cargas ? 'checked' : ''}>
+                            <label for="balancear-cargas" class="form-label">Balancear carga de trabajo entre miembros</label>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Días de limpieza:</label>
+                        <div class="checkbox-wrapper">
+                            <input type="checkbox" id="dia-martes" ${preferences.dias_limpieza.includes('martes') ? 'checked' : ''}>
+                            <label for="dia-martes">Martes</label>
+                        </div>
+                        <div class="checkbox-wrapper">
+                            <input type="checkbox" id="dia-sabado" ${preferences.dias_limpieza.includes('sábado') ? 'checked' : ''}>
+                            <label for="dia-sabado">Sábado</label>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="hora-preferida" class="form-label">Hora preferida de limpieza:</label>
+                        <input type="time" id="hora-preferida" class="form-control" value="${preferences.hora_preferida || '10:00'}">
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('preferences-content').innerHTML = html;
+        }
+
+        function savePreferences() {
+            const diasLimpieza = [];
+            if (document.getElementById('dia-martes').checked) diasLimpieza.push('martes');
+            if (document.getElementById('dia-sabado').checked) diasLimpieza.push('sábado');
+            
+            const preferences = {
+                rotacion_activa: document.getElementById('rotacion-activa').checked,
+                asignacion_automatica: document.getElementById('asignacion-automatica').checked,
+                balancear_cargas: document.getElementById('balancear-cargas').checked,
+                dias_limpieza: diasLimpieza,
+                hora_preferida: document.getElementById('hora-preferida').value
+            };
+            
+            fetch('/api/cleaning/preferences', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(preferences)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showMessage('Preferencias guardadas correctamente', 'success');
+                } else {
+                    showMessage(`Error al guardar preferencias: ${data.error}`, 'error');
+                }
+            })
+            .catch(error => {
+                showMessage(`Error al guardar preferencias: ${error}`, 'error');
+            });
+        }
+
+        // Statistics
+        function loadStatistics() {
+            const weeks = document.getElementById('weeks-selector').value;
+            document.getElementById('statistics-content').innerHTML = '<div class="loading">Cargando estadísticas...</div>';
+            
+            fetch(`/api/cleaning/statistics?weeks=${weeks}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        displayStatistics(data.stats);
+                    } else {
+                        document.getElementById('statistics-content').innerHTML = `<div class="error">${data.error}</div>`;
+                    }
+                })
+                .catch(error => {
+                    document.getElementById('statistics-content').innerHTML = `<div class="error">Error al cargar estadísticas: ${error}</div>`;
+                });
+        }
+
+        function displayStatistics(stats) {
+            let html = `
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value">${stats.total_tasks}</div>
+                        <div class="stat-label">Total Tareas</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">${stats.completed_tasks}</div>
+                        <div class="stat-label">Tareas Completadas</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">${Math.round(stats.completion_rate)}%</div>
+                        <div class="stat-label">Tasa de Completación</div>
+                    </div>
+                </div>
+            `;
+            
+            if (stats.member_performance && Object.keys(stats.member_performance).length > 0) {
+                html += '<h3 style="color: var(--gold); margin: 24px 0 16px 0;">Rendimiento por Miembro</h3>';
+                html += '<div style="overflow-x: auto;"><table style="width: 100%; border-collapse: collapse;">';
+                html += '<thead><tr style="background: var(--glass-bg);"><th style="padding: 12px; text-align: left; border-bottom: 1px solid var(--glass-border);">Miembro</th><th style="padding: 12px; text-align: left; border-bottom: 1px solid var(--glass-border);">Tareas</th><th style="padding: 12px; text-align: left; border-bottom: 1px solid var(--glass-border);">Completadas</th><th style="padding: 12px; text-align: left; border-bottom: 1px solid var(--glass-border);">Tasa</th></tr></thead><tbody>';
+                
+                Object.values(stats.member_performance).forEach(member => {
+                    html += `
+                        <tr style="border-bottom: 1px solid var(--glass-border);">
+                            <td style="padding: 12px;">${member.nombre}</td>
+                            <td style="padding: 12px;">${member.total_tasks}</td>
+                            <td style="padding: 12px;">${member.completed_tasks}</td>
+                            <td style="padding: 12px;">${Math.round(member.completion_rate)}%</td>
+                        </tr>
+                    `;
+                });
+                
+                html += '</tbody></table></div>';
+            }
+            
+            if (stats.area_performance && Object.keys(stats.area_performance).length > 0) {
+                html += '<h3 style="color: var(--gold); margin: 24px 0 16px 0;">Rendimiento por Área</h3>';
+                html += '<div style="overflow-x: auto;"><table style="width: 100%; border-collapse: collapse;">';
+                html += '<thead><tr style="background: var(--glass-bg);"><th style="padding: 12px; text-align: left; border-bottom: 1px solid var(--glass-border);">Área</th><th style="padding: 12px; text-align: left; border-bottom: 1px solid var(--glass-border);">Tareas</th><th style="padding: 12px; text-align: left; border-bottom: 1px solid var(--glass-border);">Completadas</th><th style="padding: 12px; text-align: left; border-bottom: 1px solid var(--glass-border);">Tasa</th></tr></thead><tbody>';
+                
+                Object.entries(stats.area_performance).forEach(([area, performance]) => {
+                    html += `
+                        <tr style="border-bottom: 1px solid var(--glass-border);">
+                            <td style="padding: 12px;">${area}</td>
+                            <td style="padding: 12px;">${performance.total_tasks}</td>
+                            <td style="padding: 12px;">${performance.completed_tasks}</td>
+                            <td style="padding: 12px;">${Math.round(performance.completion_rate)}%</td>
+                        </tr>
+                    `;
+                });
+                
+                html += '</tbody></table></div>';
+            }
+            
+            document.getElementById('statistics-content').innerHTML = html;
+        }
+
+        // Family members
+        function loadFamilyMembers() {
+            fetch('/api/cleaning/family-members')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        familyMembers = data.data;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading family members:', error);
+                });
+        }
+
+        // Utility functions
+        function showMessage(message, type) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = type;
+            messageDiv.textContent = message;
+            messageDiv.style.position = 'fixed';
+            messageDiv.style.top = '20px';
+            messageDiv.style.right = '20px';
+            messageDiv.style.zIndex = '9999';
+            messageDiv.style.padding = '12px 20px';
+            messageDiv.style.borderRadius = '6px';
+            messageDiv.style.maxWidth = '400px';
+            
+            document.body.appendChild(messageDiv);
+            
+            setTimeout(() => {
+                messageDiv.remove();
+            }, 5000);
+        }
+    </script>
+</body>
+</html>

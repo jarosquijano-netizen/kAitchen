@@ -43,8 +43,64 @@ const API = {
         return this.request(url, {
             method: 'DELETE'
         });
+    },
+
+    put(url, data) {
+        return this.request(url, {
+            method: 'PUT',
+            body: JSON.stringify(data)
+        });
     }
 };
+
+// Switch tab helper - moved to top to be available before HTML loads
+function switchTab(tabName) {
+    console.log(`[SwitchTab] Attempting to switch to ${tabName} tab`);
+    
+    // Remove active class from all sidebar items
+    document.querySelectorAll('.sidebar-item').forEach(item => {
+        item.classList.remove('active');
+    });
+    
+    // Add active class to clicked item
+    const clickedItem = document.querySelector(`[data-tab="${tabName}"]`);
+    if (clickedItem) {
+        clickedItem.classList.add('active');
+        console.log(`[SwitchTab] Added active class to sidebar item for ${tabName}`);
+    } else {
+        console.error(`[SwitchTab] Could not find sidebar item with data-tab="${tabName}"`);
+        return;
+    }
+    
+    // Hide all tab contents
+    document.querySelectorAll('.tab-content').forEach(content => {
+        content.classList.remove('active');
+        console.log(`[SwitchTab] Hidden tab content: ${content.id}`);
+    });
+    
+    // Show selected tab content
+    const targetTab = document.getElementById(`${tabName}-tab`);
+    if (targetTab) {
+        targetTab.classList.add('active');
+        console.log(`[SwitchTab] Showing tab content: ${targetTab.id}`);
+        
+        // Load content for specific tabs
+        if (tabName === 'recipes') {
+            console.log('[SwitchTab] Loading recipes...');
+            loadRecipes(); // Load recipes when tab is opened
+        } else if (tabName === 'shopping') {
+            console.log('[SwitchTab] Loading shopping list...');
+            loadShoppingLists(); // Load shopping list when tab is opened
+        } else if (tabName === 'cleaning') {
+            console.log('[SwitchTab] Loading cleaning system...');
+            loadCleaningSystem(); // Load cleaning system when tab is opened
+        }
+    } else {
+        console.error(`[SwitchTab] Could not find tab content with id="${tabName}-tab"`);
+    }
+    
+    console.log(`[SwitchTab] Successfully switched to ${tabName} tab`);
+}
 
 // Alert functions
 function showAlert(message, type = 'success') {
@@ -130,11 +186,28 @@ document.getElementById('adultForm').addEventListener('submit', async (e) => {
     
     const formData = new FormData(e.target);
     const data = Object.fromEntries(formData.entries());
+    const form = e.target;
+    const editId = form.dataset.editId;
     
     try {
-        const result = await API.post('/api/adults', data);
+        let result;
+        if (editId) {
+            // Edit mode
+            result = await API.put(`/api/adults/${editId}`, data);
+            if (result.success) {
+                showAlert('Perfil actualizado correctamente', 'success');
+                delete form.dataset.editId;
+                form.querySelector('button[type="submit"]').textContent = 'Save Profile';
+            }
+        } else {
+            // Create mode
+            result = await API.post('/api/adults', data);
+            if (result.success) {
+                showAlert('Perfil de adulto añadido correctamente', 'success');
+            }
+        }
+        
         if (result.success) {
-            showAlert('Perfil de adulto añadido correctamente', 'success');
             hideAdultForm();
             loadAdults();
         }
@@ -188,6 +261,7 @@ async function loadAdults() {
                     ${adult.objetivo_alimentario ? `<p>Objetivo: ${adult.objetivo_alimentario}</p>` : ''}
                 </div>
                 <div class="profile-actions">
+                    <button class="btn btn-primary btn-sm" onclick="editAdult(${adult.id})">Editar</button>
                     <button class="btn btn-danger btn-sm" onclick="deleteAdult(${adult.id})">Eliminar</button>
                 </div>
             `;
@@ -229,6 +303,44 @@ async function deleteAdult(id) {
     }
 }
 
+async function editAdult(id) {
+    try {
+        // Get current adult data
+        const result = await API.get(`/api/adults`);
+        const adult = result.data.find(a => a.id === id);
+        
+        if (!adult) {
+            showAlert('Perfil no encontrado', 'error');
+            return;
+        }
+        
+        // Populate form with current data
+        const form = document.getElementById('adultForm');
+        form.querySelector('input[name="nombre"]').value = adult.nombre || '';
+        form.querySelector('input[name="edad"]').value = adult.edad || '';
+        form.querySelector('select[name="objetivo_alimentario"]').value = adult.objetivo_alimentario || '';
+        form.querySelector('select[name="estilo_alimentacion"]').value = adult.estilo_alimentacion || '';
+        form.querySelector('input[name="cocinas_favoritas"]').value = adult.cocinas_favoritas || '';
+        form.querySelector('input[name="alergias"]').value = adult.alergias || '';
+        form.querySelector('input[name="intolerancias"]').value = adult.intolerancias || '';
+        form.querySelector('textarea[name="ingredientes_favoritos"]').value = adult.ingredientes_favoritos || '';
+        form.querySelector('textarea[name="ingredientes_no_gustan"]').value = adult.ingredientes_no_gustan || '';
+        form.querySelector('input[name="tiempo_max_cocinar"]').value = adult.tiempo_max_cocinar || '';
+        form.querySelector('select[name="nivel_cocina"]').value = adult.nivel_cocina || '';
+        form.querySelector('textarea[name="comentarios"]').value = adult.comentarios || '';
+        
+        // Change form to edit mode
+        form.dataset.editId = id;
+        form.querySelector('button[type="submit"]').textContent = 'Actualizar Perfil';
+        
+        // Show form
+        showAdultForm();
+        
+    } catch (error) {
+        showAlert('Error al cargar el perfil', 'error');
+    }
+}
+
 // Child profile functions
 function showChildForm() {
     document.getElementById('child-form').style.display = 'block';
@@ -244,11 +356,28 @@ document.getElementById('childForm').addEventListener('submit', async (e) => {
     
     const formData = new FormData(e.target);
     const data = Object.fromEntries(formData.entries());
+    const form = e.target;
+    const editId = form.dataset.editId;
     
     try {
-        const result = await API.post('/api/children', data);
+        let result;
+        if (editId) {
+            // Edit mode
+            result = await API.put(`/api/children/${editId}`, data);
+            if (result.success) {
+                showAlert('Perfil actualizado correctamente', 'success');
+                delete form.dataset.editId;
+                form.querySelector('button[type="submit"]').textContent = 'Save Profile';
+            }
+        } else {
+            // Create mode
+            result = await API.post('/api/children', data);
+            if (result.success) {
+                showAlert('Perfil de niño/a añadido correctamente', 'success');
+            }
+        }
+        
         if (result.success) {
-            showAlert('Perfil de niño/a añadido correctamente', 'success');
             hideChildForm();
             loadChildren();
         }
@@ -302,6 +431,7 @@ async function loadChildren() {
                     ${child.acepta_comida_nueva ? `<p>Comida nueva: ${child.acepta_comida_nueva}</p>` : ''}
                 </div>
                 <div class="profile-actions">
+                    <button class="btn btn-primary btn-sm" onclick="editChild(${child.id})">Editar</button>
                     <button class="btn btn-danger btn-sm" onclick="deleteChild(${child.id})">Eliminar</button>
                 </div>
             `;
@@ -340,6 +470,44 @@ async function deleteChild(id) {
         }
     } catch (error) {
         showAlert('Error al eliminar el perfil', 'error');
+    }
+}
+
+async function editChild(id) {
+    try {
+        // Get current child data
+        const result = await API.get(`/api/children`);
+        const child = result.data.find(c => c.id === id);
+        
+        if (!child) {
+            showAlert('Perfil no encontrado', 'error');
+            return;
+        }
+        
+        // Populate form with current data
+        const form = document.getElementById('childForm');
+        form.querySelector('input[name="nombre"]').value = child.nombre || '';
+        form.querySelector('input[name="edad"]').value = child.edad || '';
+        form.querySelector('select[name="nivel_exigencia"]').value = child.nivel_exigencia || '';
+        form.querySelector('select[name="acepta_comida_nueva"]').value = child.acepta_comida_nueva || '';
+        form.querySelector('input[name="alergias"]').value = child.alergias || '';
+        form.querySelector('input[name="intolerancias"]').value = child.intolerancias || '';
+        form.querySelector('input[name="ingredientes_favoritos"]').value = child.ingredientes_favoritos || '';
+        form.querySelector('input[name="ingredientes_rechaza"]').value = child.ingredientes_rechaza || '';
+        form.querySelector('input[name="verduras_aceptadas"]').value = child.verduras_aceptadas || '';
+        form.querySelector('input[name="verduras_rechazadas"]').value = child.verduras_rechazadas || '';
+        form.querySelector('input[name="texturas_no_gustan"]').value = child.texturas_no_gustan || '';
+        form.querySelector('textarea[name="comentarios_padres"]').value = child.comentarios_padres || '';
+        
+        // Change form to edit mode
+        form.dataset.editId = id;
+        form.querySelector('button[type="submit"]').textContent = 'Actualizar Perfil';
+        
+        // Show form
+        showChildForm();
+        
+    } catch (error) {
+        showAlert('Error al cargar el perfil', 'error');
     }
 }
 
@@ -4587,60 +4755,6 @@ function showNotification(message) {
     }, 3000);
 }
 
-// Switch tab helper
-function switchTab(tabName) {
-    console.log(`[SwitchTab] Attempting to switch to ${tabName} tab`);
-    
-    // Remove active class from all sidebar items
-    document.querySelectorAll('.sidebar-item').forEach(item => {
-        item.classList.remove('active');
-    });
-    
-    // Add active class to clicked item
-    const clickedItem = document.querySelector(`[data-tab="${tabName}"]`);
-    if (clickedItem) {
-        clickedItem.classList.add('active');
-        console.log(`[SwitchTab] Added active class to sidebar item for ${tabName}`);
-    } else {
-        console.error(`[SwitchTab] Could not find sidebar item with data-tab="${tabName}"`);
-        return;
-    }
-    
-    // Hide all tab contents
-    document.querySelectorAll('.tab-content').forEach(content => {
-        content.classList.remove('active');
-        console.log(`[SwitchTab] Hidden tab content: ${content.id}`);
-    });
-    
-    // Show selected tab content
-    const targetTab = document.getElementById(`${tabName}-tab`);
-    if (targetTab) {
-        targetTab.classList.add('active');
-        console.log(`[SwitchTab] Showing tab content: ${targetTab.id}`);
-        
-        // Load content for specific tabs
-        if (tabName === 'recipes') {
-            console.log('[SwitchTab] Loading recipes...');
-            loadRecipes(); // Load recipes when tab is opened
-        } else if (tabName === 'shopping') {
-            console.log('[SwitchTab] Loading shopping list...');
-            loadShoppingLists(); // Load shopping list when tab is opened
-        }
-    } else {
-        console.error(`[SwitchTab] Could not find tab content with id="${tabName}-tab"`);
-    }
-    
-    console.log(`[SwitchTab] Successfully switched to ${tabName} tab`);
-}
-
-// Menu data storage (kept for potential future use, but no longer used for display)
-function storeMenuData(menuData) {
-    window.currentMenuData = menuData;
-}
-
-// Removed unused functions: renderMenuPreview, openMenuVisualizer, downloadMenuJSON
-// Menu is now displayed directly using displayMenu() function
-
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', () => {
     console.log('[Init] Page loaded, loading family profiles...');
@@ -4657,3 +4771,365 @@ document.addEventListener('DOMContentLoaded', () => {
         console.error('[Init] Error loading family profiles:', error);
     }
 });
+
+// ==================== CLEANING SYSTEM FUNCTIONS ====================
+
+// Global variables for cleaning system
+let currentCleaningWeek = '';
+let cleaningTasks = [];
+let cleaningAssignments = [];
+let cleaningPreferences = {};
+
+// Main cleaning system loader
+function loadCleaningSystem() {
+    console.log('[Cleaning] Loading cleaning system...');
+    loadCurrentCleaningWeek();
+    loadCleaningTasks();
+    loadCleaningPreferences();
+}
+
+// Week navigation functions
+function getCleaningWeekStart(date = new Date()) {
+    const d = new Date(date);
+    const day = d.getDay();
+    const diff = d.getDate() - day + (day === 0 ? -6 : 1); // Adjust when day is Sunday
+    return new Date(d.setDate(diff)).toISOString().split('T')[0];
+}
+
+function addCleaningWeeks(dateStr, weeks) {
+    const date = new Date(dateStr);
+    date.setDate(date.getDate() + (weeks * 7));
+    return date.toISOString().split('T')[0];
+}
+
+function formatCleaningWeekRange(weekStart) {
+    const start = new Date(weekStart);
+    const end = new Date(start);
+    end.setDate(end.getDate() + 6);
+    
+    const options = { day: 'numeric', month: 'long', year: 'numeric' };
+    return `${start.toLocaleDateString('es-ES', options)} - ${end.toLocaleDateString('es-ES', options)}`;
+}
+
+function previousCleaningWeek() {
+    currentCleaningWeek = addCleaningWeeks(currentCleaningWeek, -1);
+    loadCleaningSchedule(currentCleaningWeek);
+}
+
+function loadCurrentCleaningWeek() {
+    currentCleaningWeek = getCleaningWeekStart();
+    loadCleaningSchedule(currentCleaningWeek);
+}
+
+async function loadCleaningSchedule(weekStart) {
+    try {
+        document.getElementById('cleaning-week-display').textContent = formatCleaningWeekRange(weekStart);
+        document.getElementById('cleaning-loading').style.display = 'block';
+        document.getElementById('cleaning-schedule').style.display = 'none';
+
+        const response = await API.get(`/api/cleaning/schedule/${weekStart}`);
+        
+        if (response.success) {
+            displayCleaningSchedule(response);
+        } else {
+            showAlert(`Error al cargar horario: ${response.error}`, 'error');
+        }
+    } catch (error) {
+        console.error('[Cleaning] Error loading schedule:', error);
+        showAlert('Error al cargar horario de limpieza', 'error');
+    } finally {
+        document.getElementById('cleaning-loading').style.display = 'none';
+    }
+}
+
+function displayCleaningSchedule(data) {
+    const schedule = data.schedule;
+    const memberStats = data.member_stats;
+    
+    let html = '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">';
+    
+    const daysOrder = ['lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado', 'domingo'];
+    
+    daysOrder.forEach(day => {
+        if (schedule[day] && schedule[day].length > 0) {
+            html += `
+                <div style="background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 8px; padding: 16px;">
+                    <h3 style="font-size: 1.2rem; font-weight: 600; color: var(--gold); margin-bottom: 12px; text-align: center;">${day.charAt(0).toUpperCase() + day.slice(1)}</h3>
+            `;
+            
+            schedule[day].forEach(task => {
+                const completedClass = task.completado ? 'completed' : '';
+                const completedText = task.completado ? '✅' : '⏳';
+                const assigneeName = memberStats[task.persona_id]?.nombre || `Miembro ${task.persona_id}`;
+                
+                html += `
+                    <div style="background: rgba(255, 255, 255, 0.05); border-radius: 6px; padding: 12px; margin-bottom: 8px; border-left: 4px solid var(--sage); ${completedClass ? 'opacity: 0.7; border-left-color: #48bb78;' : ''}">
+                        <div style="font-weight: 500; margin-bottom: 4px;">${completedText} ${task.task_nombre}</div>
+                        <div style="font-size: 0.875rem; color: var(--silver); margin-bottom: 4px;">👤 ${assigneeName}</div>
+                        <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--silver);">
+                            <span>📍 ${task.area}</span>
+                            <span>⏱️ ${task.tiempo_estimado}min</span>
+                            <span>💪 ${task.dificultad}/5</span>
+                        </div>
+                        <div style="margin-top: 8px;">
+                            <button class="btn btn-sm ${task.completado ? 'btn-secondary' : 'btn-success'}" 
+                                    onclick="toggleCleaningTaskCompletion(${task.id}, ${!task.completado})">
+                                ${task.completado ? 'Desmarcar' : 'Completar'}
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            html += '</div>';
+        }
+    });
+    
+    if (html === '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">') {
+        html += '<p style="grid-column: 1/-1; text-align: center; color: var(--silver);">No hay tareas asignadas para esta semana. Haz clic en "Asignar Semana" para generar el horario.</p>';
+    }
+    
+    html += '</div>';
+    
+    // Add member statistics
+    if (Object.keys(memberStats).length > 0) {
+        html += '<div style="margin-top: 24px;"><h3 style="color: var(--gold); margin-bottom: 16px;">Resumen por Miembro</h3><div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">';
+        
+        Object.values(memberStats).forEach(member => {
+            const completionRate = member.num_tasks > 0 ? Math.round((member.completed_tasks / member.num_tasks) * 100) : 0;
+            html += `
+                <div style="background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 8px; padding: 16px; text-align: center;">
+                    <div style="font-size: 1.5rem; font-weight: 700; color: var(--gold);">${member.nombre}</div>
+                    <div style="font-size: 0.875rem; color: var(--silver);">${member.completed_tasks}/${member.num_tasks} tareas (${completionRate}%)</div>
+                    <div style="font-size: 0.875rem; color: var(--silver);">⏱️ ${member.total_tiempo}min</div>
+                </div>
+            `;
+        });
+        
+        html += '</div></div>';
+    }
+    
+    document.getElementById('cleaning-schedule').innerHTML = html;
+    document.getElementById('cleaning-schedule').style.display = 'block';
+    
+    // Update quick stats
+    updateCleaningQuickStats(data);
+}
+
+async function toggleCleaningTaskCompletion(assignmentId, completed) {
+    try {
+        const response = await API.post(`/api/cleaning/complete/${assignmentId}`, {
+            completado: completed
+        });
+        
+        if (response.success) {
+            showAlert('Tarea actualizada correctamente', 'success');
+            loadCleaningSchedule(currentCleaningWeek);
+        } else {
+            showAlert(`Error al actualizar tarea: ${response.error}`, 'error');
+        }
+    } catch (error) {
+        console.error('[Cleaning] Error updating task:', error);
+        showAlert('Error al actualizar tarea', 'error');
+    }
+}
+
+// Task management functions
+async function loadCleaningTasks() {
+    try {
+        const response = await API.get('/api/cleaning/tasks');
+        
+        if (response.success) {
+            cleaningTasks = response.data;
+            console.log('[Cleaning] Tasks loaded:', cleaningTasks.length);
+        } else {
+            console.error('[Cleaning] Error loading tasks:', response.error);
+        }
+    } catch (error) {
+        console.error('[Cleaning] Error loading tasks:', error);
+    }
+}
+
+async function initializeCleaningTasks() {
+    if (!confirm('¿Deseas inicializar las tareas de limpieza por defecto?')) {
+        return;
+    }
+    
+    try {
+        const response = await API.post('/api/cleaning/initialize');
+        
+        if (response.success) {
+            showAlert('Tareas inicializadas correctamente', 'success');
+            loadCleaningTasks();
+        } else {
+            showAlert(`Error al inicializar tareas: ${response.error}`, 'error');
+        }
+    } catch (error) {
+        console.error('[Cleaning] Error initializing tasks:', error);
+        showAlert('Error al inicializar tareas', 'error');
+    }
+}
+
+async function assignCleaningTasks() {
+    if (!confirm('¿Deseas generar automáticamente las asignaciones de limpieza para esta semana? Esto reemplazará las asignaciones existentes.')) {
+        return;
+    }
+    
+    try {
+        document.getElementById('assign-cleaning-btn').disabled = true;
+        document.getElementById('assign-cleaning-btn').textContent = '⚡ Asignando...';
+        
+        const response = await API.post('/api/cleaning/assign', {
+            week_start: currentCleaningWeek
+        });
+        
+        if (response.success) {
+            showAlert('Tareas asignadas correctamente', 'success');
+            loadCleaningSchedule(currentCleaningWeek);
+        } else {
+            showAlert(`Error al asignar tareas: ${response.error}`, 'error');
+        }
+    } catch (error) {
+        console.error('[Cleaning] Error assigning tasks:', error);
+        showAlert('Error al asignar tareas', 'error');
+    } finally {
+        document.getElementById('assign-cleaning-btn').disabled = false;
+        document.getElementById('assign-cleaning-btn').textContent = '⚡ Asignar Semana';
+    }
+}
+
+// Preferences functions
+async function loadCleaningPreferences() {
+    try {
+        const response = await API.get('/api/cleaning/preferences');
+        
+        if (response.success) {
+            cleaningPreferences = response.data;
+            console.log('[Cleaning] Preferences loaded:', cleaningPreferences);
+        } else {
+            console.error('[Cleaning] Error loading preferences:', response.error);
+        }
+    } catch (error) {
+        console.error('[Cleaning] Error loading preferences:', error);
+    }
+}
+
+// UI toggle functions
+function toggleTaskManagement() {
+    const container = document.getElementById('cleaning-tasks-container');
+    const btn = document.getElementById('toggle-tasks-btn');
+    
+    if (container.style.display === 'none') {
+        container.style.display = 'block';
+        btn.textContent = '👁️ Ocultar Tareas';
+        displayCleaningTasks();
+    } else {
+        container.style.display = 'none';
+        btn.textContent = '👁️ Ver Tareas';
+    }
+}
+
+function toggleCleaningPreferences() {
+    const container = document.getElementById('cleaning-preferences-container');
+    const btn = document.getElementById('toggle-prefs-btn');
+    
+    if (container.style.display === 'none') {
+        container.style.display = 'block';
+        btn.textContent = '⚙️ Ocultar Config';
+        displayCleaningPreferences();
+    } else {
+        container.style.display = 'none';
+        btn.textContent = '⚙️ Configurar';
+    }
+}
+
+function displayCleaningTasks() {
+    let html = '<div style="overflow-x: auto;"><table style="width: 100%; border-collapse: collapse;">';
+    html += '<thead><tr style="background: var(--glass-bg);"><th style="padding: 12px; text-align: left; border-bottom: 1px solid var(--glass-border);">Tarea</th><th style="padding: 12px; text-align: left; border-bottom: 1px solid var(--glass-border);">Área</th><th style="padding: 12px; text-align: left; border-bottom: 1px solid var(--glass-border);">Dificultad</th><th style="padding: 12px; text-align: left; border-bottom: 1px solid var(--glass-border);">Tiempo</th><th style="padding: 12px; text-align: left; border-bottom: 1px solid var(--glass-border);">Frecuencia</th></tr></thead><tbody>';
+    
+    cleaningTasks.forEach(task => {
+        html += `
+            <tr style="border-bottom: 1px solid var(--glass-border);">
+                <td style="padding: 12px;">${task.nombre}</td>
+                <td style="padding: 12px;">${task.area}</td>
+                <td style="padding: 12px;">${'⭐'.repeat(task.dificultad)}</td>
+                <td style="padding: 12px;">${task.tiempo_estimado}min</td>
+                <td style="padding: 12px;">${task.frecuencia}</td>
+            </tr>
+        `;
+    });
+    
+    html += '</tbody></table></div>';
+    
+    if (cleaningTasks.length === 0) {
+        html = '<p style="text-align: center; color: var(--silver);">No hay tareas configuradas. Haz clic en "Inicializar Tareas" para crear las tareas por defecto.</p>';
+    }
+    
+    document.getElementById('cleaning-tasks-list').innerHTML = html;
+    document.getElementById('cleaning-tasks-list').style.display = 'block';
+}
+
+function displayCleaningPreferences() {
+    const html = `
+        <div style="max-width: 600px;">
+            <div style="margin-bottom: 16px;">
+                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                    <input type="checkbox" ${cleaningPreferences.rotacion_activa ? 'checked' : ''} disabled>
+                    <span>Activar rotación automática de tareas</span>
+                </label>
+            </div>
+            
+            <div style="margin-bottom: 16px;">
+                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                    <input type="checkbox" ${cleaningPreferences.asignacion_automatica ? 'checked' : ''} disabled>
+                    <span>Asignación automática de tareas</span>
+                </label>
+            </div>
+            
+            <div style="margin-bottom: 16px;">
+                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                    <input type="checkbox" ${cleaningPreferences.balancear_cargas ? 'checked' : ''} disabled>
+                    <span>Balancear carga de trabajo entre miembros</span>
+                </label>
+            </div>
+            
+            <div style="margin-bottom: 16px;">
+                <label style="display: block; margin-bottom: 8px; font-weight: 500;">Días de limpieza:</label>
+                <div style="display: flex; gap: 16px;">
+                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                        <input type="checkbox" ${cleaningPreferences.dias_limpieza?.includes('martes') ? 'checked' : ''} disabled>
+                        <span>Martes</span>
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                        <input type="checkbox" ${cleaningPreferences.dias_limpieza?.includes('sábado') ? 'checked' : ''} disabled>
+                        <span>Sábado</span>
+                    </label>
+                </div>
+            </div>
+            
+            <div style="margin-bottom: 16px;">
+                <label style="display: block; margin-bottom: 8px; font-weight: 500;">Hora preferida de limpieza:</label>
+                <input type="time" value="${cleaningPreferences.hora_preferida || '10:00'}" disabled 
+                       style="width: 150px; padding: 8px 12px; background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 6px; color: var(--white);">
+            </div>
+        </div>
+    `;
+    
+    document.getElementById('cleaning-preferences-form').innerHTML = html;
+    document.getElementById('cleaning-preferences-form').style.display = 'block';
+}
+
+function updateCleaningQuickStats(data) {
+    const stats = `
+        <div style="background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 8px; padding: 16px; text-align: center;">
+            <div style="font-size: 2rem; font-weight: 700; color: var(--gold);">${data.total_assignments || 0}</div>
+            <div style="font-size: 0.875rem; color: var(--silver);">Tareas esta semana</div>
+        </div>
+        <div style="background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 8px; padding: 16px; text-align: center;">
+            <div style="font-size: 2rem; font-weight: 700; color: var(--gold);">${Math.round(data.completion_rate || 0)}%</div>
+            <div style="font-size: 0.875rem; color: var(--silver);">Tasa completación</div>
+        </div>
+    `;
+    
+    document.getElementById('cleaning-stats').innerHTML = stats;
+}

@@ -333,6 +333,90 @@ class Database:
                     (include_weekend, include_breakfast, include_lunch, include_dinner, excluded_days)
                     VALUES (1, 1, 1, 1, '[]')
                 ''')
+            
+            # Cleaning tables
+            if self.is_postgres:
+                cursor.execute('''
+                    CREATE TABLE IF NOT EXISTS cleaning_tasks (
+                        id SERIAL PRIMARY KEY,
+                        nombre TEXT NOT NULL,
+                        descripcion TEXT,
+                        area TEXT NOT NULL,
+                        dificultad INTEGER DEFAULT 1 CHECK (dificultad >= 1 AND dificultad <= 5),
+                        frecuencia TEXT NOT NULL,
+                        tiempo_estimado INTEGER,
+                        herramientas TEXT,
+                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                    )
+                ''')
+                
+                cursor.execute('''
+                    CREATE TABLE IF NOT EXISTS cleaning_assignments (
+                        id SERIAL PRIMARY KEY,
+                        task_id INTEGER NOT NULL REFERENCES cleaning_tasks(id),
+                        member_id INTEGER NOT NULL,
+                        member_type TEXT NOT NULL,
+                        dia_semana TEXT NOT NULL,
+                        week_start DATE NOT NULL,
+                        completado BOOLEAN DEFAULT FALSE,
+                        notas TEXT,
+                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                        UNIQUE(task_id, member_id, week_start)
+                    )
+                ''')
+                
+                cursor.execute('''
+                    CREATE TABLE IF NOT EXISTS cleaning_preferences (
+                        id SERIAL PRIMARY KEY,
+                        asignacion_automatica BOOLEAN DEFAULT TRUE,
+                        dias_trabajo TEXT DEFAULT '[]',
+                        areas_preferidas TEXT DEFAULT '[]',
+                        areas_evitar TEXT DEFAULT '[]',
+                        dificultad_maxima INTEGER DEFAULT 3,
+                        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                    )
+                ''')
+            else:
+                cursor.execute('''
+                    CREATE TABLE IF NOT EXISTS cleaning_tasks (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        nombre TEXT NOT NULL,
+                        descripcion TEXT,
+                        area TEXT NOT NULL,
+                        dificultad INTEGER DEFAULT 1 CHECK (dificultad >= 1 AND dificultad <= 5),
+                        frecuencia TEXT NOT NULL,
+                        tiempo_estimado INTEGER,
+                        herramientas TEXT,
+                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                    )
+                ''')
+                
+                cursor.execute('''
+                    CREATE TABLE IF NOT EXISTS cleaning_assignments (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        task_id INTEGER NOT NULL,
+                        member_id INTEGER NOT NULL,
+                        member_type TEXT NOT NULL,
+                        dia_semana TEXT NOT NULL,
+                        week_start DATE NOT NULL,
+                        completado BOOLEAN DEFAULT FALSE,
+                        notas TEXT,
+                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                        UNIQUE(task_id, member_id, week_start)
+                    )
+                ''')
+                
+                cursor.execute('''
+                    CREATE TABLE IF NOT EXISTS cleaning_preferences (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        asignacion_automatica BOOLEAN DEFAULT TRUE,
+                        dias_trabajo TEXT DEFAULT '[]',
+                        areas_preferidas TEXT DEFAULT '[]',
+                        areas_evitar TEXT DEFAULT '[]',
+                        dificultad_maxima INTEGER DEFAULT 3,
+                        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                    )
+                ''')
         
         conn.commit()
         self._close_connection(conn)
@@ -405,6 +489,42 @@ class Database:
             
             rows = cursor.fetchall()
             return [dict(row) for row in rows]
+        finally:
+            self._close_connection(conn)
+    
+    def update_adult(self, adult_id: int, profile: Dict) -> bool:
+        """Update adult profile"""
+        conn = self.get_connection()
+        cursor = conn.cursor()
+        
+        try:
+            # Build dynamic update query
+            set_clause = []
+            values = []
+            
+            for key, value in profile.items():
+                if key != 'id':  # Don't update the ID
+                    set_clause.append(f"{key} = ?")
+                    values.append(value)
+            
+            if not set_clause:
+                return False  # Nothing to update
+            
+            values.append(adult_id)
+            
+            if self.is_postgres:
+                query = f"UPDATE adults SET {', '.join(set_clause)} WHERE id = %s"
+                cursor.execute(query, values)
+            else:
+                query = f"UPDATE adults SET {', '.join(set_clause)} WHERE id = ?"
+                cursor.execute(query, values)
+            
+            conn.commit()
+            success = cursor.rowcount > 0
+            return success
+        except Exception as e:
+            conn.rollback()
+            raise e
         finally:
             self._close_connection(conn)
     
@@ -492,6 +612,42 @@ class Database:
         finally:
             self._close_connection(conn)
     
+    def update_child(self, child_id: int, profile: Dict) -> bool:
+        """Update child profile"""
+        conn = self.get_connection()
+        cursor = conn.cursor()
+        
+        try:
+            # Build dynamic update query
+            set_clause = []
+            values = []
+            
+            for key, value in profile.items():
+                if key != 'id':  # Don't update the ID
+                    set_clause.append(f"{key} = ?")
+                    values.append(value)
+            
+            if not set_clause:
+                return False  # Nothing to update
+            
+            values.append(child_id)
+            
+            if self.is_postgres:
+                query = f"UPDATE children SET {', '.join(set_clause)} WHERE id = %s"
+                cursor.execute(query, values)
+            else:
+                query = f"UPDATE children SET {', '.join(set_clause)} WHERE id = ?"
+                cursor.execute(query, values)
+            
+            conn.commit()
+            success = cursor.rowcount > 0
+            return success
+        except Exception as e:
+            conn.rollback()
+            raise e
+        finally:
+            self._close_connection(conn)
+    
     def delete_child(self, child_id: int) -> bool:
         """Delete child profile"""
         conn = self.get_connection()
@@ -566,6 +722,7 @@ class Database:
                 cursor = conn.cursor(cursor_factory=RealDictCursor)
                 cursor.execute('SELECT * FROM recipes ORDER BY title')
             else:
+                # SQLite connection - row_factory already set in get_connection()
                 cursor = conn.cursor()
                 cursor.execute('SELECT * FROM recipes ORDER BY title')
             
@@ -574,8 +731,22 @@ class Database:
             recipes = []
             for row in rows:
                 recipe = dict(row)
-                recipe['ingredients'] = json.loads(recipe.get('ingredients', '[]'))
-                recipe['extracted_data'] = json.loads(recipe.get('extracted_data', '{}'))
+                
+                # Parse JSON fields safely - only if they exist and are strings
+                if 'ingredients' in recipe and recipe['ingredients']:
+                    try:
+                        recipe['ingredients'] = json.loads(recipe['ingredients'])
+                    except (json.JSONDecodeError, TypeError):
+                        pass  # Keep original value if parsing fails
+                
+                if 'extracted_data' in recipe and recipe['extracted_data']:
+                    try:
+                        recipe['extracted_data'] = json.loads(recipe['extracted_data'])
+                    except (json.JSONDecodeError, TypeError):
+                        recipe['extracted_data'] = {}  # Default to empty dict
+                else:
+                    recipe['extracted_data'] = {}
+                
                 recipes.append(recipe)
             
             return recipes
@@ -1079,3 +1250,240 @@ class Database:
         
         self._close_connection(conn)
         return menus
+    
+    # ==================== CLEANING METHODS ====================
+    
+    def get_all_cleaning_tasks(self) -> List[Dict]:
+        """Get all cleaning tasks"""
+        conn = self.get_connection()
+        
+        if self.is_postgres:
+            cursor = conn.cursor(cursor_factory=RealDictCursor)
+            cursor.execute('SELECT * FROM cleaning_tasks ORDER BY area, nombre')
+        else:
+            conn.row_factory = sqlite3.Row
+            cursor = conn.cursor()
+            cursor.execute('SELECT * FROM cleaning_tasks ORDER BY area, nombre')
+        
+        rows = cursor.fetchall()
+        self._close_connection(conn)
+        return [dict(row) for row in rows]
+    
+    def add_cleaning_task(self, task: Dict) -> int:
+        """Add a new cleaning task"""
+        conn = self.get_connection()
+        cursor = conn.cursor()
+        
+        if self.is_postgres:
+            cursor.execute('''
+                INSERT INTO cleaning_tasks (nombre, descripcion, area, dificultad, frecuencia, 
+                    tiempo_estimado, herramientas)
+                VALUES (%s, %s, %s, %s, %s, %s, %s)
+                RETURNING id
+            ''', (
+                task.get('nombre'), task.get('descripcion'), task.get('area'),
+                task.get('dificultad', 1), task.get('frecuencia'),
+                task.get('tiempo_estimado'), task.get('herramientas')
+            ))
+            task_id = cursor.fetchone()[0]
+        else:
+            cursor.execute('''
+                INSERT INTO cleaning_tasks (nombre, descripcion, area, dificultad, frecuencia, 
+                    tiempo_estimado, herramientas)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+            ''', (
+                task.get('nombre'), task.get('descripcion'), task.get('area'),
+                task.get('dificultad', 1), task.get('frecuencia'),
+                task.get('tiempo_estimado'), task.get('herramientas')
+            ))
+            task_id = cursor.lastrowid
+        
+        conn.commit()
+        self._close_connection(conn)
+        return task_id
+    
+    def save_cleaning_assignment(self, assignment: Dict) -> int:
+        """Save a cleaning assignment"""
+        conn = self.get_connection()
+        cursor = conn.cursor()
+        
+        if self.is_postgres:
+            cursor.execute('''
+                INSERT INTO cleaning_assignments (task_id, member_id, member_type, 
+                    dia_semana, week_start, completado, notas)
+                VALUES (%s, %s, %s, %s, %s, %s, %s)
+                ON CONFLICT (task_id, member_id, week_start) 
+                DO UPDATE SET dia_semana = EXCLUDED.dia_semana, 
+                              member_type = EXCLUDED.member_type,
+                              completado = EXCLUDED.completado,
+                              notas = EXCLUDED.notas
+                RETURNING id
+            ''', (
+                assignment.get('task_id'), assignment.get('member_id'),
+                assignment.get('member_type'), assignment.get('dia_semana'),
+                assignment.get('week_start'), assignment.get('completado', False),
+                assignment.get('notas')
+            ))
+            assignment_id = cursor.fetchone()[0]
+        else:
+            cursor.execute('''
+                INSERT OR REPLACE INTO cleaning_assignments (task_id, member_id, member_type, 
+                    dia_semana, week_start, completado, notas)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+            ''', (
+                assignment.get('task_id'), assignment.get('member_id'),
+                assignment.get('member_type'), assignment.get('dia_semana'),
+                assignment.get('week_start'), assignment.get('completado', False),
+                assignment.get('notas')
+            ))
+            assignment_id = cursor.lastrowid
+        
+        conn.commit()
+        self._close_connection(conn)
+        return assignment_id
+    
+    def get_weekly_cleaning_assignments(self, week_start: str) -> List[Dict]:
+        """Get all cleaning assignments for a specific week"""
+        conn = self.get_connection()
+        
+        if self.is_postgres:
+            cursor = conn.cursor(cursor_factory=RealDictCursor)
+            cursor.execute('''
+                SELECT ca.*, ct.nombre as task_nombre, ct.area, ct.descripcion
+                FROM cleaning_assignments ca
+                JOIN cleaning_tasks ct ON ca.task_id = ct.id
+                WHERE ca.week_start = %s
+                ORDER BY ca.dia_semana, ct.area
+            ''', (week_start,))
+        else:
+            conn.row_factory = sqlite3.Row
+            cursor = conn.cursor()
+            cursor.execute('''
+                SELECT ca.*, ct.nombre as task_nombre, ct.area, ct.descripcion
+                FROM cleaning_assignments ca
+                JOIN cleaning_tasks ct ON ca.task_id = ct.id
+                WHERE ca.week_start = ?
+                ORDER BY ca.dia_semana, ct.area
+            ''', (week_start,))
+        
+        rows = cursor.fetchall()
+        self._close_connection(conn)
+        return [dict(row) for row in rows]
+    
+    def update_assignment_completion(self, assignment_id: int, completado: bool, notas: str = None) -> bool:
+        """Update assignment completion status"""
+        conn = self.get_connection()
+        cursor = conn.cursor()
+        
+        if self.is_postgres:
+            cursor.execute('''
+                UPDATE cleaning_assignments 
+                SET completado = %s, notas = %s
+                WHERE id = %s
+            ''', (completado, notas, assignment_id))
+        else:
+            cursor.execute('''
+                UPDATE cleaning_assignments 
+                SET completado = ?, notas = ?
+                WHERE id = ?
+            ''', (completado, notas, assignment_id))
+        
+        conn.commit()
+        success = cursor.rowcount > 0
+        self._close_connection(conn)
+        return success
+    
+    def get_cleaning_preferences(self) -> Dict:
+        """Get cleaning preferences"""
+        conn = self.get_connection()
+        
+        if self.is_postgres:
+            cursor = conn.cursor(cursor_factory=RealDictCursor)
+            cursor.execute('SELECT * FROM cleaning_preferences ORDER BY id DESC LIMIT 1')
+        else:
+            conn.row_factory = sqlite3.Row
+            cursor = conn.cursor()
+            cursor.execute('SELECT * FROM cleaning_preferences ORDER BY id DESC LIMIT 1')
+        
+        row = cursor.fetchone()
+        self._close_connection(conn)
+        
+        if row:
+            prefs = dict(row)
+            prefs['dias_trabajo'] = json.loads(prefs.get('dias_trabajo', '[]'))
+            prefs['areas_preferidas'] = json.loads(prefs.get('areas_preferidas', '[]'))
+            prefs['areas_evitar'] = json.loads(prefs.get('areas_evitar', '[]'))
+            return prefs
+        
+        # Return default preferences if none exist
+        return {
+            'asignacion_automatica': True,
+            'dias_trabajo': [],
+            'areas_preferidas': [],
+            'areas_evitar': [],
+            'dificultad_maxima': 3
+        }
+    
+    def save_cleaning_preferences(self, preferences: Dict) -> bool:
+        """Save cleaning preferences"""
+        conn = self.get_connection()
+        cursor = conn.cursor()
+        
+        if self.is_postgres:
+            cursor.execute('''
+                UPDATE cleaning_preferences 
+                SET asignacion_automatica = %s, dias_trabajo = %s, 
+                    areas_preferidas = %s, areas_evitar = %s, 
+                    dificultad_maxima = %s, updated_at = CURRENT_TIMESTAMP
+                WHERE id = (SELECT id FROM cleaning_preferences ORDER BY id DESC LIMIT 1)
+            ''', (
+                preferences.get('asignacion_automatica', True),
+                json.dumps(preferences.get('dias_trabajo', [])),
+                json.dumps(preferences.get('areas_preferidas', [])),
+                json.dumps(preferences.get('areas_evitar', [])),
+                preferences.get('dificultad_maxima', 3)
+            ))
+            
+            if cursor.rowcount == 0:
+                cursor.execute('''
+                    INSERT INTO cleaning_preferences 
+                    (asignacion_automatica, dias_trabajo, areas_preferidas, areas_evitar, dificultad_maxima)
+                    VALUES (%s, %s, %s, %s, %s)
+                ''', (
+                    preferences.get('asignacion_automatica', True),
+                    json.dumps(preferences.get('dias_trabajo', [])),
+                    json.dumps(preferences.get('areas_preferidas', [])),
+                    json.dumps(preferences.get('areas_evitar', [])),
+                    preferences.get('dificultad_maxima', 3)
+                ))
+        else:
+            cursor.execute('''
+                UPDATE cleaning_preferences 
+                SET asignacion_automatica = ?, dias_trabajo = ?, 
+                    areas_preferidas = ?, areas_evitar = ?, 
+                    dificultad_maxima = ?, updated_at = CURRENT_TIMESTAMP
+                WHERE id = (SELECT id FROM cleaning_preferences ORDER BY id DESC LIMIT 1)
+            ''', (
+                preferences.get('asignacion_automatica', True),
+                json.dumps(preferences.get('dias_trabajo', [])),
+                json.dumps(preferences.get('areas_preferidas', [])),
+                json.dumps(preferences.get('areas_evitar', [])),
+                preferences.get('dificultad_maxima', 3)
+            ))
+            
+            if cursor.rowcount == 0:
+                cursor.execute('''
+                    INSERT INTO cleaning_preferences 
+                    (asignacion_automatica, dias_trabajo, areas_preferidas, areas_evitar, dificultad_maxima)
+                    VALUES (?, ?, ?, ?, ?)
+                ''', (
+                    preferences.get('asignacion_automatica', True),
+                    json.dumps(preferences.get('dias_trabajo', [])),
+                    json.dumps(preferences.get('areas_preferidas', [])),
+                    json.dumps(preferences.get('areas_evitar', [])),
+                    preferences.get('dificultad_maxima', 3)
+                ))
+        
+        conn.commit()
+        self._close_connection(conn)
+        return True

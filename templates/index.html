@@ -1224,6 +1224,14 @@
                     </svg>
                     <span>Family</span>
                 </a>
+                <a href="#" class="sidebar-item" data-tab="cleaning" onclick="switchTab('cleaning'); return false;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3 3h18v18H3zM8 12h8M12 8v8"></path>
+                        <circle cx="12" cy="12" r="2"></circle>
+                        <path d="M9 3l6 18M15 3l-6 18"></path>
+                    </svg>
+                    <span>Cleaning</span>
+                </a>
                 <a href="#" class="sidebar-item" data-tab="settings" onclick="switchTab('settings'); return false;">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <circle cx="12" cy="12" r="3"></circle>
@@ -1618,6 +1626,91 @@ https://example.com/recipe3"></textarea>
             </div>
         </div>
 
+        <!-- CLEANING TAB -->
+        <div class="tab-content" id="cleaning-tab">
+            <div class="card">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
+                    <h2 style="margin: 0;">🧹 Sistema de Limpieza</h2>
+                    <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                        <button class="btn btn-primary" onclick="initializeCleaningTasks()" id="init-cleaning-btn" style="font-size: 1rem; padding: 1rem 2rem;">
+                            🚀 Inicializar Tareas
+                        </button>
+                        <button class="btn btn-success" onclick="assignCleaningTasks()" id="assign-cleaning-btn" style="font-size: 1rem; padding: 1rem 2rem;">
+                            ⚡ Asignar Semana
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Week Navigation -->
+                <div style="display: flex; justify-content: center; align-items: center; gap: 1rem; margin-bottom: 2rem;">
+                    <button class="btn btn-secondary" onclick="previousCleaningWeek()" style="padding: 0.5rem 1rem;">←</button>
+                    <div id="cleaning-week-display" style="font-weight: 600; color: var(--gold); min-width: 250px; text-align: center;">Cargando...</div>
+                    <button class="btn btn-secondary" onclick="nextCleaningWeek()" style="padding: 0.5rem 1rem;">→</button>
+                    <button class="btn btn-secondary" onclick="goToCurrentCleaningWeek()" style="padding: 0.5rem 1rem;">📅 Hoy</button>
+                </div>
+
+                <!-- Cleaning Schedule Display -->
+                <div id="cleaning-schedule-container">
+                    <div class="loading" id="cleaning-loading">
+                        <div class="spinner"></div>
+                        <p>Cargando horario de limpieza...</p>
+                    </div>
+                    
+                    <div id="cleaning-schedule" style="display: none;">
+                        <!-- Schedule will be loaded here -->
+                    </div>
+                </div>
+
+                <!-- Quick Stats -->
+                <div style="margin-top: 2rem; padding-top: 2rem; border-top: 1px solid var(--glass-border);">
+                    <h3 style="color: var(--gold); margin-bottom: 1rem;">📊 Resumen Rápido</h3>
+                    <div id="cleaning-stats" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                        <!-- Stats will be loaded here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tasks Management Card -->
+            <div class="card" style="margin-top: 2rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                    <h3 style="margin: 0; color: var(--gold);">📋 Gestión de Tareas</h3>
+                    <button class="btn btn-secondary" onclick="toggleTaskManagement()" id="toggle-tasks-btn">
+                        👁️ Ver Tareas
+                    </button>
+                </div>
+                
+                <div id="cleaning-tasks-container" style="display: none;">
+                    <div class="loading" id="cleaning-tasks-loading">
+                        <p>Cargando tareas...</p>
+                    </div>
+                    
+                    <div id="cleaning-tasks-list" style="display: none;">
+                        <!-- Tasks list will be loaded here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Preferences Card -->
+            <div class="card" style="margin-top: 2rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                    <h3 style="margin: 0; color: var(--gold);">⚙️ Preferencias</h3>
+                    <button class="btn btn-secondary" onclick="toggleCleaningPreferences()" id="toggle-prefs-btn">
+                        ⚙️ Configurar
+                    </button>
+                </div>
+                
+                <div id="cleaning-preferences-container" style="display: none;">
+                    <div class="loading" id="cleaning-prefs-loading">
+                        <p>Cargando preferencias...</p>
+                    </div>
+                    
+                    <div id="cleaning-preferences-form" style="display: none;">
+                        <!-- Preferences form will be loaded here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- SETTINGS TAB -->
         <div class="tab-content" id="settings-tab">
             <div class="card">
@@ -1672,7 +1765,194 @@ https://example.com/recipe3"></textarea>
                     </form>
                 </div>
 
-                <div style="background: rgba(251, 191, 36, 0.1); border-left: 4px solid rgba(251, 191, 36, 0.5); padding: 20px; border-radius: 4px;">
+                <!-- House Configuration Section -->
+                <div style="background: rgba(212, 175, 55, 0.1); border-left: 4px solid rgba(212, 175, 55, 0.5); padding: 20px; margin-bottom: 30px; border-radius: 4px;">
+                    <h3 style="margin-bottom: 10px; color: var(--gold);">🏠 Configuración de la Casa</h3>
+                    <p style="color: var(--silver); margin-bottom: 15px;">
+                        Configura las características de tu hogar para personalizar el sistema de limpieza.
+                    </p>
+                    
+                    <form id="houseConfigForm">
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px;">
+                            <div class="form-group">
+                                <label for="num-habitaciones">
+                                    <strong>🛏 Habitaciones</strong>
+                                    <span style="color: var(--silver); font-weight: normal; font-size: 0.9rem;">
+                                        (Número total de habitaciones)
+                                    </span>
+                                </label>
+                                <input 
+                                    type="number" 
+                                    id="num-habitaciones" 
+                                    name="num_habitaciones" 
+                                    min="1" 
+                                    max="10" 
+                                    value="3"
+                                    style="font-family: monospace; font-size: 0.95rem;"
+                                >
+                            </div>
+
+                            <div class="form-group">
+                                <label for="num-banos">
+                                    <strong>🚽 Baños</strong>
+                                    <span style="color: var(--silver); font-weight: normal; font-size: 0.9rem;">
+                                        (Número total de baños)
+                                    </span>
+                                </label>
+                                <input 
+                                    type="number" 
+                                    id="num-banos" 
+                                    name="num_banos" 
+                                    min="1" 
+                                    max="5" 
+                                    value="2"
+                                    style="font-family: monospace; font-size: 0.95rem;"
+                                >
+                            </div>
+
+                            <div class="form-group">
+                                <label for="num-salas">
+                                    <strong>🛋 Salas/Estar</strong>
+                                    <span style="color: var(--silver); font-weight: normal; font-size: 0.9rem;">
+                                        (Sala, comedor, etc.)
+                                    </span>
+                                </label>
+                                <input 
+                                    type="number" 
+                                    id="num-salas" 
+                                    name="num_salas" 
+                                    min="1" 
+                                    max="5" 
+                                    value="2"
+                                    style="font-family: monospace; font-size: 0.95rem;"
+                                >
+                            </div>
+
+                            <div class="form-group">
+                                <label for="num-cocinas">
+                                    <strong>🍳 Cocinas</strong>
+                                    <span style="color: var(--silver); font-weight: normal; font-size: 0.9rem;">
+                                        (Cocina principal, secundaria, etc.)
+                                    </span>
+                                </label>
+                                <input 
+                                    type="number" 
+                                    id="num-cocinas" 
+                                    name="num_cocinas" 
+                                    min="1" 
+                                    max="3" 
+                                    value="1"
+                                    style="font-family: monospace; font-size: 0.95rem;"
+                                >
+                            </div>
+
+                            <div class="form-group">
+                                <label for="superficie-total">
+                                    <strong>📐 Superficie Total (m²)</strong>
+                                    <span style="color: var(--silver); font-weight: normal; font-size: 0.9rem;">
+                                        (Área aproximada de la casa)
+                                    </span>
+                                </label>
+                                <input 
+                                    type="number" 
+                                    id="superficie-total" 
+                                    name="superficie_total" 
+                                    min="20" 
+                                    max="1000" 
+                                    value="120"
+                                    style="font-family: monospace; font-size: 0.95rem;"
+                                >
+                            </div>
+
+                            <div class="form-group">
+                                <label for="tipo-piso">
+                                    <strong>🏢 Tipo de Piso</strong>
+                                    <span style="color: var(--silver); font-weight: normal; font-size: 0.9rem;">
+                                        (Apartamento, casa, etc.)
+                                    </span>
+                                </label>
+                                <select 
+                                    id="tipo-piso" 
+                                    name="tipo_piso" 
+                                    style="font-family: monospace; font-size: 0.95rem; padding: 8px; background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 6px; color: var(--white);"
+                                >
+                                    <option value="apartamento">🏢 Apartamento</option>
+                                    <option value="casa">🏠 Casa</option>
+                                    <option value="duplex">🏠 Duplex</option>
+                                    <option value="atico">🏢 Ático</option>
+                                    <option value="chalet">🏠 Chalet</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="tiene-jardin">
+                                    <strong>🌿 Jardín/Terraza</strong>
+                                    <span style="color: var(--silver); font-weight: normal; font-size: 0.9rem;">
+                                        (Espacios exteriores)
+                                    </span>
+                                </label>
+                                <select 
+                                    id="tiene-jardin" 
+                                    name="tiene_jardin" 
+                                    style="font-family: monospace; font-size: 0.95rem; padding: 8px; background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 6px; color: var(--white);"
+                                >
+                                    <option value="no">🚫 No</option>
+                                    <option value="terraza">🛋 Terraza</option>
+                                    <option value="balcon">🏢 Balcón</option>
+                                    <option value="jardin">🌿 Jardín</option>
+                                    <option value="patio">🏠 Patio</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="mascotas">
+                                    <strong>🐕 Mascotas</strong>
+                                    <span style="color: var(--silver); font-weight: normal; font-size: 0.9rem;">
+                                        (Para ajustar frecuencia de limpieza)
+                                    </span>
+                                </label>
+                                <select 
+                                    id="mascotas" 
+                                    name="mascotas" 
+                                    style="font-family: monospace; font-size: 0.95rem; padding: 8px; background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 6px; color: var(--white);"
+                                >
+                                    <option value="no">🚫 No</option>
+                                    <option value="perro">🐕 Perro</option>
+                                    <option value="gato">🐈 Gato</option>
+                                    <option value="ambos">🐕🐈 Perro y Gato</option>
+                                    <option value="otros">🐾 Otros</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--glass-border);">
+                            <h4 style="color: var(--gold); margin-bottom: 10px;">📋 Notas Adicionales</h4>
+                            <textarea 
+                                id="notas-casa" 
+                                name="notas_casa" 
+                                rows="3" 
+                                placeholder="Información adicional sobre la casa (ej: tipo de suelo, materiales especiales, zonas difíciles, etc.)"
+                                style="width: 100%; padding: 10px; background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 6px; color: var(--white); font-family: monospace; resize: vertical;"
+                            ></textarea>
+                        </div>
+
+                        <div id="house-config-status" style="margin-top: 15px;"></div>
+
+                        <div style="display: flex; gap: 10px; margin-top: 20px;">
+                            <button type="submit" class="btn btn-success">
+                                💾 Guardar Configuración
+                            </button>
+                            <button type="button" class="btn btn-primary" onclick="loadHouseConfig()">
+                                🔄 Cargar Configuración
+                            </button>
+                            <button type="button" class="btn btn-secondary" onclick="optimizeCleaningTasks()">
+                                ⚡ Optimizar Tareas
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <div style="background: rgba(251, 191, 36, 0.1); border-left: 4px solid rgba(251, 191, 36, 0.5); padding: 20px; margin-bottom: 30px; border-radius: 4px;">
                     <h3 style="margin-bottom: 10px; color: #FCD34D;">ℹ️ System Information</h3>
                     <div style="color: var(--silver);">
                         <p><strong>Server Port:</strong> <code>7000</code></p>
@@ -1808,7 +2088,7 @@ https://example.com/recipe3"></textarea>
         updateSidebarClock();
         setInterval(updateSidebarClock, 1000);
     </script>
-
+    <script src="/static/js/house_config.js"></script>
     <script src="/static/js/app.js"></script>
 </body>
 </html>
