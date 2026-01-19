@@ -2166,17 +2166,17 @@
             // Update clock every second
             setInterval(updateDateTime, 1000);
             
-            // Auto-refresh menu every 5 minutes (faster updates)
-            setInterval(async () => {
-                console.log('[TV] Auto-refreshing menu...');
-                await loadMenu();
-            }, 300000);
+            // Auto-refresh menu every 5 minutes (DISABLED)
+            // setInterval(async () => {
+            //     console.log('[TV] Auto-refreshing menu...');
+            //     await loadMenu();
+            // }, 300000);
             
-            // Force reload every hour to ensure latest changes
-            setInterval(() => {
-                console.log('[TV] Force reloading page...');
-                window.location.reload(true);
-            }, 3600000);
+            // Force reload every hour (DISABLED)
+            // setInterval(() => {
+            //     console.log('[TV] Force reloading page...');
+            //     window.location.reload(true);
+            // }, 3600000);
         });
 
         // Rating and regeneration functions
@@ -2342,12 +2342,12 @@
         window.rateDayMenu = rateDayMenu;
         window.regenerateDayMenu = regenerateDayMenu;
         
-        // Start when page loads
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', initialize);
-        } else {
-            initialize();
-        }
+        // Start when page loads - initialize function removed
+        // if (document.readyState === 'loading') {
+        //     document.addEventListener('DOMContentLoaded', initialize);
+        // } else {
+        //     initialize();
+        // }
     </script>
 </body>
 </html>
