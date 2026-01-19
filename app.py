@@ -112,6 +112,17 @@ def tv_view():
     
     return render_template('tv_display.html')
 
+@app.route('/test')
+def test_endpoint():
+    """Simple test endpoint"""
+    print("[TEST] Test endpoint called!")
+    return jsonify({
+        'success': True,
+        'message': 'Server is working',
+        'timestamp': str(datetime.now()),
+        'template_version': '202501191730'
+    })
+
 @app.route('/menu/visualizer')
 def menu_visualizer():
     """Menu visualizer page"""
