@@ -1264,10 +1264,13 @@
                 }
             }
             
-            // Limit text for QR code (much smaller to avoid overflow)
-            if (menuText.length > 300) {
-                menuText = menuText.substring(0, 300) + '\n...';
+            // Limit text for QR code (very small to avoid overflow)
+            console.log('[TV] Original menuText length:', menuText.length);
+            if (menuText.length > 100) {
+                menuText = menuText.substring(0, 100) + '\n...';
             }
+            console.log('[TV] Limited menuText length:', menuText.length);
+            console.log('[TV] MenuText preview:', menuText.substring(0, 50) + '...');
             
             qrContainer.innerHTML = '';
             try {
@@ -1279,19 +1282,23 @@
                     colorLight: '#ffffff',
                     correctLevel: QRCode.CorrectLevel.L  // Use L level for more capacity
                 });
+                console.log('[TV] QR code generated successfully');
             } catch (error) {
                 console.error('[TV] Error generating simple QR code:', error);
                 // Fallback to just the day name
                 qrContainer.innerHTML = '';
                 try {
+                    const fallbackText = `MENU: ${selectedDay.toUpperCase()}`;
+                    console.log('[TV] Using fallback text:', fallbackText);
                     new QRCode(qrContainer, {
-                        text: `MENU: ${selectedDay.toUpperCase()}`,
+                        text: fallbackText,
                         width: 56,
                         height: 56,
                         colorDark: '#000000',
                         colorLight: '#ffffff',
                         correctLevel: QRCode.CorrectLevel.L
                     });
+                    console.log('[TV] Fallback QR code generated successfully');
                 } catch (fallbackError) {
                     console.error('[TV] Error generating fallback QR code:', fallbackError);
                     qrContainer.innerHTML = '<div style="font-size: 0.6rem; color: #666;">QR Error</div>';
