@@ -2134,13 +2134,13 @@
                 
                 console.log(`[TV] NUCLEAR: Fixed ${cardsFixed} cards`);
                 
-                // If no cards were fixed, something is wrong - force reload
+                // If no cards were fixed, something is wrong - but DON'T reload
                 if (cardsFixed === 0) {
-                    console.log('[TV] NUCLEAR: No cards found, forcing reload...');
-                    localStorage.setItem('tv-display-version', 'nuclear-' + Date.now());
-                    setTimeout(() => {
-                        window.location.reload(true);
-                    }, 1000);
+                    console.log('[TV] NUCLEAR: No cards found, but NOT reloading to prevent infinite loop');
+                    // localStorage.setItem('tv-display-version', 'nuclear-' + Date.now());
+                    // setTimeout(() => {
+                    //     window.location.reload(true);
+                    // }, 1000);
                 }
             }, 3000);
             
