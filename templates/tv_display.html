@@ -2343,11 +2343,25 @@
         window.regenerateDayMenu = regenerateDayMenu;
         
         // Start when page loads - initialize function removed
-        // if (document.readyState === 'loading') {
-        //     document.addEventListener('DOMContentLoaded', initialize);
-        // } else {
-        //     initialize();
-        // }
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', function() {
+                try {
+                    if (typeof initialize === 'function') {
+                        initialize();
+                    }
+                } catch (error) {
+                    console.log('[TV] Initialize function not available:', error);
+                }
+            });
+        } else {
+            try {
+                if (typeof initialize === 'function') {
+                    initialize();
+                }
+            } catch (error) {
+                console.log('[TV] Initialize function not available:', error);
+            }
+        }
     </script>
 </body>
 </html>
