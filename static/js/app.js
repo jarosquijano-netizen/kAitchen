@@ -3948,9 +3948,20 @@ function mergeShoppingLists(menuData) {
         return merged;
     }
     
-    // FALLBACK: Try new structure first (por_categoria)
-    let adultList = menuData.menu_adultos?.lista_compras?.por_categoria || {};
-    let childrenList = menuData.menu_ninos?.lista_compras?.por_categoria || {};
+    // FALLBACK: Try new structure first (lista_compras at root level)
+    let adultList = menuData.lista_compras?.por_categoria || {};
+    let childrenList = {};
+    
+    // Also check for lista_compras in meal structures
+    if (Object.keys(adultList).length === 0 && menuData.menu_adultos?.lista_compras?.por_categoria) {
+        console.log('[ShoppingList] Using adults lista_compras from menu_adultos structure');
+        adultList = menuData.menu_adultos.lista_compras.por_categoria;
+    }
+    
+    if (Object.keys(childrenList).length === 0 && menuData.menu_ninos?.lista_compras?.por_categoria) {
+        console.log('[ShoppingList] Using children lista_compras from menu_ninos structure');
+        childrenList = menuData.menu_ninos.lista_compras.por_categoria;
+    }
     
     console.log('[ShoppingList] Adult list (por_categoria):', Object.keys(adultList));
     console.log('[ShoppingList] Children list (por_categoria):', Object.keys(childrenList));
@@ -3980,10 +3991,15 @@ function mergeShoppingLists(menuData) {
             adultList = menuData.lista_compras_combinada.por_categoria || menuData.lista_compras_combinada;
         }
         
-        // Also check for old lista_compras at root
-        if (Object.keys(adultList).length === 0 && Array.isArray(menuData.lista_compras)) {
-            console.log('[ShoppingList] Using root lista_compras array format...');
-            adultList = categorizeShoppingItems(menuData.lista_compras, numAdults, numChildren);
+        // Also check for lista_compras at root
+        if (Object.keys(adultList).length === 0 && menuData.lista_compras?.por_categoria) {
+            console.log('[ShoppingList] Using root lista_compras for adults');
+            adultList = menuData.lista_compras.por_categoria;
+        }
+        
+        if (Object.keys(childrenList).length === 0 && menuData.lista_compras?.resumen_cantidades) {
+            console.log('[ShoppingList] Using root lista_compras for children summary');
+            childrenList = {}; // Empty since it's combined
         }
     }
     
