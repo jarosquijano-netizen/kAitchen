@@ -1740,7 +1740,7 @@
                 // Return complete meal card HTML matching zenith design EXACTLY
                 return {
                     html: `
-                        <div style="position: relative; overflow: hidden; background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.06); border-radius: 1rem; padding: 1.2rem; display: flex; flex-direction: column; gap: 1rem; transition: all 0.5s ease; min-height: 220px; max-height: 280px;">
+                        <div style="position: relative !important; overflow: hidden !important; background: rgba(255, 255, 255, 0.03) !important; backdrop-filter: blur(12px) !important; -webkit-backdrop-filter: blur(12px) !important; border: 1px solid rgba(255, 255, 255, 0.06) !important; border-radius: 1rem !important; padding: 1.2rem !important; display: flex !important; flex-direction: column !important; gap: 1rem !important; transition: all 0.5s ease !important; min-height: 220px !important; max-height: 280px !important;">
                             <!-- Background Accent Blur (zenith: -top-24 -right-24 w-64 h-64 blur-[100px] opacity-20) -->
                             <div style="position: absolute; top: -60px; right: -60px; width: 180px; height: 180px; background: ${isAdult ? '#3B82F6' : '#F97316'}; opacity: 0.2; filter: blur(60px); pointer-events: none; border-radius: 50%; z-index: 0;"></div>
                             
@@ -1750,7 +1750,7 @@
                                     <div style="padding: 0.4rem; border-radius: 0.6rem; background: ${isAdult ? 'rgba(59, 130, 246, 0.2)' : 'rgba(249, 115, 22, 0.2)'}; color: ${isAdult ? '#60A5FA' : '#FB923C'}; display: flex; align-items: center; justify-content: center; width: 1.2rem; height: 1.2rem;">
                                         ${isAdult ? `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 13V8a6 6 0 0 1 12 0v5"></path><path d="M4 10a2 2 0 0 1-2 2v4a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-4a2 2 0 0 1-2-2"></path><path d="M8 10V8a4 4 0 1 1 8 0v2"></path></svg>` : `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12h.01"></path><path d="M15 12h.01"></path><path d="M10 16c.5.3 1.2.5 2 .5s1.5-.2 2-.5"></path><path d="M19 6.3a9 9 0 0 1 1.8 3.9 2 2 0 0 1 0 3.6 9 9 0 0 1-17.6 0 2 2 0 0 1 0-3.6A9 9 0 0 1 12 3a9 9 0 0 1 7 3.3z"></path><path d="M7.5 13.5 7 15l-1.5 1"></path><path d="M16.5 13.5 17 15l1.5 1"></path></svg>`}
                                     </div>
-                                    <span style="font-size: 0.75rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: ${isAdult ? '#60A5FA' : '#FB923C'};">
+                                    <span style="font-size: 0.75rem !important; font-weight: 600 !important; letter-spacing: 0.1em !important; text-transform: uppercase !important; color: ${isAdult ? '#60A5FA' : '#FB923C'} !important;">
                                         ${isAdult ? 'Adults' : 'Children'}
                                     </span>
                                 </div>
@@ -1763,7 +1763,7 @@
                             <div style="display: flex; flex-direction: column; gap: 0.8rem; position: relative; z-index: 1;">
                                 <div style="display: flex; flex-direction: column;">
                                     <span style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.08em; color: rgba(255, 255, 255, 0.5); margin-bottom: 0.2rem;">${mealNames[mealType].es} / ${mealNames[mealType].en}</span>
-                                    <h2 style="font-family: 'Playfair Display', serif; font-size: 1.4rem; color: #FFFFFF; line-height: 1.1; margin: 0; transition: color 0.3s ease;">
+                                    <h2 style="font-family: 'Playfair Display', serif !important; font-size: 1.4rem !important; color: #FFFFFF !important; line-height: 1.1 !important; margin: 0 !important; transition: color 0.3s ease !important;">
                                         ${mealName}
                                     </h2>
                                 </div>
