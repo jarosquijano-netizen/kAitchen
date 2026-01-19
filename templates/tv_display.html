@@ -2037,8 +2037,8 @@
             console.log('[TV] innerHTML set successfully');
             console.log('[TV] Container children count:', container.children.length);
             
-            // Update QR code with menu information
-            generateSimpleQRCode();
+            // QR Code generation disabled to prevent errors
+            // generateSimpleQRCode();
             
             // Force a reflow to ensure rendering
             void container.offsetHeight;
@@ -2159,7 +2159,7 @@
             
             updateDateTime();
             updateWeather();
-            generateSimpleQRCode();
+            // generateSimpleQRCode(); // Disabled to prevent QR errors
             updateWeekNav();
             await loadMenu();
             
