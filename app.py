@@ -524,19 +524,30 @@ def generate_menu():
             week_start = (today - timedelta(days=days_since_monday)).strftime('%Y-%m-%d')
             print(f"[GenerateMenu] No week_start_date provided, using current week: {week_start}")
         else:
-            # Validate and use provided date - ALWAYS use it as-is (frontend sends correct Monday dates)
+            # Clean and validate provided date
             try:
-                provided_date = datetime.strptime(week_start_date, '%Y-%m-%d')
-                # Use the date as-is - frontend is responsible for sending correct Monday dates
-                week_start = week_start_date
-                print(f"[GenerateMenu] Using provided week_start_date as-is: {week_start}")
+                # Remove any whitespace and ensure clean format
+                cleaned_date = str(week_start_date).strip()
+                print(f"[GenerateMenu] Original week_start_date: '{week_start_date}'")
+                print(f"[GenerateMenu] Cleaned week_start_date: '{cleaned_date}'")
+                
+                # Validate date format
+                provided_date = datetime.strptime(cleaned_date, '%Y-%m-%d')
+                
+                # Use the cleaned date
+                week_start = cleaned_date
+                print(f"[GenerateMenu] Using provided week_start_date: {week_start}")
+                
                 # Log warning if it's not a Monday (for debugging)
                 if provided_date.weekday() != 0:
-                    print(f"[GenerateMenu] WARNING: week_start_date {week_start_date} is not a Monday (weekday: {provided_date.weekday()})")
-            except ValueError:
+                    print(f"[GenerateMenu] WARNING: week_start_date {week_start} is not a Monday (weekday: {provided_date.weekday()})")
+                    
+            except ValueError as e:
+                print(f"[GenerateMenu] Date validation error: {str(e)}")
+                print(f"[GenerateMenu] Invalid date format received: '{week_start_date}'")
                 return jsonify({
                     'success': False,
-                    'error': 'Formato de fecha inválido. Usa YYYY-MM-DD'
+                    'error': f'Formato de fecha inválido. Usa YYYY-MM-DD. Recibido: {str(week_start_date)[:50]}'
                 }), 400
         
         # Get menu preferences from database
@@ -1454,38 +1465,34 @@ def get_house_config():
         conn.close()
         
         if config:
-            # Convert to dictionary with proper field names
-            config_dict = {
-                'id': config[0],
-                'num_habitaciones': config[1],
-                'num_banos': config[2],
-                'num_salas': config[3],
-                'num_cocinas': config[4],
-                'superficie_total': config[5],
-                'tipo_piso': config[6],
-                'tiene_jardin': bool(config[7]),
-                'mascotas': config[8],
-                'notas_casa': config[9],
-                'updated_at': config[10]
-            }
-            return jsonify({
-                'success': True,
-                'data': config_dict
-            })
-        else:
-            # Return default configuration if no data found
+            # Parse config_data from JSON
+            import json
+            try:
+                config_data = json.loads(config[1]) if config[1] else {}
+            except:
+                config_data = {}
+                
             return jsonify({
                 'success': True,
                 'data': {
-                    'num_habitaciones': 3,
-                    'num_banos': 2,
-                    'num_salas': 2,
-                    'num_cocinas': 1,
-                    'superficie_total': 120,
-                    'tipo_piso': 'apartamento',
-                    'tiene_jardin': False,
-                    'mascotas': 'no',
-                    'notas_casa': ''
+                    'id': config[0],
+                    'config_data': config_data,
+                    'created_at': config[2].isoformat() if config[2] else None,
+                    'updated_at': config[3].isoformat() if config[3] else None
+                }
+            })
+        else:
+            # Return default configuration if none exists
+            default_config = {
+                "house_size": "mediana",
+                "rooms": ["cocina", "sala", "banos", "dormitorios"],
+                "cleaning_frequency": "semanal",
+                "residents_count": 5
+            }
+            return jsonify({
+                'success': True,
+                'data': {
+                    'config_data': default_config
                 }
             })
     except Exception as e:
@@ -1509,44 +1516,23 @@ def save_house_config():
         cursor.execute('SELECT id FROM house_config ORDER BY id DESC LIMIT 1')
         existing = cursor.fetchone()
         
+        import json
+        config_json = json.dumps(data)
+        
         if existing:
             # Update existing record
             cursor.execute('''
                 UPDATE house_config SET 
-                num_habitaciones = ?, num_banos = ?, num_salas = ?, num_cocinas = ?,
-                superficie_total = ?, tipo_piso = ?, tiene_jardin = ?, mascotas = ?, notas_casa = ?,
-                updated_at = CURRENT_TIMESTAMP
+                config_data = ?, updated_at = CURRENT_TIMESTAMP
                 WHERE id = ?
-            ''', (
-                data.get('num_habitaciones', 3),
-                data.get('num_banos', 2),
-                data.get('num_salas', 2),
-                data.get('num_cocinas', 1),
-                data.get('superficie_total', 120),
-                data.get('tipo_piso', 'apartamento'),
-                1 if data.get('tiene_jardin') else 0,
-                data.get('mascotas', 'no'),
-                data.get('notas_casa', ''),
-                existing[0]
-            ))
+            ''', (config_json, existing[0]))
             print(f"[HouseConfig] Updated {cursor.rowcount} rows")
         else:
             # Insert new record
             cursor.execute('''
-                INSERT INTO house_config 
-                (num_habitaciones, num_banos, num_salas, num_cocinas, superficie_total, tipo_piso, tiene_jardin, mascotas, notas_casa)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            ''', (
-                data.get('num_habitaciones', 3),
-                data.get('num_banos', 2),
-                data.get('num_salas', 2),
-                data.get('num_cocinas', 1),
-                data.get('superficie_total', 120),
-                data.get('tipo_piso', 'apartamento'),
-                1 if data.get('tiene_jardin') else 0,
-                data.get('mascotas', 'no'),
-                data.get('notas_casa', '')
-            ))
+                INSERT INTO house_config (config_data)
+                VALUES (?)
+            ''', (config_json,))
             print(f"[HouseConfig] Inserted new record")
         
         # Commit changes
@@ -1582,16 +1568,24 @@ def generate_smart_cleaning_plan():
         conn.close()
         
         if house_config_record:
+            # Parse config_data from JSON
+            import json
+            try:
+                config_data = json.loads(house_config_record[1]) if house_config_record[1] else {}
+            except:
+                config_data = {}
+            
+            # Use config_data or defaults
             house_config = {
-                'num_habitaciones': house_config_record[1],
-                'num_banos': house_config_record[2],
-                'num_salas': house_config_record[3],
-                'num_cocinas': house_config_record[4],
-                'superficie_total': house_config_record[5],
-                'tipo_piso': house_config_record[6],
-                'tiene_jardin': bool(house_config_record[7]),
-                'mascotas': house_config_record[8],
-                'notas_casa': house_config_record[9]
+                'num_habitaciones': config_data.get('num_habitaciones', 3),
+                'num_banos': config_data.get('num_banos', 2),
+                'num_salas': config_data.get('num_salas', 2),
+                'num_cocinas': config_data.get('num_cocinas', 1),
+                'superficie_total': config_data.get('superficie_total', 120),
+                'tipo_piso': config_data.get('tipo_piso', 'apartamento'),
+                'tiene_jardin': config_data.get('tiene_jardin', False),
+                'mascotas': config_data.get('mascotas', 'no'),
+                'notas_casa': config_data.get('notas_casa', '')
             }
         else:
             # Use defaults if no configuration found

@@ -752,7 +752,21 @@ async function loadRecipes() {
 let currentWeekStart = null;
 let currentViewingWeek = null;
 
-// Helper function to get Monday of a given date
+// Helper function to normalize currentViewingWeek to string YYYY-MM-DD
+    function normalizeViewingWeek(date) {
+        if (!date) return null;
+        
+        if (typeof date === 'string') {
+            return date.split('T')[0]; // Remove time part if exists
+        } else if (date instanceof Date) {
+            return date.toISOString().split('T')[0];
+        } else {
+            // Try to convert to string then normalize
+            return String(date).split('T')[0];
+        }
+    }
+
+    // Helper function to get Monday of a given date
 function getMondayOfWeek(date) {
     const d = new Date(date);
     d.setHours(0, 0, 0, 0); // Reset time to avoid timezone issues
@@ -867,10 +881,14 @@ async function generateMenu() {
     console.log('[GenerateMenu] Calculated current week:', calculatedCurrentWeek);
     console.log('[GenerateMenu] currentViewingWeek:', currentViewingWeek);
     
-    if (currentViewingWeek && currentViewingWeek !== calculatedCurrentWeek) {
+    // Normalize currentViewingWeek to ensure it's a string
+    const normalizedViewingWeek = normalizeViewingWeek(currentViewingWeek);
+    console.log('[GenerateMenu] normalizedViewingWeek:', normalizedViewingWeek);
+    
+    if (normalizedViewingWeek && normalizedViewingWeek !== calculatedCurrentWeek) {
         // If currentViewingWeek is set but different from calculated current week,
         // use currentViewingWeek (user is viewing a different week)
-        weekStartDate = currentViewingWeek;
+        weekStartDate = normalizedViewingWeek;
         console.log('[GenerateMenu] Using currentViewingWeek (different week):', weekStartDate);
     } else {
         // Use calculated current week (most accurate)
@@ -887,6 +905,14 @@ async function generateMenu() {
     try {
         console.log('[Frontend] Iniciando generación de menú para semana:', weekStartDate);
         
+        // Validate date format before sending
+        const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+        if (!dateRegex.test(weekStartDate)) {
+            throw new Error(`Formato de fecha inválido en frontend: ${weekStartDate}. Se espera YYYY-MM-DD`);
+        }
+        
+        console.log('[Frontend] Fecha validada correctamente:', weekStartDate);
+        
         // Use fetch directly with timeout
         const response = await fetch('/api/menu/generate', {
             method: 'POST',
@@ -894,7 +920,7 @@ async function generateMenu() {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                week_start_date: weekStartDate
+                week_start_date: weekStartDate.trim()
             }),
             signal: controller.signal
         });
@@ -1329,7 +1355,7 @@ async function loadCurrentWeekMenu() {
         
         if (result.success && result.data) {
             // Use the actual week_start from response, but verify it matches current week
-            const weekStart = result.week_start || result.data.week_start_date;
+            const weekStart = normalizeViewingWeek(result.week_start || result.data.week_start_date);
             const calculatedCurrentWeek = getCurrentWeekStart();
             
             if (weekStart) {
@@ -2346,8 +2372,19 @@ ${contenido || 'No hay contenido disponible'}
         const actualCurrentWeek = getCurrentWeekStart();
         
         if (currentViewingWeek) {
-            // Use the week being viewed
-            const weekStart = new Date(currentViewingWeek + 'T00:00:00');
+            // Handle both string and Date object formats
+            let weekStart;
+            if (typeof currentViewingWeek === 'string') {
+                // If it's a string, create Date from it
+                weekStart = new Date(currentViewingWeek + 'T00:00:00');
+            } else if (currentViewingWeek instanceof Date) {
+                // If it's already a Date object, use it directly
+                weekStart = new Date(currentViewingWeek);
+            } else {
+                // Fallback: try to convert to string then Date
+                weekStart = new Date(String(currentViewingWeek) + 'T00:00:00');
+            }
+            
             weekStart.setHours(0, 0, 0, 0);
             console.log('[getWeekStartForDisplay] Using currentViewingWeek:', currentViewingWeek, '->', weekStart.toISOString().split('T')[0]);
             return weekStart;

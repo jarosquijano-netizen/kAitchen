@@ -677,8 +677,23 @@ class Database:
         
         if row:
             menu = dict(row)
-            menu['menu_data'] = json.loads(menu.get('menu_data', '{}'))
-            menu['metadata'] = json.loads(menu.get('metadata', '{}'))
+            # Handle None values properly
+            menu_data_str = menu.get('menu_data') or '{}'
+            metadata_str = menu.get('metadata') or '{}'
+            
+            menu['menu_data'] = json.loads(menu_data_str) if menu_data_str else {}
+            menu['metadata'] = json.loads(metadata_str) if metadata_str else {}
+            
+            # Ensure week_start_date is always a string in YYYY-MM-DD format
+            if 'week_start_date' in menu:
+                week_date = menu['week_start_date']
+                if hasattr(week_date, 'strftime'):
+                    # It's a datetime object, format it
+                    menu['week_start_date'] = week_date.strftime('%Y-%m-%d')
+                else:
+                    # It's already a string, ensure it's clean
+                    menu['week_start_date'] = str(week_date).split('T')[0]
+            
             self._close_connection(conn)
             return menu
         self._close_connection(conn)
@@ -699,8 +714,23 @@ class Database:
             
             if row:
                 menu = dict(row)
-                menu['menu_data'] = json.loads(menu.get('menu_data', '{}'))
-                menu['metadata'] = json.loads(menu.get('metadata', '{}'))
+                # Handle None values properly
+                menu_data_str = menu.get('menu_data') or '{}'
+                metadata_str = menu.get('metadata') or '{}'
+                
+                menu['menu_data'] = json.loads(menu_data_str) if menu_data_str else {}
+                menu['metadata'] = json.loads(metadata_str) if metadata_str else {}
+                
+                # Ensure week_start_date is always a string in YYYY-MM-DD format
+                if 'week_start_date' in menu:
+                    week_date = menu['week_start_date']
+                    if hasattr(week_date, 'strftime'):
+                        # It's a datetime object, format it
+                        menu['week_start_date'] = week_date.strftime('%Y-%m-%d')
+                    else:
+                        # It's already a string, ensure it's clean
+                        menu['week_start_date'] = str(week_date).split('T')[0]
+                
                 return menu
             return None
         finally:
@@ -722,8 +752,23 @@ class Database:
         menus = []
         for row in rows:
             menu = dict(row)
-            menu['menu_data'] = json.loads(menu.get('menu_data', '{}'))
-            menu['metadata'] = json.loads(menu.get('metadata', '{}'))
+            # Handle None values properly
+            menu_data_str = menu.get('menu_data') or '{}'
+            metadata_str = menu.get('metadata') or '{}'
+            
+            menu['menu_data'] = json.loads(menu_data_str) if menu_data_str else {}
+            menu['metadata'] = json.loads(metadata_str) if metadata_str else {}
+            
+            # Ensure week_start_date is always a string in YYYY-MM-DD format
+            if 'week_start_date' in menu:
+                week_date = menu['week_start_date']
+                if hasattr(week_date, 'strftime'):
+                    # It's a datetime object, format it
+                    menu['week_start_date'] = week_date.strftime('%Y-%m-%d')
+                else:
+                    # It's already a string, ensure it's clean
+                    menu['week_start_date'] = str(week_date).split('T')[0]
+            
             menus.append(menu)
         
         self._close_connection(conn)
