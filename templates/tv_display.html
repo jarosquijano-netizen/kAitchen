@@ -10,12 +10,13 @@
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
     <title>k[AI]tchen · Weekly Menu</title>
-    <!-- Version: Zenith Design v2.2 - FORCE RELOAD - Timestamp: 202501191527 -->
+    <!-- Version: Zenith Design v2.5 - NUCLEAR FORCE RELOAD - Timestamp: 202501191716 -->
+    <meta name="cache-buster" content="202501191716-<?php echo rand(); ?>">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🍳</text></svg>">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js?v=202501191527"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js?v=202501191716"></script>
     <style>
         /* FORCE RELOAD - Timestamp: 202501191618 */
         * {
@@ -1028,7 +1029,7 @@
                 <!-- VERSION INDICATOR -->
                 <div class="menu-section">
                     <div style="background: rgba(212, 175, 55, 0.2); border: 1px solid rgba(212, 175, 55, 0.4); padding: 0.5rem 0.8rem; border-radius: 6px; font-size: 0.7rem; color: #D4AF37; font-weight: 600; letter-spacing: 0.5px; text-align: center;">
-                        v2.4-202501191630
+                        v2.6-NUCLEAR-202501191730
                     </div>
                 </div>
                 
@@ -2059,10 +2060,19 @@
 
         // Initialize page
         document.addEventListener('DOMContentLoaded', async function() {
-            console.log('[TV] DOM Content Loaded - Version 2.4 - FORCE INLINE STYLES');
+            console.log('[TV] DOM Content Loaded - Version 2.6 - NUCLEAR SOLUTION');
+            
+            // NUCLEAR CACHE CLEAR
+            if ('caches' in window) {
+                caches.keys().then(function(names) {
+                    names.forEach(function(name) {
+                        caches.delete(name);
+                    });
+                });
+            }
             
             // FORCE HARD RELOAD if old version
-            const currentVersion = '202501191630';
+            const currentVersion = '202501191730';
             const lastVersion = localStorage.getItem('tv-display-version');
             if (lastVersion !== currentVersion) {
                 console.log('[TV] Version changed, forcing hard reload...');
@@ -2073,30 +2083,39 @@
                 return;
             }
             
-            // FORCE INLINE STYLES ON ALL CARDS
+            // NUCLEAR STYLE VERIFICATION
             setTimeout(() => {
                 const cards = document.querySelectorAll('[style*="min-height"]');
+                let cardsFixed = 0;
+                
                 cards.forEach(card => {
                     if (card.innerHTML.includes('Pollo al Ajillo') || card.innerHTML.includes('Chicken Fingers')) {
-                        console.log('[TV] Forcing styles on card:', card);
-                        card.style.cssText = `
-                            position: relative !important;
-                            overflow: hidden !important;
-                            background: rgba(255, 255, 255, 0.03) !important;
-                            backdrop-filter: blur(12px) !important;
-                            -webkit-backdrop-filter: blur(12px) !important;
-                            border: 1px solid rgba(255, 255, 255, 0.06) !important;
-                            border-radius: 1rem !important;
-                            padding: 1.2rem !important;
-                            display: flex !important;
-                            flex-direction: column !important;
-                            gap: 1rem !important;
-                            transition: all 0.5s ease !important;
-                            min-height: 220px !important;
-                            max-height: 280px !important;
-                        `;
+                        console.log('[TV] NUCLEAR: Forcing styles on card:', card);
                         
-                        // Force font sizes on all text elements
+                        // NUCLEAR STYLE OVERRIDE
+                        const styles = {
+                            position: 'relative',
+                            overflow: 'hidden',
+                            background: 'rgba(255, 255, 255, 0.03)',
+                            backdropFilter: 'blur(12px)',
+                            WebkitBackdropFilter: 'blur(12px)',
+                            border: '1px solid rgba(255, 255, 255, 0.06)',
+                            borderRadius: '1rem',
+                            padding: '1.2rem',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: '1rem',
+                            transition: 'all 0.5s ease',
+                            minHeight: '220px',
+                            maxHeight: '280px'
+                        };
+                        
+                        // Apply each style individually with !important
+                        Object.keys(styles).forEach(prop => {
+                            card.style[prop] = styles[prop] + ' !important';
+                        });
+                        
+                        // Force font sizes
                         const h2Elements = card.querySelectorAll('h2');
                         h2Elements.forEach(h2 => {
                             h2.style.fontSize = '1.4rem !important';
@@ -2104,35 +2123,26 @@
                         
                         const textElements = card.querySelectorAll('span, p');
                         textElements.forEach(el => {
-                            if (el.style.fontSize) {
+                            if (el.style.fontSize || el.getAttribute('style')?.includes('font-size')) {
                                 el.style.fontSize = '0.75rem !important';
                             }
                         });
+                        
+                        cardsFixed++;
                     }
                 });
-                console.log('[TV] Forced inline styles on', cards.length, 'cards');
-            }, 2000);
-            
-            // VERIFY STYLES APPLIED - Force reload if not
-            setTimeout(() => {
-                const testElement = document.createElement('div');
-                testElement.style.cssText = 'font-size: 1.4rem;';
-                document.body.appendChild(testElement);
-                const computedStyle = window.getComputedStyle(testElement);
-                const fontSize = computedStyle.fontSize;
-                document.body.removeChild(testElement);
                 
-                console.log('[TV] Test font-size:', fontSize);
-                // If font-size is not around 22.4px (1.4rem), CSS is not loading
-                if (!fontSize.includes('22.4') && !fontSize.includes('1.4')) {
-                    console.log('[TV] Styles not applied, forcing reload...');
-                    localStorage.setItem('tv-display-version', 'force-reload-' + Date.now());
+                console.log(`[TV] NUCLEAR: Fixed ${cardsFixed} cards`);
+                
+                // If no cards were fixed, something is wrong - force reload
+                if (cardsFixed === 0) {
+                    console.log('[TV] NUCLEAR: No cards found, forcing reload...');
+                    localStorage.setItem('tv-display-version', 'nuclear-' + Date.now());
                     setTimeout(() => {
                         window.location.reload(true);
-                    }, 100);
-                    return;
+                    }, 1000);
                 }
-            }, 1000);
+            }, 3000);
             
             // Force cache refresh
             if ('serviceWorker' in navigator) {

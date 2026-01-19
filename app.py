@@ -30,10 +30,13 @@ except Exception as e:
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', os.urandom(24))
-# Disable template cache to force reload
+# Disable ALL cache to force reload
 app.config['TEMPLATES_AUTO_RELOAD'] = True
+app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
 app.jinja_env.auto_reload = True
 app.jinja_env.cache = None
+app.jinja_env.trim_blocks = True
+app.jinja_env.lstrip_blocks = True
 
 # CORS Configuration
 cors_origins = os.getenv('CORS_ORIGINS', '*').split(',')
