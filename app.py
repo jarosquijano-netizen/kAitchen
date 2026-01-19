@@ -10,8 +10,6 @@ from menu_generator import MenuGenerator
 from cleaning_manager import CleaningManager
 from datetime import datetime, timedelta
 
-print("[APP] Starting application initialization...")
-
 # Load environment variables from .env file
 try:
     from dotenv import load_dotenv
@@ -39,8 +37,6 @@ app.jinja_env.auto_reload = True
 app.jinja_env.cache = None
 app.jinja_env.trim_blocks = True
 app.jinja_env.lstrip_blocks = True
-
-print(f"[APP] Flask app created with {len(app.url_map.iter_rules())} routes")
 
 # CORS Configuration
 cors_origins = os.getenv('CORS_ORIGINS', '*').split(',')
@@ -106,26 +102,7 @@ def index():
 @app.route('/tv')
 def tv_view():
     """TV-friendly menu display"""
-    # Debug: Print template info
-    import os
-    template_path = os.path.join('templates', 'tv_display.html')
-    template_stat = os.stat(template_path) if os.path.exists(template_path) else None
-    print(f"[TV_DEBUG] Template path: {template_path}")
-    print(f"[TV_DEBUG] Template size: {template_stat.st_size if template_stat else 'N/A'} bytes")
-    print(f"[TV_DEBUG] Template modified: {template_stat.st_mtime if template_stat else 'N/A'}")
-    
     return render_template('tv_display.html')
-
-@app.route('/test')
-def test_endpoint():
-    """Simple test endpoint"""
-    print("[TEST] Test endpoint called!")
-    return jsonify({
-        'success': True,
-        'message': 'Server is working',
-        'timestamp': str(datetime.now()),
-        'template_version': '202501191730'
-    })
 
 @app.route('/menu/visualizer')
 def menu_visualizer():
