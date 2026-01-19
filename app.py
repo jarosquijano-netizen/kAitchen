@@ -102,6 +102,14 @@ def index():
 @app.route('/tv')
 def tv_view():
     """TV-friendly menu display"""
+    # Debug: Print template info
+    import os
+    template_path = os.path.join('templates', 'tv_display.html')
+    template_stat = os.stat(template_path) if os.path.exists(template_path) else None
+    print(f"[TV_DEBUG] Template path: {template_path}")
+    print(f"[TV_DEBUG] Template size: {template_stat.st_size if template_stat else 'N/A'} bytes")
+    print(f"[TV_DEBUG] Template modified: {template_stat.st_mtime if template_stat else 'N/A'}")
+    
     return render_template('tv_display.html')
 
 @app.route('/menu/visualizer')
