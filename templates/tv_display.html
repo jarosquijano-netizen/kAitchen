@@ -1025,34 +1025,22 @@
                     </div>
                 </div>
                 
-                <!-- Top Bar with Clock, Weather, QR Code -->
-                <div class="top-bar">
-                    <div class="clock-weather">
-                        <div class="clock" id="clock">00:00:00</div>
-                        <div class="date-display" id="date">Loading...</div>
-                        <div class="weather" id="weatherText">22°C Sunny</div>
-                    </div>
-                    
-                    <!-- VERSION INDICATOR -->
-                    <div style="background: rgba(212, 175, 55, 0.2); border: 1px solid rgba(212, 175, 55, 0.4); padding: 0.3rem 0.6rem; border-radius: 4px; font-size: 0.6rem; color: #D4AF37; font-weight: 600; letter-spacing: 0.5px;">
-                        v2.3-202501191618
-                    </div>
-                    
-                    <div class="qr-simple-container">
-                        <div class="qr-simple-code" id="simpleQrCode"></div>
-                        <div class="qr-simple-label">Menu QR</div>
+                <!-- VERSION INDICATOR -->
+                <div class="menu-section">
+                    <div style="background: rgba(212, 175, 55, 0.2); border: 1px solid rgba(212, 175, 55, 0.4); padding: 0.5rem 0.8rem; border-radius: 6px; font-size: 0.7rem; color: #D4AF37; font-weight: 600; letter-spacing: 0.5px; text-align: center;">
+                        v2.4-202501191630
                     </div>
                 </div>
                 
-                <!-- Clock Section (Bottom) -->
+                <!-- Clock Section -->
                 <div class="menu-section">
                     <div class="clock-section">
-                        <div class="clock" id="currentTime"></div>
-                        <div class="date-display" id="currentDate"></div>
+                        <div class="clock" id="currentTime">00:00:00</div>
+                        <div class="date-display" id="currentDate">Loading...</div>
                     </div>
                 </div>
                 
-                <!-- QR Code Section (New - Below Clock) -->
+                <!-- QR Code Section -->
                 <div class="menu-section">
                     <div class="qr-simple-container">
                         <div class="qr-simple-code" id="simpleQrCode"></div>
@@ -2071,10 +2059,10 @@
 
         // Initialize page
         document.addEventListener('DOMContentLoaded', async function() {
-            console.log('[TV] DOM Content Loaded - Version 2.3 - ULTIMATE FORCE RELOAD');
+            console.log('[TV] DOM Content Loaded - Version 2.4 - FORCE INLINE STYLES');
             
             // FORCE HARD RELOAD if old version
-            const currentVersion = '202501191618';
+            const currentVersion = '202501191630';
             const lastVersion = localStorage.getItem('tv-display-version');
             if (lastVersion !== currentVersion) {
                 console.log('[TV] Version changed, forcing hard reload...');
@@ -2084,6 +2072,46 @@
                 }, 100);
                 return;
             }
+            
+            // FORCE INLINE STYLES ON ALL CARDS
+            setTimeout(() => {
+                const cards = document.querySelectorAll('[style*="min-height"]');
+                cards.forEach(card => {
+                    if (card.innerHTML.includes('Pollo al Ajillo') || card.innerHTML.includes('Chicken Fingers')) {
+                        console.log('[TV] Forcing styles on card:', card);
+                        card.style.cssText = `
+                            position: relative !important;
+                            overflow: hidden !important;
+                            background: rgba(255, 255, 255, 0.03) !important;
+                            backdrop-filter: blur(12px) !important;
+                            -webkit-backdrop-filter: blur(12px) !important;
+                            border: 1px solid rgba(255, 255, 255, 0.06) !important;
+                            border-radius: 1rem !important;
+                            padding: 1.2rem !important;
+                            display: flex !important;
+                            flex-direction: column !important;
+                            gap: 1rem !important;
+                            transition: all 0.5s ease !important;
+                            min-height: 220px !important;
+                            max-height: 280px !important;
+                        `;
+                        
+                        // Force font sizes on all text elements
+                        const h2Elements = card.querySelectorAll('h2');
+                        h2Elements.forEach(h2 => {
+                            h2.style.fontSize = '1.4rem !important';
+                        });
+                        
+                        const textElements = card.querySelectorAll('span, p');
+                        textElements.forEach(el => {
+                            if (el.style.fontSize) {
+                                el.style.fontSize = '0.75rem !important';
+                            }
+                        });
+                    }
+                });
+                console.log('[TV] Forced inline styles on', cards.length, 'cards');
+            }, 2000);
             
             // VERIFY STYLES APPLIED - Force reload if not
             setTimeout(() => {
