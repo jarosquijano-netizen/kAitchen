@@ -10,6 +10,8 @@ from menu_generator import MenuGenerator
 from cleaning_manager import CleaningManager
 from datetime import datetime, timedelta
 
+print("[APP] Starting application initialization...")
+
 # Load environment variables from .env file
 try:
     from dotenv import load_dotenv
@@ -37,6 +39,8 @@ app.jinja_env.auto_reload = True
 app.jinja_env.cache = None
 app.jinja_env.trim_blocks = True
 app.jinja_env.lstrip_blocks = True
+
+print(f"[APP] Flask app created with {len(app.url_map.iter_rules())} routes")
 
 # CORS Configuration
 cors_origins = os.getenv('CORS_ORIGINS', '*').split(',')
