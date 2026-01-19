@@ -17,6 +17,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js?v=202501191527"></script>
     <style>
+        /* FORCE RELOAD - Timestamp: 202501191618 */
         * {
             margin: 0;
             padding: 0;
@@ -2051,10 +2052,10 @@
 
         // Initialize page
         document.addEventListener('DOMContentLoaded', async function() {
-            console.log('[TV] DOM Content Loaded - Version 2.2 - FORCE RELOAD');
+            console.log('[TV] DOM Content Loaded - Version 2.3 - ULTIMATE FORCE RELOAD');
             
             // FORCE HARD RELOAD if old version
-            const currentVersion = '202501191527';
+            const currentVersion = '202501191618';
             const lastVersion = localStorage.getItem('tv-display-version');
             if (lastVersion !== currentVersion) {
                 console.log('[TV] Version changed, forcing hard reload...');
@@ -2064,6 +2065,27 @@
                 }, 100);
                 return;
             }
+            
+            // VERIFY STYLES APPLIED - Force reload if not
+            setTimeout(() => {
+                const testElement = document.createElement('div');
+                testElement.style.cssText = 'font-size: 1.4rem;';
+                document.body.appendChild(testElement);
+                const computedStyle = window.getComputedStyle(testElement);
+                const fontSize = computedStyle.fontSize;
+                document.body.removeChild(testElement);
+                
+                console.log('[TV] Test font-size:', fontSize);
+                // If font-size is not around 22.4px (1.4rem), CSS is not loading
+                if (!fontSize.includes('22.4') && !fontSize.includes('1.4')) {
+                    console.log('[TV] Styles not applied, forcing reload...');
+                    localStorage.setItem('tv-display-version', 'force-reload-' + Date.now());
+                    setTimeout(() => {
+                        window.location.reload(true);
+                    }, 100);
+                    return;
+                }
+            }, 1000);
             
             // Force cache refresh
             if ('serviceWorker' in navigator) {
