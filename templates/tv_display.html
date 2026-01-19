@@ -2071,17 +2071,17 @@
                 });
             }
             
-            // FORCE HARD RELOAD if old version
-            const currentVersion = '202501191730';
-            const lastVersion = localStorage.getItem('tv-display-version');
-            if (lastVersion !== currentVersion) {
-                console.log('[TV] Version changed, forcing hard reload...');
-                localStorage.setItem('tv-display-version', currentVersion);
-                setTimeout(() => {
-                    window.location.reload(true);
-                }, 100);
-                return;
-            }
+            // Version checking DISABLED to prevent infinite reload
+            // const currentVersion = '202501191730';
+            // const lastVersion = localStorage.getItem('tv-display-version');
+            // if (lastVersion !== currentVersion) {
+            //     console.log('[TV] Version changed, forcing hard reload...');
+            //     localStorage.setItem('tv-display-version', currentVersion);
+            //     setTimeout(() => {
+            //         window.location.reload(true);
+            //     }, 100);
+            //     return;
+            // }
             
             // NUCLEAR STYLE VERIFICATION
             setTimeout(() => {
@@ -2343,6 +2343,14 @@
         window.regenerateDayMenu = regenerateDayMenu;
         
         // Start when page loads - initialize function removed
+        // Prevent infinite reload loop
+        let reloadCount = parseInt(localStorage.getItem('tv_reload_count') || '0');
+        if (reloadCount > 3) {
+            console.log('[TV] Too many reloads detected, stopping reload loop');
+            localStorage.removeItem('tv_reload_count');
+            return;
+        }
+        
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', function() {
                 try {
