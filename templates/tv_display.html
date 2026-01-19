@@ -1184,8 +1184,13 @@
         // QR Code functions removed - using zenith style button instead
 
         // Get food image URL (placeholder - you can use Unsplash API)
-        // Generate Simple QR Code (New - Clean without background)
+        // Generate Simple QR Code (DISABLED - was causing errors)
         function generateSimpleQRCode() {
+            console.log('[TV] QR Code generation disabled to prevent errors');
+            return;
+            
+            // Original code commented out to prevent overflow errors
+            /*
             const qrContainer = document.getElementById('simpleQrCode');
             if (!qrContainer || typeof QRCode === 'undefined' || !currentMenu || !selectedDay) {
                 return;
@@ -1250,6 +1255,7 @@
                     qrContainer.innerHTML = '<div style="font-size: 0.6rem; color: #666;">QR Error</div>';
                 }
             }
+            */
         }
 
         // Generate QR Code with menu information (ingredients and preparation) - compact format
