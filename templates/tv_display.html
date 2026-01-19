@@ -1260,9 +1260,9 @@
                 }
             }
             
-            // Limit text for QR code
-            if (menuText.length > 800) {
-                menuText = menuText.substring(0, 800) + '\n...';
+            // Limit text for QR code (much smaller to avoid overflow)
+            if (menuText.length > 300) {
+                menuText = menuText.substring(0, 300) + '\n...';
             }
             
             qrContainer.innerHTML = '';
@@ -1273,21 +1273,25 @@
                     height: 56,
                     colorDark: '#000000',
                     colorLight: '#ffffff',
-                    correctLevel: QRCode.CorrectLevel.M
+                    correctLevel: QRCode.CorrectLevel.L  // Use L level for more capacity
                 });
             } catch (error) {
                 console.error('[TV] Error generating simple QR code:', error);
-                // Fallback to URL
-                const menuUrl = `${window.location.origin}/tv?day=${selectedDay}`;
+                // Fallback to just the day name
                 qrContainer.innerHTML = '';
-                new QRCode(qrContainer, {
-                    text: menuUrl,
-                    width: 56,
-                    height: 56,
-                    colorDark: '#000000',
-                    colorLight: '#ffffff',
-                    correctLevel: QRCode.CorrectLevel.H
-                });
+                try {
+                    new QRCode(qrContainer, {
+                        text: `MENU: ${selectedDay.toUpperCase()}`,
+                        width: 56,
+                        height: 56,
+                        colorDark: '#000000',
+                        colorLight: '#ffffff',
+                        correctLevel: QRCode.CorrectLevel.L
+                    });
+                } catch (fallbackError) {
+                    console.error('[TV] Error generating fallback QR code:', fallbackError);
+                    qrContainer.innerHTML = '<div style="font-size: 0.6rem; color: #666;">QR Error</div>';
+                }
             }
         }
 
