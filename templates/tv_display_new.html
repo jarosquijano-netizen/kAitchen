@@ -2117,6 +2117,13 @@
             selectedDay = getCurrentDayName();
             console.log('[TV] Selected day:', selectedDay);
             
+            // Helper function to get current day name
+            function getCurrentDayName() {
+                const days = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
+                const today = new Date();
+                return days[today.getDay()];
+            }
+            
             // Add basic HTML structure
             document.body.innerHTML = `
                 <div class="tv-container">
