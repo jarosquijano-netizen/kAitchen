@@ -1671,9 +1671,24 @@
 
         async function displaySeparateMenus() {
             const container = document.getElementById('menu-content');
-            const dayMenuContainer = document.getElementById('day-menu');
+            if (!container) {
+                console.error('[TV] ERROR: menu-content container not found in displaySeparateMenus');
+                return;
+            }
+            
             const contentArea = container.querySelector('.content-area');
-            const daysListContainer = dayMenuContainer.querySelector('.days-list');
+            if (!contentArea) {
+                console.error('[TV] ERROR: content-area not found in displaySeparateMenus');
+                return;
+            }
+            
+            // dayMenuContainer doesn't exist in our simplified structure, skip it
+            const dayMenuContainer = document.getElementById('day-menu');
+            const daysListContainer = dayMenuContainer ? dayMenuContainer.querySelector('.days-list') : null;
+            
+            console.log('[TV] displaySeparateMenus: Container found:', container);
+            console.log('[TV] displaySeparateMenus: ContentArea found:', contentArea);
+            console.log('[TV] displaySeparateMenus: DayMenuContainer found:', dayMenuContainer);
             
             const mealIcons = {
                 'desayuno': '🌅',
