@@ -2109,10 +2109,32 @@
             `;
         }
 
-        // Initialize page
+        // Initialize page - RESTORING GRADUALLY
         document.addEventListener('DOMContentLoaded', async function() {
-            console.log('[TV] DOM Content Loaded - Version 2.6 - FINAL VERSION');
-            console.log('[TV] Starting debug...');
+            console.log('[TV] DOM Content Loaded - Version 2.6 - RESTORING');
+            
+            // Add basic HTML structure
+            document.body.innerHTML = `
+                <div class="tv-container">
+                    <div class="top-bar">
+                        <div class="clock-weather">
+                            <div class="clock">12:00</div>
+                            <div class="date-display">Test Date</div>
+                        </div>
+                    </div>
+                    <div id="menu-content">
+                        <div class="content-area">
+                            <h1 style="color: white; text-align: center; margin: 20px;">TV Display - Testing Structure</h1>
+                            <div style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; padding: 20px; margin: 10px 0; min-height: 220px; max-height: 280px;">
+                                <h2 style="font-size: 1.4rem; color: #60A5FA;">Test Menu Card</h2>
+                                <p style="font-size: 0.75rem; color: white;">This should be 220px height with 1.4rem title.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            console.log('[TV] Basic structure added successfully');
             
             // Simple debug - check if basic elements exist
             const menuContent = document.getElementById('menu-content');
