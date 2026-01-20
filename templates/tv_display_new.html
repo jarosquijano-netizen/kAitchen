@@ -2358,34 +2358,7 @@
         window.rateDayMenu = rateDayMenu;
         window.regenerateDayMenu = regenerateDayMenu;
         
-        // Start when page loads - initialize function removed
-        // Prevent infinite reload loop
-        let reloadCount = parseInt(localStorage.getItem('tv_reload_count') || '0');
-        if (reloadCount > 3) {
-            console.log('[TV] Too many reloads detected, stopping reload loop');
-            localStorage.removeItem('tv_reload_count');
-            return;
-        }
-        
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', function() {
-                try {
-                    if (typeof initialize === 'function') {
-                        initialize();
-                    }
-                } catch (error) {
-                    console.log('[TV] Initialize function not available:', error);
-                }
-            });
-        } else {
-            try {
-                if (typeof initialize === 'function') {
-                    initialize();
-                }
-            } catch (error) {
-                console.log('[TV] Initialize function not available:', error);
-            }
-        }
+        // NO initialize call - completely removed to prevent errors
     </script>
 </body>
 </html>
