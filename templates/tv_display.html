@@ -10,8 +10,24 @@
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
     <title>k[AI]tchen · Weekly Menu</title>
-    <!-- Version: Zenith Design v2.5 - NUCLEAR FORCE RELOAD - Timestamp: 202501191716 -->
-    <meta name="cache-buster" content="202501191716-<?php echo rand(); ?>">
+    <!-- Version: Zenith Design v2.5 - NUCLEAR FORCE RELOAD - Timestamp: 202501200622 -->
+    <meta name="cache-buster" content="202501200622-<?php echo rand(); ?>">
+    <script>
+        // FORCE NEW VERSION - Aggressive cache busting
+        const FORCE_VERSION = '202501200622-' + Date.now();
+        console.log('[TV] FORCE VERSION:', FORCE_VERSION);
+        
+        // Clear everything
+        localStorage.clear();
+        sessionStorage.clear();
+        
+        // Force reload if old version detected
+        if (localStorage.getItem('tv-force-version') !== FORCE_VERSION) {
+            console.log('[TV] OLD VERSION DETECTED - FORCE RELOAD');
+            localStorage.setItem('tv-force-version', FORCE_VERSION);
+            window.location.reload(true);
+        }
+    </script>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🍳</text></svg>">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
