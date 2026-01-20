@@ -1858,7 +1858,7 @@
             let simpleHtml = '<div style="display: grid; grid-template-columns: 100px 1fr 1fr; gap: 0; padding: 0; color: white; height: 100vh; background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);">';
             
             // DAYS NAVIGATION - LEFT COLUMN (PARA TV 24")
-            simpleHtml += '<div style="grid-column: 1; background: rgba(255,255,255,0.05); border-radius: 8px; padding: 10px;">';
+            simpleHtml += '<div style="grid-column: 1; background: transparent; border-radius: 0; padding: 10px;">';
             simpleHtml += '<h3 style="font-size: 1.0rem; color: white; margin-bottom: 15px; text-align: center;">Días</h3>';
             
             const weekDays = ['lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado', 'domingo'];
@@ -1902,7 +1902,7 @@
             simpleHtml += '</div>';
             
             // Show adults menu - MIDDLE COLUMN (PARA TV 24")
-            simpleHtml += '<div style="grid-column: 2; overflow-y: auto;">';
+            simpleHtml += '<div style="grid-column: 2; overflow-y: auto; background: transparent;">';
             if (currentMenu.menu_data && currentMenu.menu_data.menu_adultos && currentMenu.menu_data.menu_adultos.dias) {
                 const adultDayData = getDayDataFromMenu(currentMenu.menu_data.menu_adultos.dias, selectedDay);
                 if (adultDayData) {
@@ -1960,7 +1960,7 @@
             simpleHtml += '</div>';
             
             // Show children menu - RIGHT COLUMN (PARA TV 24")
-            simpleHtml += '<div style="grid-column: 3; overflow-y: auto;">';
+            simpleHtml += '<div style="grid-column: 3; overflow-y: auto; background: transparent;">';
             if (currentMenu.menu_data && currentMenu.menu_data.menu_ninos && currentMenu.menu_data.menu_ninos.dias) {
                 const childDayData = getDayDataFromMenu(currentMenu.menu_data.menu_ninos.dias, selectedDay);
                 if (childDayData) {
