@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>TV Test - Minimal</title>
+    <style>
+        body {
+            background: #0a0a0a;
+            color: white;
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+        .test-card {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            padding: 20px;
+            margin: 10px 0;
+            min-height: 220px;
+            max-height: 280px;
+        }
+        h1 {
+            color: #60A5FA;
+            font-size: 1.4rem;
+        }
+        p {
+            font-size: 0.75rem;
+            color: rgba(255, 255, 255, 0.8);
+        }
+    </style>
+</head>
+<body>
+    <h1>TV Display Test - Minimal Version</h1>
+    <div class="test-card">
+        <h2>Test Card Title</h2>
+        <p>This is a test card with 220px min-height and 1.4rem font size.</p>
+        <p>Should be visible and properly sized for TV display.</p>
+    </div>
+    <script>
+        console.log('[TEST] Minimal page loaded successfully');
+        console.log('[TEST] If you see this, JavaScript is working');
+    </script>
+</body>
+</html>
