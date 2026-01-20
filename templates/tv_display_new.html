@@ -1922,6 +1922,19 @@
                     </div>
                 `;
             });
+            
+            // Add time and date below days
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+            const dateString = now.toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+            
+            simpleHtml += `
+                <div style="margin-top: 20px; padding: 10px; background: rgba(255,255,255,0.1); border-radius: 6px; text-align: center;">
+                    <div style="font-size: 1.2rem; color: #60A5FA; font-weight: bold; margin-bottom: 5px;">${timeString}</div>
+                    <div style="font-size: 0.7rem; color: rgba(255,255,255,0.8); line-height: 1.2;">${dateString}</div>
+                </div>
+            `;
+            
             simpleHtml += '</div>';
             
             // Show adults menu - MIDDLE COLUMN
