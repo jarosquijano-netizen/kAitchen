@@ -1893,13 +1893,13 @@
             let adultRecipes = [];
             let childRecipes = [];
 
-            // ADULTOS MENU
-            if (currentMenu.menu_adultos && currentMenu.menu_adultos.dias) {
+            // ADULTOS MENU - CORRECTED STRUCTURE
+            if (currentMenu.menu_data && currentMenu.menu_data.menu_adultos && currentMenu.menu_data.menu_adultos.dias) {
                 console.log('[TV] About to call getDayDataFromMenu for adults with selectedDay:', selectedDay);
-                console.log('[TV] menu_adultos.dias type:', typeof currentMenu.menu_adultos.dias);
-                console.log('[TV] menu_adultos.dias keys:', Object.keys(currentMenu.menu_adultos.dias));
+                console.log('[TV] menu_adultos.dias type:', typeof currentMenu.menu_data.menu_adultos.dias);
+                console.log('[TV] menu_adultos.dias keys:', Object.keys(currentMenu.menu_data.menu_adultos.dias));
                 try {
-                    const adultDayData = getDayDataFromMenu(currentMenu.menu_adultos.dias, selectedDay);
+                    const adultDayData = getDayDataFromMenu(currentMenu.menu_data.menu_adultos.dias, selectedDay);
                 console.log('[TV] Adult day data for', selectedDay, ':', adultDayData);
                     console.log('[TV] Available day keys in menu:', Object.keys(currentMenu.menu_adultos.dias));
                 if (adultDayData) {
@@ -1973,13 +1973,13 @@
                 adultosHtml = `<div class="menu-panel adults"><div style="text-align: center; padding: 4rem; color: #CBD5E0; font-size: 2rem;">No menu structure</div></div>`;
             }
             
-            // NIÑOS MENU
-            if (currentMenu.menu_ninos && currentMenu.menu_ninos.dias) {
+            // NIÑOS MENU - CORRECTED STRUCTURE
+            if (currentMenu.menu_data && currentMenu.menu_data.menu_ninos && currentMenu.menu_data.menu_ninos.dias) {
                 console.log('[TV] About to call getDayDataFromMenu for children with selectedDay:', selectedDay);
-                console.log('[TV] menu_ninos.dias type:', typeof currentMenu.menu_ninos.dias);
-                console.log('[TV] menu_ninos.dias keys:', Object.keys(currentMenu.menu_ninos.dias));
+                console.log('[TV] menu_ninos.dias type:', typeof currentMenu.menu_data.menu_ninos.dias);
+                console.log('[TV] menu_ninos.dias keys:', Object.keys(currentMenu.menu_data.menu_ninos.dias));
                 try {
-                    const childDayData = getDayDataFromMenu(currentMenu.menu_ninos.dias, selectedDay);
+                    const childDayData = getDayDataFromMenu(currentMenu.menu_data.menu_ninos.dias, selectedDay);
                 console.log('[TV] Child day data for', selectedDay, ':', childDayData);
                     console.log('[TV] Available day keys in children menu:', Object.keys(currentMenu.menu_ninos.dias));
                 if (childDayData) {
