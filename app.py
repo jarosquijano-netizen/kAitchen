@@ -2157,10 +2157,10 @@ if __name__ == '__main__':
         print("="*60 + "\n")
         
         app.run(
-            debug=False,  
+            debug=True,  # Enable debug mode for auto-reload
             host='0.0.0.0',
             port=port,
-            use_reloader=False  # Disable reloader to prevent crashes
+            use_reloader=True  # Enable reloader to reload on changes
         )
     except KeyboardInterrupt:
         print("\n\n[INFO] Servidor detenido por el usuario")
