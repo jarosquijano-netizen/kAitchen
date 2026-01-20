@@ -2083,66 +2083,66 @@
             //     return;
             // }
             
-            // NUCLEAR STYLE VERIFICATION
-            setTimeout(() => {
-                const cards = document.querySelectorAll('[style*="min-height"]');
-                let cardsFixed = 0;
-                
-                cards.forEach(card => {
-                    if (card.innerHTML.includes('Pollo al Ajillo') || card.innerHTML.includes('Chicken Fingers')) {
-                        console.log('[TV] NUCLEAR: Forcing styles on card:', card);
-                        
-                        // NUCLEAR STYLE OVERRIDE
-                        const styles = {
-                            position: 'relative',
-                            overflow: 'hidden',
-                            background: 'rgba(255, 255, 255, 0.03)',
-                            backdropFilter: 'blur(12px)',
-                            WebkitBackdropFilter: 'blur(12px)',
-                            border: '1px solid rgba(255, 255, 255, 0.06)',
-                            borderRadius: '1rem',
-                            padding: '1.2rem',
-                            display: 'flex',
-                            flexDirection: 'column',
-                            gap: '1rem',
-                            transition: 'all 0.5s ease',
-                            minHeight: '220px',
-                            maxHeight: '280px'
-                        };
-                        
-                        // Apply each style individually with !important
-                        Object.keys(styles).forEach(prop => {
-                            card.style[prop] = styles[prop] + ' !important';
-                        });
-                        
-                        // Force font sizes
-                        const h2Elements = card.querySelectorAll('h2');
-                        h2Elements.forEach(h2 => {
-                            h2.style.fontSize = '1.4rem !important';
-                        });
-                        
-                        const textElements = card.querySelectorAll('span, p');
-                        textElements.forEach(el => {
-                            if (el.style.fontSize || el.getAttribute('style')?.includes('font-size')) {
-                                el.style.fontSize = '0.75rem !important';
-                            }
-                        });
-                        
-                        cardsFixed++;
-                    }
-                });
-                
-                console.log(`[TV] NUCLEAR: Fixed ${cardsFixed} cards`);
-                
-                // If no cards were fixed, something is wrong - but DON'T reload
-                if (cardsFixed === 0) {
-                    console.log('[TV] NUCLEAR: No cards found, but NOT reloading to prevent infinite loop');
-                    // localStorage.setItem('tv-display-version', 'nuclear-' + Date.now());
-                    // setTimeout(() => {
-                    //     window.location.reload(true);
-                    // }, 1000);
-                }
-            }, 3000);
+            // NUCLEAR STYLE VERIFICATION DISABLED - causing infinite reload
+            // setTimeout(() => {
+            //     const cards = document.querySelectorAll('[style*="min-height"]');
+            //     let cardsFixed = 0;
+            //     
+            //     cards.forEach(card => {
+            //         if (card.innerHTML.includes('Pollo al Ajillo') || card.innerHTML.includes('Chicken Fingers')) {
+            //             console.log('[TV] NUCLEAR: Forcing styles on card:', card);
+            //             
+            //             // NUCLEAR STYLE OVERRIDE
+            //             const styles = {
+            //                 position: 'relative',
+            //                 overflow: 'hidden',
+            //                 background: 'rgba(255, 255, 255, 0.03)',
+            //                 backdropFilter: 'blur(12px)',
+            //                 WebkitBackdropFilter: 'blur(12px)',
+            //                 border: '1px solid rgba(255, 255, 255, 0.06)',
+            //                 borderRadius: '1rem',
+            //                 padding: '1.2rem',
+            //                 display: 'flex',
+            //                 flexDirection: 'column',
+            //                 gap: '1rem',
+            //                 transition: 'all 0.5s ease',
+            //                 minHeight: '220px',
+            //                 maxHeight: '280px'
+            //             };
+            //             
+            //             // Apply each style individually with !important
+            //             Object.keys(styles).forEach(prop => {
+            //                 card.style[prop] = styles[prop] + ' !important';
+            //             });
+            //             
+            //             // Force font sizes
+            //             const h2Elements = card.querySelectorAll('h2');
+            //             h2Elements.forEach(h2 => {
+            //                 h2.style.fontSize = '1.4rem !important';
+            //             });
+            //             
+            //             const textElements = card.querySelectorAll('span, p');
+            //             textElements.forEach(el => {
+            //                 if (el.style.fontSize || el.getAttribute('style')?.includes('font-size')) {
+            //                     el.style.fontSize = '0.75rem !important';
+            //                 }
+            //             });
+            //             
+            //             cardsFixed++;
+            //         }
+            //     });
+            //     
+            //     console.log(`[TV] NUCLEAR: Fixed ${cardsFixed} cards`);
+            //     
+            //     // If no cards were fixed, something is wrong - but DON'T reload
+            //     if (cardsFixed === 0) {
+            //         console.log('[TV] NUCLEAR: No cards found, but NOT reloading to prevent infinite loop');
+            //         // localStorage.setItem('tv-display-version', 'nuclear-' + Date.now());
+            //         // setTimeout(() => {
+            //         //     window.location.reload(true);
+            //         // }, 1000);
+            //     }
+            // }, 3000);
             
             // Force cache refresh
             if ('serviceWorker' in navigator) {
