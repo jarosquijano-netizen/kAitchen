@@ -2111,7 +2111,19 @@
 
         // Initialize page
         document.addEventListener('DOMContentLoaded', async function() {
-            console.log('[TV] DOM Content Loaded - Version 2.6 - NUCLEAR SOLUTION');
+            console.log('[TV] DOM Content Loaded - Version 2.6 - FINAL VERSION');
+            console.log('[TV] Starting debug...');
+            
+            // Simple debug - check if basic elements exist
+            const menuContent = document.getElementById('menu-content');
+            console.log('[TV] Menu content element:', menuContent);
+            
+            if (!menuContent) {
+                console.error('[TV] ERROR: menu-content element not found!');
+                return;
+            }
+            
+            console.log('[TV] All good, proceeding with menu loading...');
             
             // NUCLEAR CACHE CLEAR
             if ('caches' in window) {
