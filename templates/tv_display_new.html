@@ -2111,7 +2111,7 @@
 
         // Initialize page - RESTORING GRADUALLY
         document.addEventListener('DOMContentLoaded', async function() {
-            console.log('[TV] DOM Content Loaded - Version 2.6 - RESTORING');
+            console.log('[TV] DOM Content Loaded - Version 2.6 - RESTORING FUNCTIONS');
             
             // Add basic HTML structure
             document.body.innerHTML = `
@@ -2124,11 +2124,8 @@
                     </div>
                     <div id="menu-content">
                         <div class="content-area">
-                            <h1 style="color: white; text-align: center; margin: 20px;">TV Display - Testing Structure</h1>
-                            <div style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; padding: 20px; margin: 10px 0; min-height: 220px; max-height: 280px;">
-                                <h2 style="font-size: 1.4rem; color: #60A5FA;">Test Menu Card</h2>
-                                <p style="font-size: 0.75rem; color: white;">This should be 220px height with 1.4rem title.</p>
-                            </div>
+                            <h1 style="color: white; text-align: center; margin: 20px;">TV Display - Testing Menu Loading</h1>
+                            <div id="menu-placeholder">Loading menu...</div>
                         </div>
                     </div>
                 </div>
@@ -2136,75 +2133,49 @@
             
             console.log('[TV] Basic structure added successfully');
             
-            // Simple debug - check if basic elements exist
-            const menuContent = document.getElementById('menu-content');
-            console.log('[TV] Menu content element:', menuContent);
-            
-            if (!menuContent) {
-                console.error('[TV] ERROR: menu-content element not found!');
-                return;
+            // Test menu loading
+            try {
+                console.log('[TV] Testing menu loading...');
+                const response = await fetch('/api/menu/current-week');
+                console.log('[TV] Menu API response:', response);
+                
+                if (response.ok) {
+                    const menuData = await response.json();
+                    console.log('[TV] Menu data loaded:', menuData);
+                    
+                    const placeholder = document.getElementById('menu-placeholder');
+                    if (placeholder) {
+                        placeholder.innerHTML = '<div style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; padding: 20px; margin: 10px 0; min-height: 220px; max-height: 280px;"><h2 style="font-size: 1.4rem; color: #60A5FA;">Menu Loaded Successfully!</h2><p style="font-size: 0.75rem; color: white;">API connection working.</p></div>';
+                    }
+                } else {
+                    console.error('[TV] Failed to load menu');
+                }
+            } catch (error) {
+                console.error('[TV] Error loading menu:', error);
             }
-            
-            console.log('[TV] All good, proceeding with menu loading...');
-            
-            // NUCLEAR CACHE CLEAR
-            if ('caches' in window) {
-                caches.keys().then(function(names) {
-                    names.forEach(function(name) {
-                        caches.delete(name);
-                    });
-                });
-            }
-            
-            // Version checking DISABLED to prevent infinite reload
-            // const currentVersion = '202501191730';
-            // const lastVersion = localStorage.getItem('tv-display-version');
-            // if (lastVersion !== currentVersion) {
-            //     console.log('[TV] Version changed, forcing hard reload...');
-            //     localStorage.setItem('tv-display-version', currentVersion);
-            //     setTimeout(() => {
-            //         window.location.reload(true);
-            //     }, 100);
-            //     return;
-            // }
-            
-            // NUCLEAR STYLE VERIFICATION DISABLED - causing infinite reload
-            // setTimeout(() => {
-            //     const cards = document.querySelectorAll('[style*="min-height"]');
-            //     let cardsFixed = 0;
-            //     
-            //     cards.forEach(card => {
-            //         if (card.innerHTML.includes('Pollo al Ajillo') || card.innerHTML.includes('Chicken Fingers')) {
-            //             console.log('[TV] NUCLEAR: Forcing styles on card:', card);
-            //             
-            //             // NUCLEAR STYLE OVERRIDE
-            //             const styles = {
-            //                 position: 'relative',
-            //                 overflow: 'hidden',
-            //                 background: 'rgba(255, 255, 255, 0.03)',
-            //                 backdropFilter: 'blur(12px)',
-            //                 WebkitBackdropFilter: 'blur(12px)',
-            //                 border: '1px solid rgba(255, 255, 255, 0.06)',
-            //                 borderRadius: '1rem',
-            //                 padding: '1.2rem',
-            //                 display: 'flex',
-            //                 flexDirection: 'column',
-            //                 gap: '1rem',
-            //                 transition: 'all 0.5s ease',
-            //                 minHeight: '220px',
-            //                 maxHeight: '280px'
-            //             };
-            //             
-            //             // Apply each style individually with !important
-            //             Object.keys(styles).forEach(prop => {
-            //                 card.style[prop] = styles[prop] + ' !important';
-            //             });
-            //             
-            //             // Force font sizes
-            //             const h2Elements = card.querySelectorAll('h2');
-            //             h2Elements.forEach(h2 => {
-            //                 h2.style.fontSize = '1.4rem !important';
         });
+
+        async function loadMenu() {
+            try {
+                console.log('[TV] Testing menu loading...');
+                const response = await fetch('/api/menu/current-week');
+                console.log('[TV] Menu API response:', response);
+                
+                if (response.ok) {
+                    const menuData = await response.json();
+                    console.log('[TV] Menu data loaded:', menuData);
+                    
+                    const placeholder = document.getElementById('menu-placeholder');
+                    if (placeholder) {
+                        placeholder.innerHTML = '<div style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; padding: 20px; margin: 10px 0; min-height: 220px; max-height: 280px;"><h2 style="font-size: 1.4rem; color: #60A5FA;">Menu Loaded Successfully!</h2><p style="font-size: 0.75rem; color: white;">API connection working.</p></div>';
+                    }
+                } else {
+                    console.error('[TV] Failed to load menu');
+                }
+            } catch (error) {
+                console.error('[TV] Error loading menu:', error);
+            }
+        }
 
         // Rating and regeneration functions
         async function rateDayMenu(menuType, rating) {
