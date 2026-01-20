@@ -1906,7 +1906,42 @@
                                 <div style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; padding: 20px; margin: 10px 0; min-height: 220px; max-height: 280px;">
                                     <h3 style="font-size: 1.4rem; color: #60A5FA; margin-bottom: 10px;">${meal.nombre}</h3>
                                     <p style="font-size: 0.75rem; color: white; margin: 5px 0;">⏱️ ${meal.tiempo_prep} min | 🔥 ${meal.calorias} cal</p>
-                                    <p style="font-size: 0.75rem; color: rgba(255,255,255,0.8); margin: 10px 0;">${meal.ingredientes.slice(0, 5).join(', ')}...</p>
+                                    
+                                    <div style="margin: 10px 0;">
+                                        <p style="font-size: 0.75rem; color: rgba(255,255,255,0.9); margin: 5px 0; font-weight: 600;">📝 Ingredientes:</p>
+                                        <p style="font-size: 0.7rem; color: rgba(255,255,255,0.8); margin: 5px 0; line-height: 1.3;">${meal.ingredientes.join(', ')}</p>
+                                    </div>
+                                    
+                                    <div style="margin: 10px 0;">
+                                        <p style="font-size: 0.75rem; color: rgba(255,255,255,0.9); margin: 5px 0; font-weight: 600;">👨‍🍳 Preparación:</p>
+                                        <p style="font-size: 0.7rem; color: rgba(255,255,255,0.8); margin: 5px 0; line-height: 1.3;">${meal.instrucciones}</p>
+                                    </div>
+                                    
+                                    ${meal.nutrientes ? `
+                                    <div style="margin: 10px 0;">
+                                        <p style="font-size: 0.75rem; color: rgba(255,255,255,0.9); margin: 5px 0; font-weight: 600;">🥗 Nutrientes:</p>
+                                        <p style="font-size: 0.7rem; color: rgba(255,255,255,0.8); margin: 5px 0; line-height: 1.3;">
+                                            💪 ${meal.nutrientes.proteinas} | 🍞 ${meal.nutrientes.carbohidratos} | 🥑 ${meal.nutrientes.grasas} | 🌾 ${meal.nutrientes.fibra}
+                                        </p>
+                                        ${meal.nutrientes.destacados ? `
+                                        <p style="font-size: 0.7rem; color: #60A5FA; margin: 5px 0; font-weight: 600;">✨ ${meal.nutrientes.destacados}</p>
+                                        ` : ''}
+                                    </div>
+                                    ` : ''}
+                                    
+                                    ${meal.notas ? `
+                                    <div style="margin: 10px 0;">
+                                        <p style="font-size: 0.75rem; color: #FB923C; margin: 5px 0; font-weight: 600;">💡 Notas:</p>
+                                        <p style="font-size: 0.7rem; color: rgba(255,255,255,0.8); margin: 5px 0; line-height: 1.3;">${meal.notas}</p>
+                                    </div>
+                                    ` : ''}
+                                    
+                                    ${meal.porque_seleccionada ? `
+                                    <div style="margin: 10px 0;">
+                                        <p style="font-size: 0.75rem; color: #10B981; margin: 5px 0; font-weight: 600;">🎯 ¿Por qué esta receta?</p>
+                                        <p style="font-size: 0.7rem; color: rgba(255,255,255,0.8); margin: 5px 0; line-height: 1.3;">${meal.porque_seleccionada}</p>
+                                    </div>
+                                    ` : ''}
                                 </div>
                             `;
                         }
@@ -1927,7 +1962,42 @@
                                 <div style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; padding: 20px; margin: 10px 0; min-height: 220px; max-height: 280px;">
                                     <h3 style="font-size: 1.4rem; color: #FB923C; margin-bottom: 10px;">${meal.nombre}</h3>
                                     <p style="font-size: 0.75rem; color: white; margin: 5px 0;">⏱️ ${meal.tiempo_prep} min | 🔥 ${meal.calorias} cal</p>
-                                    <p style="font-size: 0.75rem; color: rgba(255,255,255,0.8); margin: 10px 0;">${meal.ingredientes.slice(0, 5).join(', ')}...</p>
+                                    
+                                    <div style="margin: 10px 0;">
+                                        <p style="font-size: 0.75rem; color: rgba(255,255,255,0.9); margin: 5px 0; font-weight: 600;">📝 Ingredientes:</p>
+                                        <p style="font-size: 0.7rem; color: rgba(255,255,255,0.8); margin: 5px 0; line-height: 1.3;">${meal.ingredientes.join(', ')}</p>
+                                    </div>
+                                    
+                                    <div style="margin: 10px 0;">
+                                        <p style="font-size: 0.75rem; color: rgba(255,255,255,0.9); margin: 5px 0; font-weight: 600;">👨‍🍳 Preparación:</p>
+                                        <p style="font-size: 0.7rem; color: rgba(255,255,255,0.8); margin: 5px 0; line-height: 1.3;">${meal.instrucciones}</p>
+                                    </div>
+                                    
+                                    ${meal.nutrientes ? `
+                                    <div style="margin: 10px 0;">
+                                        <p style="font-size: 0.75rem; color: rgba(255,255,255,0.9); margin: 5px 0; font-weight: 600;">🥗 Nutrientes:</p>
+                                        <p style="font-size: 0.7rem; color: rgba(255,255,255,0.8); margin: 5px 0; line-height: 1.3;">
+                                            💪 ${meal.nutrientes.proteinas} | 🍞 ${meal.nutrientes.carbohidratos} | 🥑 ${meal.nutrientes.grasas} | 🌾 ${meal.nutrientes.fibra}
+                                        </p>
+                                        ${meal.nutrientes.destacados ? `
+                                        <p style="font-size: 0.7rem; color: #FB923C; margin: 5px 0; font-weight: 600;">✨ ${meal.nutrientes.destacados}</p>
+                                        ` : ''}
+                                    </div>
+                                    ` : ''}
+                                    
+                                    ${meal.notas ? `
+                                    <div style="margin: 10px 0;">
+                                        <p style="font-size: 0.75rem; color: #FB923C; margin: 5px 0; font-weight: 600;">💡 Notas:</p>
+                                        <p style="font-size: 0.7rem; color: rgba(255,255,255,0.8); margin: 5px 0; line-height: 1.3;">${meal.notas}</p>
+                                    </div>
+                                    ` : ''}
+                                    
+                                    ${meal.porque_seleccionada ? `
+                                    <div style="margin: 10px 0;">
+                                        <p style="font-size: 0.75rem; color: #10B981; margin: 5px 0; font-weight: 600;">🎯 ¿Por qué esta receta?</p>
+                                        <p style="font-size: 0.7rem; color: rgba(255,255,255,0.8); margin: 5px 0; line-height: 1.3;">${meal.porque_seleccionada}</p>
+                                    </div>
+                                    ` : ''}
                                 </div>
                             `;
                         }
