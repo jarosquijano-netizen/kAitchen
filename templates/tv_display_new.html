@@ -1888,233 +1888,58 @@
                 };
             }
             
-            let adultosHtml = '';
-            let ninosHtml = '';
-            let adultRecipes = [];
-            let childRecipes = [];
-
-            // ADULTOS MENU - CORRECTED STRUCTURE
+            // SIMPLIFIED VERSION - Just show the data first
+            console.log('[TV] SIMPLIFIED: Creating simple menu display...');
+            
+            let simpleHtml = '<div style="padding: 20px; color: white;">';
+            
+            // Show adults menu
             if (currentMenu.menu_data && currentMenu.menu_data.menu_adultos && currentMenu.menu_data.menu_adultos.dias) {
-                console.log('[TV] About to call getDayDataFromMenu for adults with selectedDay:', selectedDay);
-                console.log('[TV] menu_adultos.dias type:', typeof currentMenu.menu_data.menu_adultos.dias);
-                console.log('[TV] menu_adultos.dias keys:', Object.keys(currentMenu.menu_data.menu_adultos.dias));
-                try {
-                    const adultDayData = getDayDataFromMenu(currentMenu.menu_data.menu_adultos.dias, selectedDay);
-                console.log('[TV] Adult day data for', selectedDay, ':', adultDayData);
-                    console.log('[TV] Available day keys in menu:', Object.keys(currentMenu.menu_adultos.dias));
+                const adultDayData = getDayDataFromMenu(currentMenu.menu_data.menu_adultos.dias, selectedDay);
                 if (adultDayData) {
-                    // Add rating and regenerate section for adults
-                    const adultRatingId = `rating-adultos-${selectedDay}`;
-                    const adultRegenId = `regen-adultos-${selectedDay}`;
-                    adultosHtml += `
-                        <div class="menu-panel adults">
-                            <div style="margin-bottom: 0.8rem; padding: 0.6rem; background: rgba(255, 255, 255, 0.05); border-radius: 0.6rem; border: 1px solid rgba(255, 255, 255, 0.1); position: relative; z-index: 10;">
-                            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.6rem;">
-                                <div style="flex: 1; min-width: 120px;">
-                                    <div style="font-size: 0.6rem; color: rgba(255, 255, 255, 0.5); margin-bottom: 0.2rem; text-transform: uppercase; letter-spacing: 0.03em;">Califica este menú</div>
-                                    <div id="${adultRatingId}" style="display: flex; gap: 0.2rem; align-items: center;">
-                                        ${[1, 2, 3, 4, 5].map(star => {
-                                            return '<button onclick="rateDayMenu(\'adultos\', ' + star + ')" ' +
-                                                'style="background: none; border: none; font-size: 1rem; cursor: pointer; padding: 0.2rem; transition: transform 0.2s;" ' +
-                                                'onmouseover="this.style.transform=\'scale(1.1)\'" ' +
-                                                'onmouseout="this.style.transform=\'scale(1)\'" ' +
-                                                'title="' + star + ' ' + (star === 1 ? 'estrella' : 'estrellas') + '">' +
-                                                '<span class="star-' + star + '" style="color: rgba(255, 255, 255, 0.3);">☆</span>' +
-                                                '</button>';
-                                        }).join('')}
-                                    </div>
+                    simpleHtml += '<h2 style="font-size: 1.4rem; color: #60A5FA; margin-bottom: 10px;">Menú Adultos - ' + selectedDay + '</h2>';
+                    
+                    ['desayuno', 'comida', 'merienda', 'cena'].forEach(mealType => {
+                        if (adultDayData[mealType]) {
+                            const meal = adultDayData[mealType];
+                            simpleHtml += `
+                                <div style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; padding: 20px; margin: 10px 0; min-height: 220px; max-height: 280px;">
+                                    <h3 style="font-size: 1.4rem; color: #60A5FA; margin-bottom: 10px;">${meal.nombre}</h3>
+                                    <p style="font-size: 0.75rem; color: white; margin: 5px 0;">⏱️ ${meal.tiempo_prep} min | 🔥 ${meal.calorias} cal</p>
+                                    <p style="font-size: 0.75rem; color: rgba(255,255,255,0.8); margin: 10px 0;">${meal.ingredientes.slice(0, 5).join(', ')}...</p>
                                 </div>
-                                <button id="${adultRegenId}" onclick="regenerateDayMenu('adultos')" 
-                                    style="padding: 0.4rem 0.8rem; background: rgba(59, 130, 246, 0.2); border: 1px solid rgba(59, 130, 246, 0.4); border-radius: 0.4rem; color: #60A5FA; font-size: 0.7rem; font-weight: 600; cursor: pointer; transition: all 0.3s; text-transform: uppercase; letter-spacing: 0.02em;"
-                                    onmouseover="this.style.background='rgba(59, 130, 246, 0.3)'; this.style.borderColor='rgba(59, 130, 246, 0.6)'"
-                                    onmouseout="this.style.background='rgba(59, 130, 246, 0.2)'; this.style.borderColor='rgba(59, 130, 246, 0.4)'">
-                                    🔄 Regenerar
-                                </button>
-                            </div>
-                        </div>
-                            <div class="meal-grid">
-                    `;
-                    
-                    // Render meals asynchronously to fetch recipe URLs
-                    const adultMeals = ['desayuno', 'comida', 'cena'].filter(mealType => adultDayData[mealType]);
-                    console.log('[TV] Adult meals to render:', adultMeals);
-                    for (const mealType of adultMeals) {
-                        const meal = adultDayData[mealType];
-                        console.log('[TV] Rendering adult meal:', mealType, meal);
-                        const result = await renderMealCard(meal, mealType, mealNames, true);
-                        console.log('[TV] Render result for', mealType, ':', result ? 'OK' : 'FAILED');
-                        if (result && result.html) {
-                            console.log('[TV] Adding HTML for', mealType, ', length:', result.html.length);
-                            adultosHtml += result.html;
-                            if (result.recipeBase && result.recipeBase !== 'Original' && result.recipeBase !== '') {
-                                adultRecipes.push(result.recipeBase);
-                            }
-                        } else {
-                            console.error('[TV] Failed to render meal card for', mealType);
+                            `;
                         }
-                    }
-                    
-                    adultosHtml += `</div></div>`;
-                } else {
-                    console.log('[TV] No adult day data for', selectedDay);
-                    adultosHtml = `<div class="menu-panel adults"><div style="text-align: center; padding: 4rem;">
-                        <div class="zenith-qr-container" style="margin: 0 auto;">
-                            <div class="zenith-qr-code" id="adults-qr-${selectedDay}"></div>
-                            <div class="zenith-qr-label">Adult Menu QR</div>
-                        </div>
-                    </div></div>`;
+                    });
                 }
-                } catch (error) {
-                    console.error('[TV] Error in getDayDataFromMenu for adults:', error);
-                    adultosHtml = `<div class="menu-panel adults"><div style="text-align: center; padding: 4rem; color: #CBD5E0; font-size: 2rem;">Error loading menu</div></div>`;
-                }
-            } else {
-                console.log('[TV] No menu_adultos.dias structure');
-                adultosHtml = `<div class="menu-panel adults"><div style="text-align: center; padding: 4rem; color: #CBD5E0; font-size: 2rem;">No menu structure</div></div>`;
             }
             
-            // NIÑOS MENU - CORRECTED STRUCTURE
+            // Show children menu
             if (currentMenu.menu_data && currentMenu.menu_data.menu_ninos && currentMenu.menu_data.menu_ninos.dias) {
-                console.log('[TV] About to call getDayDataFromMenu for children with selectedDay:', selectedDay);
-                console.log('[TV] menu_ninos.dias type:', typeof currentMenu.menu_data.menu_ninos.dias);
-                console.log('[TV] menu_ninos.dias keys:', Object.keys(currentMenu.menu_data.menu_ninos.dias));
-                try {
-                    const childDayData = getDayDataFromMenu(currentMenu.menu_data.menu_ninos.dias, selectedDay);
-                console.log('[TV] Child day data for', selectedDay, ':', childDayData);
-                    console.log('[TV] Available day keys in children menu:', Object.keys(currentMenu.menu_ninos.dias));
+                const childDayData = getDayDataFromMenu(currentMenu.menu_data.menu_ninos.dias, selectedDay);
                 if (childDayData) {
-                    // Add rating and regenerate section for children
-                    const childRatingId = `rating-ninos-${selectedDay}`;
-                    const childRegenId = `regen-ninos-${selectedDay}`;
-                    ninosHtml += `
-                        <div class="menu-panel children">
-                            <div style="margin-bottom: 0.8rem; padding: 0.6rem; background: rgba(255, 255, 255, 0.05); border-radius: 0.6rem; border: 1px solid rgba(255, 255, 255, 0.1); position: relative; z-index: 10;">
-                            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.6rem;">
-                                <div style="flex: 1; min-width: 120px;">
-                                    <div style="font-size: 0.6rem; color: rgba(255, 255, 255, 0.5); margin-bottom: 0.2rem; text-transform: uppercase; letter-spacing: 0.03em;">Califica este menú</div>
-                                    <div id="${childRatingId}" style="display: flex; gap: 0.2rem; align-items: center;">
-                                        ${[1, 2, 3, 4, 5].map(star => {
-                                            return '<button onclick="rateDayMenu(\'ninos\', ' + star + ')" ' +
-                                                'style="background: none; border: none; font-size: 1rem; cursor: pointer; padding: 0.2rem; transition: transform 0.2s;" ' +
-                                                'onmouseover="this.style.transform=\'scale(1.1)\'" ' +
-                                                'onmouseout="this.style.transform=\'scale(1)\'" ' +
-                                                'title="' + star + ' ' + (star === 1 ? 'estrella' : 'estrellas') + '">' +
-                                                '<span class="star-' + star + '" style="color: rgba(255, 255, 255, 0.3);">☆</span>' +
-                                                '</button>';
-                                        }).join('')}
-                                    </div>
-                                </div>
-                                <button id="${childRegenId}" onclick="regenerateDayMenu('ninos')" 
-                                    style="padding: 0.4rem 0.8rem; background: rgba(249, 115, 22, 0.2); border: 1px solid rgba(249, 115, 22, 0.4); border-radius: 0.4rem; color: #FB923C; font-size: 0.7rem; font-weight: 600; cursor: pointer; transition: all 0.3s; text-transform: uppercase; letter-spacing: 0.02em;"
-                                    onmouseover="this.style.background='rgba(249, 115, 22, 0.3)'; this.style.borderColor='rgba(249, 115, 22, 0.6)'"
-                                    onmouseout="this.style.background='rgba(249, 115, 22, 0.2)'; this.style.borderColor='rgba(249, 115, 22, 0.4)'">
-                                    🔄 Regenerar
-                                </button>
-                            </div>
-                        </div>
-                            <div class="meal-grid">
-                    `;
+                    simpleHtml += '<h2 style="font-size: 1.4rem; color: #FB923C; margin-bottom: 10px; margin-top: 20px;">Menú Niños - ' + selectedDay + '</h2>';
                     
-                    // Render meals asynchronously to fetch recipe URLs
-                    const childMeals = ['desayuno', 'comida', 'merienda', 'cena'].filter(mealType => childDayData[mealType]);
-                    console.log('[TV] Child meals to render:', childMeals);
-                    for (const mealType of childMeals) {
+                    ['desayuno', 'comida', 'merienda', 'cena'].forEach(mealType => {
+                        if (childDayData[mealType]) {
                             const meal = childDayData[mealType];
-                        console.log('[TV] Rendering child meal:', mealType, meal);
-                        const result = await renderMealCard(meal, mealType, mealNames, false);
-                        console.log('[TV] Render result for', mealType, ':', result ? 'OK' : 'FAILED');
-                        if (result && result.html) {
-                            console.log('[TV] Adding HTML for', mealType, ', length:', result.html.length);
-                            ninosHtml += result.html;
-                            if (result.recipeBase && result.recipeBase !== 'Original' && result.recipeBase !== '') {
-                                childRecipes.push(result.recipeBase);
-                            }
-                        } else {
-                            console.error('[TV] Failed to render meal card for', mealType);
+                            simpleHtml += `
+                                <div style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; padding: 20px; margin: 10px 0; min-height: 220px; max-height: 280px;">
+                                    <h3 style="font-size: 1.4rem; color: #FB923C; margin-bottom: 10px;">${meal.nombre}</h3>
+                                    <p style="font-size: 0.75rem; color: white; margin: 5px 0;">⏱️ ${meal.tiempo_prep} min | 🔥 ${meal.calorias} cal</p>
+                                    <p style="font-size: 0.75rem; color: rgba(255,255,255,0.8); margin: 10px 0;">${meal.ingredientes.slice(0, 5).join(', ')}...</p>
+                                </div>
+                            `;
                         }
-                    }
-                    
-                    ninosHtml += `</div></div>`;
-                } else {
-                    console.log('[TV] No child day data for', selectedDay);
-                    ninosHtml = `<div class="menu-panel children"><div style="text-align: center; padding: 4rem;">
-                        <div class="zenith-qr-container" style="margin: 0 auto;">
-                            <div class="zenith-qr-code" id="children-qr-${selectedDay}"></div>
-                            <div class="zenith-qr-label">Children Menu QR</div>
-                        </div>
-                    </div></div>`;
+                    });
                 }
-                } catch (error) {
-                    console.error('[TV] Error in getDayDataFromMenu for children:', error);
-                    ninosHtml = `<div class="menu-panel children"><div style="text-align: center; padding: 4rem; color: #CBD5E0; font-size: 2rem;">Error loading menu</div></div>`;
-                }
-            } else {
-                console.log('[TV] No menu_ninos.dias structure');
-                ninosHtml = `<div class="menu-panel children"><div style="text-align: center; padding: 4rem; color: #CBD5E0; font-size: 2rem;">No menu structure</div></div>`;
             }
             
-            // Collect all recipes from both menus (use the ones we already collected)
-            const allRecipes = [...new Set([...adultRecipes, ...childRecipes])];
+            simpleHtml += '</div>';
             
-            // QR codes removed - using zenith style button instead
-            
-            let finalHtml = `
-                <div class="meal-grid">
-                    ${adultosHtml}
-                    ${ninosHtml}
-                </div>
-            `;
-            
-            console.log('[TV] Final HTML length:', finalHtml.length);
-            console.log('[TV] Adult HTML length:', adultosHtml.length);
-            console.log('[TV] Child HTML length:', ninosHtml.length);
-            console.log('[TV] About to set innerHTML');
-            
-            contentArea.innerHTML = finalHtml;
-            
-            console.log('[TV] innerHTML set successfully');
-            console.log('[TV] Container children count:', container.children.length);
-            
-            // QR Code generation disabled to prevent errors
-            // generateSimpleQRCode();
-            
-            // Force a reflow to ensure rendering
-            void container.offsetHeight;
-            
-            // Load existing ratings
-            setTimeout(loadDayRatings, 100);
-            
-            // FORCE STYLES DIRECTLY IN DOM - Override any CSS
-            setTimeout(() => {
-                console.log('[TV] FORCE STYLES: Applying direct DOM styles...');
-                const allCards = document.querySelectorAll('[style*="min-height"]');
-                let fixedCount = 0;
-                
-                allCards.forEach(card => {
-                    if (card.innerHTML.includes('Baked Crunchy Hot Honey') || card.innerHTML.includes('Pasta con Pollo')) {
-                        console.log('[TV] FORCE STYLES: Fixing card:', card);
-                        
-                        // Force styles directly with highest priority
-                        card.style.setProperty('min-height', '220px', 'important');
-                        card.style.setProperty('max-height', '280px', 'important');
-                        card.style.setProperty('font-size', '1.4rem', 'important');
-                        
-                        // Force all text elements
-                        const allText = card.querySelectorAll('*');
-                        allText.forEach(el => {
-                            if (el.tagName === 'H2') {
-                                el.style.setProperty('font-size', '1.4rem', 'important');
-                            } else if (el.tagName === 'SPAN' || el.tagName === 'P') {
-                                el.style.setProperty('font-size', '0.75rem', 'important');
-                            }
-                        });
-                        
-                        fixedCount++;
-                    }
-                });
-                
-                console.log(`[TV] FORCE STYLES: Fixed ${fixedCount} cards directly`);
-            }, 2000);
+            console.log('[TV] SIMPLIFIED: Setting simple HTML...');
+            contentArea.innerHTML = simpleHtml;
+            console.log('[TV] SIMPLIFIED: Simple menu displayed successfully!');
         }
 
         function showNoMenu() {
