@@ -1906,49 +1906,49 @@
             if (currentMenu.menu_data && currentMenu.menu_data.menu_adultos && currentMenu.menu_data.menu_adultos.dias) {
                 const adultDayData = getDayDataFromMenu(currentMenu.menu_data.menu_adultos.dias, selectedDay);
                 if (adultDayData) {
-                    simpleHtml += '<h2 style="font-size: 1.8rem; color: #60A5FA; margin-bottom: 10px; text-align: center;">Menú Adultos - ' + selectedDay + '</h2>';
+                    simpleHtml += '<h2 style="font-size: 1.5rem; color: #60A5FA; margin-bottom: 5px; text-align: center;">Menú Adultos - ' + selectedDay + '</h2>';
                     
                     ['desayuno', 'comida', 'merienda', 'cena'].forEach(mealType => {
                         if (adultDayData[mealType]) {
                             const meal = adultDayData[mealType];
                             simpleHtml += `
                                 <div style="background: rgba(255,255,255,0.1); border: none; border-radius: 0; padding: 25px; margin: 15px 0; min-height: 220px; max-height: 280px;">
-                                    <h3 style="font-size: 1.6rem; color: #60A5FA; margin-bottom: 15px;">${meal.nombre}</h3>
-                                    <p style="font-size: 1.0rem; color: white; margin: 8px 0;">⏱️ ${meal.tiempo_prep} min | 🔥 ${meal.calorias} cal</p>
+                                    <h3 style="font-size: 1.4rem; color: #60A5FA; margin-bottom: 15px;">${meal.nombre}</h3>
+                                    <p style="font-size: 0.85rem; color: white; margin: 8px 0;">⏱️ ${meal.tiempo_prep} min | 🔥 ${meal.calorias} cal</p>
                                     
                                     <div style="margin: 15px 0;">
-                                        <p style="font-size: 1.0rem; color: rgba(255,255,255,0.9); margin: 8px 0; font-weight: 600;">📝 Ingredientes:</p>
-                                        <p style="font-size: 0.9rem; color: rgba(255,255,255,0.8); margin: 8px 0; line-height: 1.4;">${meal.ingredientes.join(', ')}</p>
+                                        <p style="font-size: 0.85rem; color: rgba(255,255,255,0.9); margin: 8px 0; font-weight: 600;">📝 Ingredientes:</p>
+                                        <p style="font-size: 0.75rem; color: rgba(255,255,255,0.8); margin: 8px 0; line-height: 1.4;">${meal.ingredientes.join(', ')}</p>
                                     </div>
                                     
                                     <div style="margin: 15px 0;">
-                                        <p style="font-size: 1.0rem; color: rgba(255,255,255,0.9); margin: 8px 0; font-weight: 600;">👨‍🍳 Preparación:</p>
-                                        <p style="font-size: 0.9rem; color: rgba(255,255,255,0.8); margin: 8px 0; line-height: 1.4;">${meal.instrucciones}</p>
+                                        <p style="font-size: 0.85rem; color: rgba(255,255,255,0.9); margin: 8px 0; font-weight: 600;">👨‍🍳 Preparación:</p>
+                                        <p style="font-size: 0.75rem; color: rgba(255,255,255,0.8); margin: 8px 0; line-height: 1.4;">${meal.instrucciones}</p>
                                     </div>
                                     
                                     ${meal.nutrientes ? `
                                     <div style="margin: 15px 0;">
-                                        <p style="font-size: 1.0rem; color: rgba(255,255,255,0.9); margin: 8px 0; font-weight: 600;">🥗 Nutrientes:</p>
-                                        <p style="font-size: 0.9rem; color: rgba(255,255,255,0.8); margin: 8px 0; line-height: 1.4;">
+                                        <p style="font-size: 0.85rem; color: rgba(255,255,255,0.9); margin: 8px 0; font-weight: 600;">🥗 Nutrientes:</p>
+                                        <p style="font-size: 0.75rem; color: rgba(255,255,255,0.8); margin: 8px 0; line-height: 1.4;">
                                             💪 ${meal.nutrientes.proteinas} | 🍞 ${meal.nutrientes.carbohidratos} | 🥑 ${meal.nutrientes.grasas} | 🌾 ${meal.nutrientes.fibra}
                                         </p>
                                         ${meal.nutrientes.destacados ? `
-                                        <p style="font-size: 0.9rem; color: #60A5FA; margin: 8px 0; font-weight: 600;">✨ ${meal.nutrientes.destacados}</p>
+                                        <p style="font-size: 0.75rem; color: #60A5FA; margin: 8px 0; font-weight: 600;">✨ ${meal.nutrientes.destacados}</p>
                                         ` : ''}
                                     </div>
                                     ` : ''}
                                     
                                     ${meal.notas ? `
                                     <div style="margin: 15px 0;">
-                                        <p style="font-size: 1.0rem; color: #FB923C; margin: 8px 0; font-weight: 600;">💡 Notas:</p>
-                                        <p style="font-size: 0.9rem; color: rgba(255,255,255,0.8); margin: 8px 0; line-height: 1.4;">${meal.notas}</p>
+                                        <p style="font-size: 0.85rem; color: #FB923C; margin: 8px 0; font-weight: 600;">💡 Notas:</p>
+                                        <p style="font-size: 0.75rem; color: rgba(255,255,255,0.8); margin: 8px 0; line-height: 1.4;">${meal.notas}</p>
                                     </div>
                                     ` : ''}
                                     
                                     ${meal.porque_seleccionada ? `
                                     <div style="margin: 15px 0;">
-                                        <p style="font-size: 1.0rem; color: #10B981; margin: 8px 0; font-weight: 600;">🎯 ¿Por qué esta receta?</p>
-                                        <p style="font-size: 0.9rem; color: rgba(255,255,255,0.8); margin: 8px 0; line-height: 1.4;">${meal.porque_seleccionada}</p>
+                                        <p style="font-size: 0.85rem; color: #10B981; margin: 8px 0; font-weight: 600;">🎯 ¿Por qué esta receta?</p>
+                                        <p style="font-size: 0.75rem; color: rgba(255,255,255,0.8); margin: 8px 0; line-height: 1.4;">${meal.porque_seleccionada}</p>
                                     </div>
                                     ` : ''}
                                 </div>
@@ -1964,49 +1964,49 @@
             if (currentMenu.menu_data && currentMenu.menu_data.menu_ninos && currentMenu.menu_data.menu_ninos.dias) {
                 const childDayData = getDayDataFromMenu(currentMenu.menu_data.menu_ninos.dias, selectedDay);
                 if (childDayData) {
-                    simpleHtml += '<h2 style="font-size: 1.8rem; color: #FB923C; margin-bottom: 10px; text-align: center;">Menú Niños - ' + selectedDay + '</h2>';
+                    simpleHtml += '<h2 style="font-size: 1.5rem; color: #FB923C; margin-bottom: 5px; text-align: center;">Menú Niños - ' + selectedDay + '</h2>';
                     
                     ['desayuno', 'comida', 'merienda', 'cena'].forEach(mealType => {
                         if (childDayData[mealType]) {
                             const meal = childDayData[mealType];
                             simpleHtml += `
                                 <div style="background: rgba(255,255,255,0.1); border: none; border-radius: 0; padding: 25px; margin: 15px 0; min-height: 220px; max-height: 280px;">
-                                    <h3 style="font-size: 1.6rem; color: #FB923C; margin-bottom: 15px;">${meal.nombre}</h3>
-                                    <p style="font-size: 1.0rem; color: white; margin: 8px 0;">⏱️ ${meal.tiempo_prep} min | 🔥 ${meal.calorias} cal</p>
+                                    <h3 style="font-size: 1.4rem; color: #FB923C; margin-bottom: 15px;">${meal.nombre}</h3>
+                                    <p style="font-size: 0.85rem; color: white; margin: 8px 0;">⏱️ ${meal.tiempo_prep} min | 🔥 ${meal.calorias} cal</p>
                                     
                                     <div style="margin: 15px 0;">
-                                        <p style="font-size: 1.0rem; color: rgba(255,255,255,0.9); margin: 8px 0; font-weight: 600;">📝 Ingredientes:</p>
-                                        <p style="font-size: 0.9rem; color: rgba(255,255,255,0.8); margin: 8px 0; line-height: 1.4;">${meal.ingredientes.join(', ')}</p>
+                                        <p style="font-size: 0.85rem; color: rgba(255,255,255,0.9); margin: 8px 0; font-weight: 600;">📝 Ingredientes:</p>
+                                        <p style="font-size: 0.75rem; color: rgba(255,255,255,0.8); margin: 8px 0; line-height: 1.4;">${meal.ingredientes.join(', ')}</p>
                                     </div>
                                     
                                     <div style="margin: 15px 0;">
-                                        <p style="font-size: 1.0rem; color: rgba(255,255,255,0.9); margin: 8px 0; font-weight: 600;">👨‍🍳 Preparación:</p>
-                                        <p style="font-size: 0.9rem; color: rgba(255,255,255,0.8); margin: 8px 0; line-height: 1.4;">${meal.instrucciones}</p>
+                                        <p style="font-size: 0.85rem; color: rgba(255,255,255,0.9); margin: 8px 0; font-weight: 600;">👨‍🍳 Preparación:</p>
+                                        <p style="font-size: 0.75rem; color: rgba(255,255,255,0.8); margin: 8px 0; line-height: 1.4;">${meal.instrucciones}</p>
                                     </div>
                                     
                                     ${meal.nutrientes ? `
                                     <div style="margin: 15px 0;">
-                                        <p style="font-size: 1.0rem; color: rgba(255,255,255,0.9); margin: 8px 0; font-weight: 600;">🥗 Nutrientes:</p>
-                                        <p style="font-size: 0.9rem; color: rgba(255,255,255,0.8); margin: 8px 0; line-height: 1.4;">
+                                        <p style="font-size: 0.85rem; color: rgba(255,255,255,0.9); margin: 8px 0; font-weight: 600;">🥗 Nutrientes:</p>
+                                        <p style="font-size: 0.75rem; color: rgba(255,255,255,0.8); margin: 8px 0; line-height: 1.4;">
                                             💪 ${meal.nutrientes.proteinas} | 🍞 ${meal.nutrientes.carbohidratos} | 🥑 ${meal.nutrientes.grasas} | 🌾 ${meal.nutrientes.fibra}
                                         </p>
                                         ${meal.nutrientes.destacados ? `
-                                        <p style="font-size: 0.9rem; color: #FB923C; margin: 8px 0; font-weight: 600;">✨ ${meal.nutrientes.destacados}</p>
+                                        <p style="font-size: 0.75rem; color: #FB923C; margin: 8px 0; font-weight: 600;">✨ ${meal.nutrientes.destacados}</p>
                                         ` : ''}
                                     </div>
                                     ` : ''}
                                     
                                     ${meal.notas ? `
                                     <div style="margin: 15px 0;">
-                                        <p style="font-size: 1.0rem; color: #FB923C; margin: 8px 0; font-weight: 600;">💡 Notas:</p>
-                                        <p style="font-size: 0.9rem; color: rgba(255,255,255,0.8); margin: 8px 0; line-height: 1.4;">${meal.notas}</p>
+                                        <p style="font-size: 0.85rem; color: #FB923C; margin: 8px 0; font-weight: 600;">💡 Notas:</p>
+                                        <p style="font-size: 0.75rem; color: rgba(255,255,255,0.8); margin: 8px 0; line-height: 1.4;">${meal.notas}</p>
                                     </div>
                                     ` : ''}
                                     
                                     ${meal.porque_seleccionada ? `
                                     <div style="margin: 15px 0;">
-                                        <p style="font-size: 1.0rem; color: #10B981; margin: 8px 0; font-weight: 600;">🎯 ¿Por qué esta receta?</p>
-                                        <p style="font-size: 0.9rem; color: rgba(255,255,255,0.8); margin: 8px 0; line-height: 1.4;">${meal.porque_seleccionada}</p>
+                                        <p style="font-size: 0.85rem; color: #10B981; margin: 8px 0; font-weight: 600;">🎯 ¿Por qué esta receta?</p>
+                                        <p style="font-size: 0.75rem; color: rgba(255,255,255,0.8); margin: 8px 0; line-height: 1.4;">${meal.porque_seleccionada}</p>
                                     </div>
                                     ` : ''}
                                 </div>
