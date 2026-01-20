@@ -1704,15 +1704,19 @@
                 'cena': { es: 'Cena', en: 'Dinner' }
             };
             
-            // Generate day menu items
+            // Generate day menu items - SKIP daysListContainer since it doesn't exist in our simplified structure
             const days = ['lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado', 'domingo'];
-            daysListContainer.innerHTML = days.map(day => `
-                <div class="day-menu-item ${day === selectedDay ? 'active' : ''}" 
-                     onclick="selectDay('${day}')" 
-                     data-day="${day}">
-                    ${day.charAt(0).toUpperCase() + day.slice(1)}
-                </div>
-            `).join('');
+            if (daysListContainer) {
+                daysListContainer.innerHTML = days.map(day => `
+                    <div class="day-menu-item ${day === selectedDay ? 'active' : ''}" 
+                         onclick="selectDay('${day}')" 
+                         data-day="${day}">
+                        ${day.charAt(0).toUpperCase() + day.slice(1)}
+                    </div>
+                `).join('');
+            } else {
+                console.log('[TV] Skipping daysListContainer - not available in simplified structure');
+            }
             
             // Helper function to render a meal card with EXACT zenith design
             // Returns { html: string, recipeBase: string }
