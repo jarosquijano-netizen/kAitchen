@@ -1891,9 +1891,10 @@
             // SIMPLIFIED VERSION - Just show the data first
             console.log('[TV] SIMPLIFIED: Creating simple menu display...');
             
-            let simpleHtml = '<div style="padding: 20px; color: white;">';
+            let simpleHtml = '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; padding: 20px; color: white;">';
             
-            // Show adults menu
+            // Show adults menu - LEFT COLUMN
+            simpleHtml += '<div style="grid-column: 1;">';
             if (currentMenu.menu_data && currentMenu.menu_data.menu_adultos && currentMenu.menu_data.menu_adultos.dias) {
                 const adultDayData = getDayDataFromMenu(currentMenu.menu_data.menu_adultos.dias, selectedDay);
                 if (adultDayData) {
@@ -1948,12 +1949,14 @@
                     });
                 }
             }
+            simpleHtml += '</div>';
             
-            // Show children menu
+            // Show children menu - RIGHT COLUMN
+            simpleHtml += '<div style="grid-column: 2;">';
             if (currentMenu.menu_data && currentMenu.menu_data.menu_ninos && currentMenu.menu_data.menu_ninos.dias) {
                 const childDayData = getDayDataFromMenu(currentMenu.menu_data.menu_ninos.dias, selectedDay);
                 if (childDayData) {
-                    simpleHtml += '<h2 style="font-size: 1.4rem; color: #FB923C; margin-bottom: 10px; margin-top: 20px;">Menú Niños - ' + selectedDay + '</h2>';
+                    simpleHtml += '<h2 style="font-size: 1.4rem; color: #FB923C; margin-bottom: 10px;">Menú Niños - ' + selectedDay + '</h2>';
                     
                     ['desayuno', 'comida', 'merienda', 'cena'].forEach(mealType => {
                         if (childDayData[mealType]) {
@@ -2004,6 +2007,7 @@
                     });
                 }
             }
+            simpleHtml += '</div>';
             
             simpleHtml += '</div>';
             
