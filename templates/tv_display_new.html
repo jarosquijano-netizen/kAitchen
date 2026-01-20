@@ -2113,6 +2113,10 @@
         document.addEventListener('DOMContentLoaded', async function() {
             console.log('[TV] DOM Content Loaded - Version 2.6 - RESTORING FUNCTIONS');
             
+            // Define selectedDay first
+            selectedDay = getCurrentDayName();
+            console.log('[TV] Selected day:', selectedDay);
+            
             // Add basic HTML structure
             document.body.innerHTML = `
                 <div class="tv-container">
