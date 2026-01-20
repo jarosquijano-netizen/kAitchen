@@ -1900,45 +1900,17 @@
                         if (adultDayData[mealType]) {
                             const meal = adultDayData[mealType];
                             simpleHtml += `
-                                <div style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; padding: 15px; margin: 8px 0; min-height: 180px; max-height: 220px;">
-                                    <h3 style="font-size: 1.2rem; color: #60A5FA; margin-bottom: 8px;">${meal.nombre}</h3>
-                                    <p style="font-size: 0.7rem; color: white; margin: 3px 0;">⏱️ ${meal.tiempo_prep} min | 🔥 ${meal.calorias} cal</p>
+                                <div style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; padding: 8px; margin: 4px 0; min-height: 80px; max-height: 100px;">
+                                    <h3 style="font-size: 0.9rem; color: #60A5FA; margin-bottom: 4px;">${meal.nombre}</h3>
+                                    <p style="font-size: 0.6rem; color: white; margin: 2px 0;">⏱️ ${meal.tiempo_prep} min | 🔥 ${meal.calorias} cal</p>
                                     
-                                    <div style="margin: 8px 0;">
-                                        <p style="font-size: 0.7rem; color: rgba(255,255,255,0.9); margin: 3px 0; font-weight: 600;">📝 Ingredientes:</p>
-                                        <p style="font-size: 0.65rem; color: rgba(255,255,255,0.8); margin: 3px 0; line-height: 1.2;">${meal.ingredientes.slice(0, 8).join(', ')}${meal.ingredientes.length > 8 ? '...' : ''}</p>
+                                    <div style="margin: 4px 0;">
+                                        <p style="font-size: 0.6rem; color: rgba(255,255,255,0.9); margin: 2px 0; font-weight: 600;">📝 ${meal.ingredientes.slice(0, 4).join(', ')}${meal.ingredientes.length > 4 ? '...' : ''}</p>
                                     </div>
                                     
-                                    <div style="margin: 8px 0;">
-                                        <p style="font-size: 0.7rem; color: rgba(255,255,255,0.9); margin: 3px 0; font-weight: 600;">👨‍🍳 Preparación:</p>
-                                        <p style="font-size: 0.65rem; color: rgba(255,255,255,0.8); margin: 3px 0; line-height: 1.2;">${meal.instrucciones.substring(0, 80)}${meal.instrucciones.length > 80 ? '...' : ''}</p>
+                                    <div style="margin: 4px 0;">
+                                        <p style="font-size: 0.55rem; color: rgba(255,255,255,0.8); margin: 2px 0; line-height: 1.1;">${meal.instrucciones.substring(0, 40)}${meal.instrucciones.length > 40 ? '...' : ''}</p>
                                     </div>
-                                    
-                                    ${meal.nutrientes ? `
-                                    <div style="margin: 8px 0;">
-                                        <p style="font-size: 0.7rem; color: rgba(255,255,255,0.9); margin: 3px 0; font-weight: 600;">🥗 Nutrientes:</p>
-                                        <p style="font-size: 0.65rem; color: rgba(255,255,255,0.8); margin: 3px 0; line-height: 1.2;">
-                                            💪 ${meal.nutrientes.proteinas} | 🍞 ${meal.nutrientes.carbohidratos} | 🥑 ${meal.nutrientes.grasas}
-                                        </p>
-                                        ${meal.nutrientes.destacados ? `
-                                        <p style="font-size: 0.65rem; color: #60A5FA; margin: 3px 0; font-weight: 600;">✨ ${meal.nutrientes.destacados}</p>
-                                        ` : ''}
-                                    </div>
-                                    ` : ''}
-                                    
-                                    ${meal.notas ? `
-                                    <div style="margin: 8px 0;">
-                                        <p style="font-size: 0.7rem; color: #FB923C; margin: 3px 0; font-weight: 600;">💡 Notas:</p>
-                                        <p style="font-size: 0.65rem; color: rgba(255,255,255,0.8); margin: 3px 0; line-height: 1.2;">${meal.notas.substring(0, 60)}${meal.notas.length > 60 ? '...' : ''}</p>
-                                    </div>
-                                    ` : ''}
-                                    
-                                    ${meal.porque_seleccionada ? `
-                                    <div style="margin: 8px 0;">
-                                        <p style="font-size: 0.7rem; color: #10B981; margin: 3px 0; font-weight: 600;">🎯 ¿Por qué esta receta?</p>
-                                        <p style="font-size: 0.65rem; color: rgba(255,255,255,0.8); margin: 3px 0; line-height: 1.2;">${meal.porque_seleccionada.substring(0, 60)}${meal.porque_seleccionada.length > 60 ? '...' : ''}</p>
-                                    </div>
-                                    ` : ''}
                                 </div>
                             `;
                         }
@@ -1958,45 +1930,17 @@
                         if (childDayData[mealType]) {
                             const meal = childDayData[mealType];
                             simpleHtml += `
-                                <div style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; padding: 15px; margin: 8px 0; min-height: 180px; max-height: 220px;">
-                                    <h3 style="font-size: 1.2rem; color: #FB923C; margin-bottom: 8px;">${meal.nombre}</h3>
-                                    <p style="font-size: 0.7rem; color: white; margin: 3px 0;">⏱️ ${meal.tiempo_prep} min | 🔥 ${meal.calorias} cal</p>
+                                <div style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; padding: 8px; margin: 4px 0; min-height: 80px; max-height: 100px;">
+                                    <h3 style="font-size: 0.9rem; color: #FB923C; margin-bottom: 4px;">${meal.nombre}</h3>
+                                    <p style="font-size: 0.6rem; color: white; margin: 2px 0;">⏱️ ${meal.tiempo_prep} min | 🔥 ${meal.calorias} cal</p>
                                     
-                                    <div style="margin: 8px 0;">
-                                        <p style="font-size: 0.7rem; color: rgba(255,255,255,0.9); margin: 3px 0; font-weight: 600;">📝 Ingredientes:</p>
-                                        <p style="font-size: 0.65rem; color: rgba(255,255,255,0.8); margin: 3px 0; line-height: 1.2;">${meal.ingredientes.slice(0, 8).join(', ')}${meal.ingredientes.length > 8 ? '...' : ''}</p>
+                                    <div style="margin: 4px 0;">
+                                        <p style="font-size: 0.6rem; color: rgba(255,255,255,0.9); margin: 2px 0; font-weight: 600;">📝 ${meal.ingredientes.slice(0, 4).join(', ')}${meal.ingredientes.length > 4 ? '...' : ''}</p>
                                     </div>
                                     
-                                    <div style="margin: 8px 0;">
-                                        <p style="font-size: 0.7rem; color: rgba(255,255,255,0.9); margin: 3px 0; font-weight: 600;">👨‍🍳 Preparación:</p>
-                                        <p style="font-size: 0.65rem; color: rgba(255,255,255,0.8); margin: 3px 0; line-height: 1.2;">${meal.instrucciones.substring(0, 80)}${meal.instrucciones.length > 80 ? '...' : ''}</p>
+                                    <div style="margin: 4px 0;">
+                                        <p style="font-size: 0.55rem; color: rgba(255,255,255,0.8); margin: 2px 0; line-height: 1.1;">${meal.instrucciones.substring(0, 40)}${meal.instrucciones.length > 40 ? '...' : ''}</p>
                                     </div>
-                                    
-                                    ${meal.nutrientes ? `
-                                    <div style="margin: 8px 0;">
-                                        <p style="font-size: 0.7rem; color: rgba(255,255,255,0.9); margin: 3px 0; font-weight: 600;">🥗 Nutrientes:</p>
-                                        <p style="font-size: 0.65rem; color: rgba(255,255,255,0.8); margin: 3px 0; line-height: 1.2;">
-                                            💪 ${meal.nutrientes.proteinas} | 🍞 ${meal.nutrientes.carbohidratos} | 🥑 ${meal.nutrientes.grasas}
-                                        </p>
-                                        ${meal.nutrientes.destacados ? `
-                                        <p style="font-size: 0.65rem; color: #FB923C; margin: 3px 0; font-weight: 600;">✨ ${meal.nutrientes.destacados}</p>
-                                        ` : ''}
-                                    </div>
-                                    ` : ''}
-                                    
-                                    ${meal.notas ? `
-                                    <div style="margin: 8px 0;">
-                                        <p style="font-size: 0.7rem; color: #FB923C; margin: 3px 0; font-weight: 600;">💡 Notas:</p>
-                                        <p style="font-size: 0.65rem; color: rgba(255,255,255,0.8); margin: 3px 0; line-height: 1.2;">${meal.notas.substring(0, 60)}${meal.notas.length > 60 ? '...' : ''}</p>
-                                    </div>
-                                    ` : ''}
-                                    
-                                    ${meal.porque_seleccionada ? `
-                                    <div style="margin: 8px 0;">
-                                        <p style="font-size: 0.7rem; color: #10B981; margin: 3px 0; font-weight: 600;">🎯 ¿Por qué esta receta?</p>
-                                        <p style="font-size: 0.65rem; color: rgba(255,255,255,0.8); margin: 3px 0; line-height: 1.2;">${meal.porque_seleccionada.substring(0, 60)}${meal.porque_seleccionada.length > 60 ? '...' : ''}</p>
-                                    </div>
-                                    ` : ''}
                                 </div>
                             `;
                         }
