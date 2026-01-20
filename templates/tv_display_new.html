@@ -2061,6 +2061,38 @@
             
             // Load existing ratings
             setTimeout(loadDayRatings, 100);
+            
+            // FORCE STYLES DIRECTLY IN DOM - Override any CSS
+            setTimeout(() => {
+                console.log('[TV] FORCE STYLES: Applying direct DOM styles...');
+                const allCards = document.querySelectorAll('[style*="min-height"]');
+                let fixedCount = 0;
+                
+                allCards.forEach(card => {
+                    if (card.innerHTML.includes('Baked Crunchy Hot Honey') || card.innerHTML.includes('Pasta con Pollo')) {
+                        console.log('[TV] FORCE STYLES: Fixing card:', card);
+                        
+                        // Force styles directly with highest priority
+                        card.style.setProperty('min-height', '220px', 'important');
+                        card.style.setProperty('max-height', '280px', 'important');
+                        card.style.setProperty('font-size', '1.4rem', 'important');
+                        
+                        // Force all text elements
+                        const allText = card.querySelectorAll('*');
+                        allText.forEach(el => {
+                            if (el.tagName === 'H2') {
+                                el.style.setProperty('font-size', '1.4rem', 'important');
+                            } else if (el.tagName === 'SPAN' || el.tagName === 'P') {
+                                el.style.setProperty('font-size', '0.75rem', 'important');
+                            }
+                        });
+                        
+                        fixedCount++;
+                    }
+                });
+                
+                console.log(`[TV] FORCE STYLES: Fixed ${fixedCount} cards directly`);
+            }, 2000);
         }
 
         function showNoMenu() {
