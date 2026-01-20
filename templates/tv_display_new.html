@@ -1024,22 +1024,13 @@
     </style>
 </head>
 <body>
-    <div class="tv-container">
-        <!-- Main Content: Vertical Layout with Side Menu -->
-        <div class="main-content" id="menu-content">
-            <!-- Side Menu with Days, Weather, QR Code and Clock -->
-            <div class="day-menu" id="day-menu">
-                <!-- Days Navigation (Top) -->
-                <div class="menu-section">
-                    <div class="days-title">Días de la Semana</div>
-                    <div class="days-list">
-                        <!-- Day menu items will be rendered here -->
-                    </div>
-                </div>
-                
-                <!-- Weather Section -->
-                <div class="menu-section">
-                    <div class="weather" id="weatherWidget">
+    <!-- TV Display Container -->
+    <div class="tv-container" style="width: 100%; height: 100vh; background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); overflow: hidden; position: relative;">
+        
+        <!-- Main Content Area -->
+        <div id="menu-content" class="menu-container" style="width: 100%; height: 100%; position: relative;">
+            <div class="content-area" style="width: 100%; height: 100%; position: relative;">
+                <!-- Content will be dynamically loaded here -->
             </div>
         </div>
     </div>
