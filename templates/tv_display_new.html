@@ -1891,10 +1891,41 @@
             // SIMPLIFIED VERSION - Just show the data first
             console.log('[TV] SIMPLIFIED: Creating simple menu display...');
             
-            let simpleHtml = '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; padding: 20px; color: white;">';
+            let simpleHtml = '<div style="display: grid; grid-template-columns: 120px 1fr 1fr; gap: 20px; padding: 20px; color: white; height: 100vh;">';
             
-            // Show adults menu - LEFT COLUMN
-            simpleHtml += '<div style="grid-column: 1;">';
+            // DAYS NAVIGATION - LEFT COLUMN
+            simpleHtml += '<div style="grid-column: 1; background: rgba(255,255,255,0.05); border-radius: 8px; padding: 10px;">';
+            simpleHtml += '<h3 style="font-size: 1.2rem; color: white; margin-bottom: 15px; text-align: center;">Días</h3>';
+            
+            const weekDays = ['lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado', 'domingo'];
+            weekDays.forEach(day => {
+                const isActive = day === selectedDay;
+                simpleHtml += `
+                    <div style="
+                        background: ${isActive ? 'rgba(59, 130, 246, 0.3)' : 'rgba(255,255,255,0.1)'};
+                        border: 1px solid ${isActive ? '#60A5FA' : 'rgba(255,255,255,0.2)'};
+                        border-radius: 6px;
+                        padding: 8px;
+                        margin: 5px 0;
+                        cursor: pointer;
+                        text-align: center;
+                        font-size: 0.8rem;
+                        color: ${isActive ? '#60A5FA' : 'white'};
+                        transition: all 0.3s;
+                        text-transform: capitalize;
+                    "
+                    onclick="selectDay('${day}')"
+                    onmouseover="this.style.background='${isActive ? 'rgba(59, 130, 246, 0.4)' : 'rgba(255,255,255,0.2)'}'"
+                    onmouseout="this.style.background='${isActive ? 'rgba(59, 130, 246, 0.3)' : 'rgba(255,255,255,0.1)'}'"
+                    >
+                        ${day.charAt(0).toUpperCase() + day.slice(1, 3)}
+                    </div>
+                `;
+            });
+            simpleHtml += '</div>';
+            
+            // Show adults menu - MIDDLE COLUMN
+            simpleHtml += '<div style="grid-column: 2; overflow-y: auto;">';
             if (currentMenu.menu_data && currentMenu.menu_data.menu_adultos && currentMenu.menu_data.menu_adultos.dias) {
                 const adultDayData = getDayDataFromMenu(currentMenu.menu_data.menu_adultos.dias, selectedDay);
                 if (adultDayData) {
@@ -1952,7 +1983,7 @@
             simpleHtml += '</div>';
             
             // Show children menu - RIGHT COLUMN
-            simpleHtml += '<div style="grid-column: 2;">';
+            simpleHtml += '<div style="grid-column: 3; overflow-y: auto;">';
             if (currentMenu.menu_data && currentMenu.menu_data.menu_ninos && currentMenu.menu_data.menu_ninos.dias) {
                 const childDayData = getDayDataFromMenu(currentMenu.menu_data.menu_ninos.dias, selectedDay);
                 if (childDayData) {
@@ -2014,6 +2045,15 @@
             console.log('[TV] SIMPLIFIED: Setting simple HTML...');
             contentArea.innerHTML = simpleHtml;
             console.log('[TV] SIMPLIFIED: Simple menu displayed successfully!');
+        }
+
+        // Function to select a day and reload the menu
+        function selectDay(dayName) {
+            console.log('[TV] Selecting day:', dayName);
+            selectedDay = dayName;
+            
+            // Reload the menu with the new selected day
+            displaySeparateMenus();
         }
 
         function showNoMenu() {
