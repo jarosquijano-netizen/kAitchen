@@ -2179,6 +2179,9 @@
                         currentWeekStart = menuData.week_start;
                         
                         console.log('[TV] Menu loaded successfully, ID:', currentMenuId, 'Week:', currentWeekStart);
+                        console.log('[TV] Menu structure:', JSON.stringify(currentMenu, null, 2));
+                        console.log('[TV] Menu data keys:', Object.keys(currentMenu));
+                        console.log('[TV] Menu menu_data keys:', currentMenu.menu_data ? Object.keys(currentMenu.menu_data) : 'No menu_data');
                         
                         // Render the actual menu
                         const placeholder = document.getElementById('menu-placeholder');
