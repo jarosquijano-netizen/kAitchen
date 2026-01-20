@@ -104,6 +104,11 @@ def tv_view():
     """TV-friendly menu display"""
     return render_template('tv_display_new.html')
 
+@app.route('/tv2')
+def tv_view2():
+    """TV-friendly menu display - NEW CLEAN VERSION"""
+    return render_template('tv_display_new.html')
+
 @app.route('/menu/visualizer')
 def menu_visualizer():
     """Menu visualizer page"""
