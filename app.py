@@ -102,7 +102,7 @@ def index():
 @app.route('/tv')
 def tv_view():
     """TV-friendly menu display"""
-    return render_template('tv_display.html')
+    return render_template('tv_display_new.html')
 
 @app.route('/menu/visualizer')
 def menu_visualizer():

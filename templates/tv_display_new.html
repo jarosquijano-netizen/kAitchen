@@ -1,0 +1,2391 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="description" content="k[AI]tchen TV Display - Weekly Menu View">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <!-- Cache control -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>k[AI]tchen · Weekly Menu</title>
+    <!-- Version: Zenith Design v2.5 - NUCLEAR FORCE RELOAD - Timestamp: 202501200622 -->
+    <meta name="cache-buster" content="202501200622-<?php echo rand(); ?>">
+    <script>
+        // FORCE NEW VERSION - Aggressive cache busting
+        const FORCE_VERSION = '202501200622-' + Date.now();
+        console.log('[TV] FORCE VERSION:', FORCE_VERSION);
+        
+        // Clear everything
+        localStorage.clear();
+        sessionStorage.clear();
+        
+        // Force reload if old version detected
+        if (localStorage.getItem('tv-force-version') !== FORCE_VERSION) {
+            console.log('[TV] OLD VERSION DETECTED - FORCE RELOAD');
+            localStorage.setItem('tv-force-version', FORCE_VERSION);
+            window.location.reload(true);
+        }
+    </script>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🍳</text></svg>">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js?v=202501191716"></script>
+    <style>
+        /* FORCE RELOAD - Timestamp: 202501191618 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --black: #0A0A0A;
+            --charcoal: #1A1A1A;
+            --gold: #D4AF37;
+            --gold-dark: #C9A227;
+            --sage: #8AA193;
+            --sage-dark: #6B8575;
+            --blue-adults: #3B82F6;
+            --blue-adults-dark: #2563EB;
+            --orange-children: #F97316;
+            --orange-children-dark: #EA580C;
+            --silver: #CBD5E0;
+            --white: #FFFFFF;
+            --glass-bg: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.05);
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background-color: #0a0a0a;
+            color: #e5e5e5;
+            padding: 1rem;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Animated gradient background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(212, 175, 55, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(138, 161, 147, 0.08) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+            animation: shift 20s ease-in-out infinite;
+        }
+
+        @keyframes shift {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        /* Grain texture removed - interfering with QR code visibility */
+
+        .tv-container {
+            max-width: 1920px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 2;
+            animation: fadeIn 1s ease-out;
+            height: calc(100vh - 2rem); /* Subtract body padding (1rem top + 1rem bottom) */
+            display: flex;
+            flex-direction: column;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* Top Bar with Clock, Weather, QR Code */
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 1rem;
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--glass-border);
+            margin-bottom: 0.75rem;
+            border-radius: 12px;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            flex-shrink: 0;
+        }
+
+        .clock-weather {
+            display: flex;
+            gap: 3rem;
+            align-items: center;
+        }
+
+        .clock {
+            font-size: 2.5rem;
+            font-weight: 700;
+            font-family: 'Inter', sans-serif;
+            color: var(--white);
+            letter-spacing: 2px;
+        }
+
+        .date-display {
+            font-size: 1.1rem;
+            color: var(--silver);
+            font-weight: 400;
+        }
+
+        .weather {
+            font-size: 1.5rem;
+            color: var(--silver);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* Old QR code styles completely removed - using zenith QR code only */
+
+        /* Old QR code styles removed - using zenith QR code only */
+
+        /* Week Navigation - Slimmer */
+        .week-nav {
+            background: var(--glass-bg);
+            backdrop-filter: blur(30px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 0.75rem 1.5rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .week-days {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 1rem;
+        }
+
+        .week-day-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 1rem 0.75rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .week-day-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.05);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .week-day-card:hover::before {
+            opacity: 1;
+        }
+
+        .week-day-card:hover {
+            transform: translateY(-2px);
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .week-day-card.active {
+            background: linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%);
+            color: var(--black);
+            transform: scale(1.05);
+            box-shadow: 0 15px 40px rgba(212, 175, 55, 0.4), 0 0 0 1px rgba(212, 175, 55, 0.2);
+            border-color: var(--gold);
+        }
+
+        .week-day-card.active::before {
+            opacity: 0;
+        }
+
+        .week-day-name {
+            font-size: 1.6rem;
+            font-weight: 800;
+            margin-bottom: 0.25rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .week-day-date {
+            font-size: 1.8rem;
+            font-weight: 700;
+            opacity: 0.9;
+        }
+
+        /* Main Content Area - Vertical Layout with Side Menu */
+        .main-content {
+            flex: 1;
+            display: flex;
+            height: calc(100vh - 180px);
+            gap: 0;
+        }
+
+        /* Side Menu with Days, Weather, QR Code and Clock */
+        .day-menu {
+            width: 250px;
+            background: rgba(255, 255, 255, 0.02);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px 0 0 16px;
+            padding: 1.2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            overflow-y: auto;
+        }
+
+        .menu-section {
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .menu-section:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        /* Days Section (Top Priority) */
+        .days-title {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--white);
+            text-align: center;
+            margin-bottom: 0.3rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .days-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.3rem;
+        }
+
+        .day-menu-item {
+            padding: 0.6rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+            color: rgba(255, 255, 255, 0.8);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            font-family: 'Playfair Display', serif;
+            font-weight: 600;
+            font-size: 0.75rem;
+        }
+
+        .day-menu-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--white);
+            transform: translateX(3px);
+        }
+
+        .day-menu-item.active {
+            background: linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%);
+            color: var(--black);
+            font-weight: 700;
+            box-shadow: 0 0 15px rgba(212, 175, 55, 0.3);
+        }
+
+        /* Weather Section */
+        .weather {
+            text-align: center;
+            font-size: 1rem;
+            color: var(--white);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.4rem;
+        }
+
+        /* QR Code Section */
+        .zenith-qr-container {
+            text-align: center;
+        }
+
+        .zenith-qr-code {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 0.4rem;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 6px;
+            padding: 3px;
+            background: white;
+        }
+
+        .zenith-qr-code canvas {
+            width: 74px !important;
+            height: 74px !important;
+        }
+
+        .zenith-qr-label {
+            font-size: 0.7rem;
+            color: var(--silver);
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        /* QR Code Section (New Simple) */
+        .qr-simple-container {
+            text-align: center;
+        }
+
+        .qr-simple-code {
+            width: 60px;
+            height: 60px;
+            margin: 0 auto 0.3rem;
+            background: white;
+            border-radius: 4px;
+            padding: 2px;
+        }
+
+        .qr-simple-code canvas {
+            width: 56px !important;
+            height: 56px !important;
+        }
+
+        .qr-simple-label {
+            font-size: 0.6rem;
+            color: var(--silver);
+            text-transform: uppercase;
+            letter-spacing: 0.2px;
+        }
+
+        /* Clock Section (Bottom) */
+        .clock-section {
+            text-align: center;
+        }
+
+        .clock {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--white);
+            margin-bottom: 0.3rem;
+        }
+
+        .date-display {
+            font-size: 0.75rem;
+            color: var(--silver);
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+        }
+
+        /* Content Area */
+        .content-area {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 0 16px 16px 0;
+            padding: 2rem;
+            overflow-y: auto;
+        }
+
+        .menu-panel {
+            /* Layout and visual styling */
+            overflow-y: auto;
+            overflow-x: hidden;
+            min-height: 0;
+            max-height: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            -webkit-overflow-scrolling: touch;
+            overscroll-behavior: contain;
+            flex: 1 1 auto;
+            scroll-behavior: smooth;
+            padding: 1.5rem;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 16px;
+        }
+        
+        /* Base font sizes for menu content - REMOVED to allow inline styles */
+        /* .menu-panel h2, .menu-panel h3, .menu-panel p, .menu-panel span styles removed */
+        
+        /* OLD STYLES REMOVED - All visual styling is now inline in HTML */
+
+        .meal-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1rem;
+            flex: 1;
+            min-height: 0;
+            width: 100%;
+            overflow: visible;
+            position: relative;
+            /* Ensure content can overflow and scroll */
+            padding-bottom: 1rem;
+        }
+
+        /* ZENITH-STYLE MEAL CARD - All styles are inline in HTML, no CSS needed */
+
+        /* Ingredient badges */
+        /* Ingredient badges - zenith style (no CSS needed, all inline) */
+
+        /* Ingredient badges - zenith style (no CSS needed, all inline) */
+
+
+        /* Recipe link styles */
+        .recipe-link a {
+            transform: translateY(0);
+        }
+        
+        .recipe-base-text {
+            color: var(--silver);
+            font-size: 1rem;
+            font-style: italic;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+
+        .loading {
+            text-align: center;
+            padding: 8rem 2rem;
+            grid-column: 1 / -1; /* Span all columns */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100%;
+        }
+
+        .spinner {
+            width: 100px;
+            height: 100px;
+            border: 6px solid rgba(255, 255, 255, 0.1);
+            border-top: 6px solid var(--gold);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 2rem;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading p {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5rem;
+            color: var(--silver);
+            font-weight: 300;
+        }
+
+        .no-menu {
+            text-align: center;
+            padding: 8rem 2rem;
+            grid-column: 1 / -1; /* Span all columns */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100%;
+        }
+
+        .no-menu h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 4rem;
+            margin-bottom: 1.5rem;
+            color: var(--white);
+        }
+
+        .no-menu p {
+            font-size: 2rem;
+            color: var(--silver);
+            font-weight: 300;
+        }
+
+        .auto-refresh {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            padding: 1rem 2rem;
+            border-radius: 50px;
+            font-size: 1rem;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+            color: var(--silver);
+            font-weight: 500;
+            letter-spacing: 1px;
+            z-index: 10;
+        }
+
+        /* Scrollbar styling - Make it more visible and functional */
+        .menu-panel::-webkit-scrollbar {
+            width: 12px;
+        }
+
+        .menu-panel::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+            margin: 0.5rem 0;
+        }
+
+        .menu-panel::-webkit-scrollbar-thumb {
+            background: var(--gold);
+            border-radius: 6px;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .menu-panel::-webkit-scrollbar-thumb:hover {
+            background: var(--gold-dark);
+        }
+
+        /* Ensure scrollbar is always visible when content overflows */
+        .menu-panel {
+            scrollbar-width: thin;
+            scrollbar-color: var(--gold) rgba(255, 255, 255, 0.1);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1600px) {
+            .main-content {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto auto;
+            }
+            
+            .divider {
+                display: none;
+            }
+            
+        }
+
+        @media (max-width: 1200px) {
+            .week-days {
+                grid-template-columns: repeat(4, 1fr);
+            }
+            
+        }
+
+        /* Tablet (iPad) */
+        @media (max-width: 1024px) {
+            body {
+                padding: 1rem;
+            }
+
+            .tv-container {
+                height: calc(100vh - 2rem);
+            }
+
+            .top-bar {
+                padding: 0.5rem 1rem;
+                margin-bottom: 0.75rem;
+            }
+
+            .clock {
+                font-size: 1.5rem;
+            }
+
+            .date-display {
+                font-size: 1rem;
+            }
+
+            .week-nav {
+                padding: 0.5rem 1rem;
+                margin-bottom: 0.75rem;
+            }
+
+            .week-days {
+                grid-template-columns: repeat(7, 1fr);
+                gap: 0.5rem;
+            }
+
+            .week-day-card {
+                padding: 0.75rem 0.5rem;
+            }
+
+            .week-day-name {
+                font-size: 1.1rem;
+            }
+
+            .week-day-date {
+                font-size: 1.3rem;
+            }
+
+            .menu-panel {
+                padding: 1.5rem;
+            }
+
+            .panel-title {
+                font-size: 2.5rem;
+            }
+
+            .meal-grid {
+                /* gap: 1.5rem; REMOVED - was overriding our 1rem gap */
+            }
+
+            /* Old qr-code styles removed from media queries */
+        }
+
+        /* Mobile - Zenith responsive */
+        @media (max-width: 768px) {
+            body {
+                padding: 0.75rem;
+            }
+
+            .tv-container {
+                height: calc(100vh - 1.5rem);
+            }
+
+            .top-bar {
+                padding: 0.75rem;
+                margin-bottom: 0.75rem;
+                flex-direction: column;
+                gap: 0.75rem;
+            }
+
+            .clock-weather {
+                flex-direction: column;
+                gap: 0.5rem;
+                width: 100%;
+            }
+
+            .clock {
+                font-size: 1.75rem;
+            }
+
+            .date-display {
+                font-size: 0.75rem;
+            }
+
+            .weather {
+                font-size: 0.875rem;
+            }
+
+            /* Old qr-containers-wrapper and qr-code styles removed from mobile */
+
+            .week-nav {
+                padding: 0.5rem;
+                margin-bottom: 0.75rem;
+            }
+
+            .week-days {
+                grid-template-columns: repeat(7, 1fr);
+                gap: 0.25rem;
+            }
+
+            .week-day-card {
+                padding: 0.5rem 0.25rem;
+            }
+
+            .week-day-name {
+                font-size: 0.625rem;
+                margin-bottom: 0.1rem;
+            }
+
+            .week-day-date {
+                font-size: 1rem;
+            }
+
+            .main-content {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .divider {
+                display: none;
+            }
+
+            .menu-panel {
+                padding: 1rem;
+            }
+
+            .meal-grid {
+                gap: 1rem;
+            }
+
+            .auto-refresh {
+                bottom: 0.5rem;
+                right: 0.5rem;
+                padding: 0.5rem 0.75rem;
+                font-size: 0.75rem;
+            }
+        }
+
+        /* Small Mobile - Zenith responsive */
+        @media (max-width: 480px) {
+            body {
+                padding: 0.5rem;
+            }
+
+            .tv-container {
+                height: calc(100vh - 1rem);
+            }
+
+            .top-bar {
+                padding: 0.5rem;
+            }
+
+            .clock {
+                font-size: 1.5rem;
+            }
+
+            .date-display {
+                font-size: 0.625rem;
+            }
+
+            .week-day-name {
+                font-size: 0.5rem;
+            }
+
+            .week-day-date {
+                font-size: 0.875rem;
+            }
+
+            .menu-panel {
+                padding: 0.75rem;
+            }
+
+            .meal-grid {
+                gap: 0.75rem;
+            }
+        }
+
+        /* Large screens (TV/Monitor 24"+) - Optimized for 1920x1080 */
+        @media (min-width: 1600px) {
+            .clock {
+                font-size: 3rem;
+            }
+
+            .date-display {
+                font-size: 1.3rem;
+            }
+
+            .weather {
+                font-size: 1.8rem;
+            }
+
+            .week-day-name {
+                font-size: 1.8rem;
+            }
+            
+            .main-content {
+                gap: 1rem;
+                height: calc(100vh - 200px);
+            }
+            
+            .menu-panel {
+                padding: 2.5rem;
+                /* font-size: 1.1rem; REMOVED */
+            }
+            
+            /* .menu-panel h2, h3, p, span styles REMOVED - allow inline styles */
+            
+            .week-day-card {
+                /* min-height: 320px; REMOVED - was overriding inline styles */
+                padding: 1.5rem;
+            }
+            
+            .meal-item {
+                font-size: 1.3rem;
+                line-height: 1.4;
+                padding: 0.8rem;
+            }
+            
+            .meal-grid {
+                /* gap: 2rem; REMOVED - was overriding our 1rem gap */
+                grid-template-columns: 1fr;
+            }
+            
+            .clock {
+                font-size: 4rem;
+            }
+            
+            .date-display {
+                font-size: 1.5rem;
+            }
+            
+            .weather {
+                font-size: 2rem;
+            }
+            
+            .week-day-name {
+                font-size: 2.2rem;
+            }
+            
+            .week-day-date {
+                font-size: 2.4rem;
+            }
+        }
+        
+        /* Extra large screens (TV/Monitor 27"+) */
+        @media (min-width: 2500px) {
+            .tv-container {
+                max-width: 2560px;
+            }
+            
+            .main-content {
+                gap: 1.5rem;
+                height: calc(100vh - 220px);
+            }
+            
+            .menu-panel {
+                padding: 3rem;
+                /* font-size: 1.3rem; REMOVED */
+            }
+            
+            /* .menu-panel h2, h3, p styles REMOVED - allow inline styles */
+            
+            /* .menu-panel span[style*="font-size"] REMOVED - allow inline styles */
+            
+            .week-day-card {
+                /* min-height: 380px; REMOVED - was overriding inline styles */
+                padding: 2rem;
+            }
+            
+            .meal-item {
+                font-size: 1.5rem;
+                line-height: 1.5;
+                padding: 1rem;
+            }
+            
+            .meal-grid {
+                /* gap: 2.5rem; REMOVED - was overriding our 1rem gap */
+                grid-template-columns: 1fr;
+            }
+            
+            .clock {
+                font-size: 5rem;
+            }
+            
+            .date-display {
+                font-size: 1.8rem;
+            }
+            
+            .weather {
+                font-size: 2.5rem;
+            }
+            
+            .week-day-name {
+                font-size: 2.8rem;
+            }
+            
+            .week-day-date {
+                font-size: 3rem;
+            }
+        }
+
+        /* Extra large screens (TV/Monitor) - Zenith responsive - Optimized for 24" 1920x1080 */
+        @media (min-width: 1920px) {
+            .tv-container {
+                max-width: 1920px;
+                padding: 1rem;
+            }
+
+            .clock {
+                font-size: 2.5rem;
+                font-weight: 700;
+            }
+
+            .date-display {
+                font-size: 1rem;
+                font-weight: 500;
+            }
+
+            .weather {
+                font-size: 1.5rem;
+                font-weight: 600;
+            }
+
+            .week-day-name {
+                font-size: 1.8rem;
+                font-weight: 700;
+            }
+
+            .week-day-date {
+                font-size: 2rem;
+                font-weight: 600;
+            }
+
+            .main-content {
+                gap: 2rem;
+                height: calc(100vh - 160px);
+            }
+
+            .meal-grid {
+                /* gap: 2rem; REMOVED - was overriding our 1rem gap for TV screens */
+                grid-template-columns: 1fr;
+            }
+
+            .menu-panel {
+                padding: 1rem;
+                font-size: 0.9rem;
+                /* min-height: 350px; REMOVED - was affecting layout */
+            }
+
+            .menu-panel h2 {
+                font-size: 1.5rem !important;
+                margin-bottom: 0.8rem !important;
+            }
+
+            .menu-panel h3 {
+                font-size: 1.2rem !important;
+                margin-bottom: 0.8rem !important;
+            }
+
+            .menu-panel p {
+                font-size: 0.9rem !important;
+                margin-bottom: 0.6rem !important;
+                line-height: 1.3 !important;
+            }
+
+            .menu-panel span[style*="font-size"] {
+                font-size: 0.9rem !important;
+            }
+
+            .week-day-card {
+                /* min-height: 280px; REMOVED - was overriding inline styles */
+                padding: 1rem;
+                border-radius: 12px;
+            }
+
+            .meal-item {
+                font-size: 1rem;
+                padding: 0.8rem;
+                margin-bottom: 0.6rem;
+                border-radius: 8px;
+            }
+
+            .meal-name {
+                font-size: 1.1rem;
+                font-weight: 600;
+            }
+
+            .meal-description {
+                font-size: 0.9rem;
+                margin-top: 0.3rem;
+            }
+
+            .top-bar {
+                padding: 1.5rem;
+                margin-bottom: 1.5rem;
+            }
+
+            .qr-container {
+                width: 100px;
+                height: 100px;
+            }
+
+            .qr-container canvas {
+                width: 100px !important;
+                height: 100px !important;
+            }
+        }
+
+        /* Scrollbar styling - Zenith style */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #333;
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #444;
+        }
+    </style>
+</head>
+<body>
+    <div class="tv-container">
+        <!-- Main Content: Vertical Layout with Side Menu -->
+        <div class="main-content" id="menu-content">
+            <!-- Side Menu with Days, Weather, QR Code and Clock -->
+            <div class="day-menu" id="day-menu">
+                <!-- Days Navigation (Top) -->
+                <div class="menu-section">
+                    <div class="days-title">Días de la Semana</div>
+                    <div class="days-list">
+                        <!-- Day menu items will be rendered here -->
+                    </div>
+                </div>
+                
+                <!-- Weather Section -->
+                <div class="menu-section">
+                    <div class="weather" id="weatherWidget">
+                        <span>🌤️</span>
+                        <span id="weatherText">Loading...</span>
+                    </div>
+                </div>
+                
+                <!-- VERSION INDICATOR -->
+                <div class="menu-section">
+                    <div style="background: rgba(212, 175, 55, 0.2); border: 1px solid rgba(212, 175, 55, 0.4); padding: 0.5rem 0.8rem; border-radius: 6px; font-size: 0.7rem; color: #D4AF37; font-weight: 600; letter-spacing: 0.5px; text-align: center;">
+                        v2.6-NUCLEAR-202501191730
+                    </div>
+                </div>
+                
+                <!-- Clock Section -->
+                <div class="menu-section">
+                    <div class="clock-section">
+                        <div class="clock" id="currentTime">00:00:00</div>
+                        <div class="date-display" id="currentDate">Loading...</div>
+                    </div>
+                </div>
+                
+                <!-- QR Code Section -->
+                <div class="menu-section">
+                    <div class="qr-simple-container">
+                        <div class="qr-simple-code" id="simpleQrCode"></div>
+                        <div class="qr-simple-label">Menu QR</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Content Area -->
+            <div class="content-area">
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>Loading your personalized menu...</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="auto-refresh">
+            Auto-refresh enabled
+        </div>
+    </div>
+
+    <script>
+        const diasSemana = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
+        const diasES = {
+            'lunes': 'Lunes',
+            'martes': 'Martes',
+            'miércoles': 'Miércoles',
+            'jueves': 'Jueves',
+            'viernes': 'Viernes',
+            'sábado': 'Sábado',
+            'domingo': 'Domingo'
+        };
+        
+        const diasEN = {
+            'lunes': 'Monday',
+            'martes': 'Tuesday',
+            'miércoles': 'Wednesday',
+            'jueves': 'Thursday',
+            'viernes': 'Friday',
+            'sábado': 'Saturday',
+            'domingo': 'Sunday'
+        };
+        
+        const mesesES = [
+            'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
+            'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'
+        ];
+        
+        const mesesEN = [
+            'January', 'February', 'March', 'April', 'May', 'June',
+            'July', 'August', 'September', 'October', 'November', 'December'
+        ];
+        
+        // Get current week start (Monday) - same logic as app.js
+        function getCurrentWeekStart() {
+            // Use local date components to avoid timezone conversion issues
+            const today = new Date();
+            const year = today.getFullYear();
+            const month = today.getMonth();
+            const date = today.getDate();
+            
+            // Create date using local components (avoids UTC conversion)
+            const localToday = new Date(year, month, date, 0, 0, 0, 0);
+            
+            // Calculate Monday of the week
+            const day = localToday.getDay(); // 0 = Sunday, 1 = Monday, etc.
+            let diff = localToday.getDate() - day + (day === 0 ? -6 : 1); // Adjust when day is Sunday
+            
+            const monday = new Date(localToday);
+            monday.setDate(diff);
+            monday.setHours(0, 0, 0, 0);
+            
+            return monday;
+        }
+        
+        // Get current day name (lunes, martes, etc.)
+        function getCurrentDayName() {
+            const today = new Date();
+            const day = today.getDay();
+            // Convert JS day (0=Sunday) to our day names (lunes=0)
+            const dayMap = [6, 0, 1, 2, 3, 4, 5]; // Sunday=6, Monday=0, etc.
+            const dayIndex = dayMap[day];
+            const dayNames = ['lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado', 'domingo'];
+            return dayNames[dayIndex];
+        }
+        
+        // Get date for a specific day of the week
+        function getDateForDay(dayKey) {
+            const dayMap = { 'lunes': 0, 'martes': 1, 'miércoles': 2, 'jueves': 3, 'viernes': 4, 'sábado': 5, 'domingo': 6 };
+            const dayIndex = dayMap[dayKey];
+            if (dayIndex === undefined) return new Date();
+            
+            const weekStart = getCurrentWeekStart();
+            const date = new Date(weekStart);
+            date.setDate(weekStart.getDate() + dayIndex);
+            return date;
+        }
+        
+        // Get formatted day with calendar date
+        function getDayWithDate(dayKey, lang = 'es') {
+            const date = getDateForDay(dayKey);
+            const dayName = lang === 'es' ? diasES[dayKey] : diasEN[dayKey];
+            const dayNumber = date.getDate();
+            return `${dayName} ${dayNumber}`;
+        }
+
+        let currentMenu = null;
+        let selectedDay = null;
+        let currentMenuId = null;
+        let currentWeekStart = null;
+
+        // Update clock and date
+        function updateDateTime() {
+            const now = new Date();
+            const dayIndex = now.getDay();
+            const dayName = diasSemana[dayIndex];
+            const day = now.getDate();
+            const monthES = mesesES[now.getMonth()];
+            const monthEN = mesesEN[now.getMonth()];
+            const year = now.getFullYear();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+            
+            document.getElementById('currentTime').textContent = `${hours}:${minutes}:${seconds}`;
+            document.getElementById('currentDate').textContent = 
+                `${diasES[dayName]} ${day} ${monthES} / ${diasEN[dayName]} ${day} ${monthEN} ${year}`;
+            
+            // Don't auto-reset selectedDay - let user keep their selection
+            // Only set it initially if not already set
+            if (!selectedDay) {
+                selectedDay = getCurrentDayName();
+                console.log('[TV] Initial selectedDay set to today:', selectedDay);
+                // Update menu display if menu is already loaded
+                if (currentMenu) {
+                    displayMenu();
+                    updateWeekNav();
+                }
+            }
+        }
+
+        // Update weather (placeholder - you can integrate with a weather API)
+        function updateWeather() {
+            // Placeholder - you can integrate with OpenWeatherMap or similar
+            document.getElementById('weatherText').textContent = '22°C Sunny';
+        }
+
+        // QR Code functions removed - using zenith style button instead
+
+        // Get food image URL (placeholder - you can use Unsplash API)
+        // Generate Simple QR Code (DISABLED - was causing errors)
+        function generateSimpleQRCode() {
+            console.log('[TV] QR Code generation disabled to prevent errors');
+            return;
+            
+            // Original code commented out to prevent overflow errors
+            /*
+            const qrContainer = document.getElementById('simpleQrCode');
+            if (!qrContainer || typeof QRCode === 'undefined' || !currentMenu || !selectedDay) {
+                return;
+            }
+            
+            // Build simple menu text
+            let menuText = `MENU: ${selectedDay.toUpperCase()}\n\n`;
+            
+            // Adults menu - compact format
+            if (currentMenu.menu_adultos && currentMenu.menu_adultos.dias) {
+                const adultDayData = getDayDataFromMenu(currentMenu.menu_adultos.dias, selectedDay);
+                if (adultDayData) {
+                    menuText += 'ADULTOS:\n';
+                    ['desayuno', 'comida', 'cena'].forEach(mealType => {
+                        if (adultDayData[mealType] && adultDayData[mealType].nombre) {
+                            const mealName = typeof adultDayData[mealType].nombre === 'string' ? 
+                                adultDayData[mealType].nombre : 
+                                (adultDayData[mealType].nombre?.name || 'N/A');
+                            menuText += `• ${mealType.toUpperCase()}: ${mealName}\n`;
+                        }
+                    });
+                }
+            }
+            
+            // Limit text for QR code (very small to avoid overflow)
+            console.log('[TV] Original menuText length:', menuText.length);
+            if (menuText.length > 100) {
+                menuText = menuText.substring(0, 100) + '\n...';
+            }
+            console.log('[TV] Limited menuText length:', menuText.length);
+            console.log('[TV] MenuText preview:', menuText.substring(0, 50) + '...');
+            
+            qrContainer.innerHTML = '';
+            try {
+                new QRCode(qrContainer, {
+                    text: menuText,
+                    width: 56,
+                    height: 56,
+                    colorDark: '#000000',
+                    colorLight: '#ffffff',
+                    correctLevel: QRCode.CorrectLevel.L  // Use L level for more capacity
+                });
+                console.log('[TV] QR code generated successfully');
+            } catch (error) {
+                console.error('[TV] Error generating simple QR code:', error);
+                // Fallback to just the day name
+                qrContainer.innerHTML = '';
+                try {
+                    const fallbackText = `MENU: ${selectedDay.toUpperCase()}`;
+                    console.log('[TV] Using fallback text:', fallbackText);
+                    new QRCode(qrContainer, {
+                        text: fallbackText,
+                        width: 56,
+                        height: 56,
+                        colorDark: '#000000',
+                        colorLight: '#ffffff',
+                        correctLevel: QRCode.CorrectLevel.L
+                    });
+                    console.log('[TV] Fallback QR code generated successfully');
+                } catch (fallbackError) {
+                    console.error('[TV] Error generating fallback QR code:', fallbackError);
+                    qrContainer.innerHTML = '<div style="font-size: 0.6rem; color: #666;">QR Error</div>';
+                }
+            }
+            */
+        }
+
+        // Generate QR Code with menu information (ingredients and preparation) - compact format
+        function generateZenithQRCode() {
+            const qrContainer = document.getElementById('zenithQrCode');
+            if (!qrContainer || typeof QRCode === 'undefined' || !currentMenu || !selectedDay) {
+                return;
+            }
+            
+            // Build compact menu text (limit to fit QR code)
+            let menuText = `MENU: ${selectedDay.toUpperCase()}\n\n`;
+            
+            // Adults menu - compact format
+            if (currentMenu.menu_adultos && currentMenu.menu_adultos.dias) {
+                const adultDayData = getDayDataFromMenu(currentMenu.menu_adultos.dias, selectedDay);
+                if (adultDayData) {
+                    menuText += `ADULTOS:\n`;
+                    
+                    ['desayuno', 'comida', 'cena'].forEach(mealType => {
+                        if (adultDayData[mealType]) {
+                            const meal = adultDayData[mealType];
+                            const mealName = typeof meal.nombre === 'string' ? meal.nombre : (meal.nombre?.name || 'N/A');
+                            menuText += `\n${mealType.toUpperCase()}: ${mealName}\n`;
+                            
+                            if (meal.ingredientes && Array.isArray(meal.ingredientes) && meal.ingredientes.length > 0) {
+                                menuText += `Ing: ${meal.ingredientes.slice(0, 5).join(', ')}${meal.ingredientes.length > 5 ? '...' : ''}\n`;
+                            }
+                            
+                            if (meal.instrucciones) {
+                                // Limit instructions to 200 chars
+                                const shortInst = meal.instrucciones.length > 200 
+                                    ? meal.instrucciones.substring(0, 200) + '...' 
+                                    : meal.instrucciones;
+                                menuText += `Prep: ${shortInst}\n`;
+                            }
+                        }
+                    });
+                }
+            }
+            
+            // Children menu - compact format
+            if (currentMenu.menu_ninos && currentMenu.menu_ninos.dias) {
+                const childDayData = getDayDataFromMenu(currentMenu.menu_ninos.dias, selectedDay);
+                if (childDayData) {
+                    menuText += `\nNINOS:\n`;
+                    
+                    ['desayuno', 'comida', 'merienda', 'cena'].forEach(mealType => {
+                        if (childDayData[mealType]) {
+                            const meal = childDayData[mealType];
+                            const mealName = typeof meal.nombre === 'string' ? meal.nombre : (meal.nombre?.name || 'N/A');
+                            menuText += `\n${mealType.toUpperCase()}: ${mealName}\n`;
+                            
+                            if (meal.ingredientes && Array.isArray(meal.ingredientes) && meal.ingredientes.length > 0) {
+                                menuText += `Ing: ${meal.ingredientes.slice(0, 5).join(', ')}${meal.ingredientes.length > 5 ? '...' : ''}\n`;
+                            }
+                            
+                            if (meal.instrucciones) {
+                                // Limit instructions to 200 chars
+                                const shortInst = meal.instrucciones.length > 200 
+                                    ? meal.instrucciones.substring(0, 200) + '...' 
+                                    : meal.instrucciones;
+                                menuText += `Prep: ${shortInst}\n`;
+                            }
+                        }
+                    });
+                }
+            }
+            
+            // Limit total text to ~3000 chars to fit QR code
+            if (menuText.length > 3000) {
+                menuText = menuText.substring(0, 3000) + '\n...';
+            }
+            
+            qrContainer.innerHTML = '';
+            try {
+                new QRCode(qrContainer, {
+                    text: menuText,
+                    width: 104,
+                    height: 104,
+                    colorDark: '#000000',
+                    colorLight: '#ffffff',
+                    correctLevel: QRCode.CorrectLevel.M // Use M instead of H for more capacity
+                });
+            } catch (error) {
+                console.error('[TV] Error generating QR code:', error);
+                // Fallback: use URL instead
+                const menuUrl = `${window.location.origin}/tv?day=${selectedDay}`;
+                qrContainer.innerHTML = '';
+                new QRCode(qrContainer, {
+                    text: menuUrl,
+                    width: 104,
+                    height: 104,
+                    colorDark: '#000000',
+                    colorLight: '#ffffff',
+                    correctLevel: QRCode.CorrectLevel.H
+                });
+            }
+        }
+
+        function getFoodImage(mealName) {
+            // Placeholder - in production, use Unsplash API or similar
+            const encodedName = encodeURIComponent(mealName);
+            return `https://source.unsplash.com/400x300/?food,${encodedName}`;
+        }
+
+        // Store last menu data to prevent unnecessary refreshes
+        let lastMenuData = null;
+
+        async function loadMenu() {
+            try {
+                // Always load current week menu
+                const response = await fetch('/api/menu/current-week');
+                
+                if (response.status === 404) {
+                    console.log('[TV] No menu for current week, trying latest menu...');
+                    // Fallback to latest menu
+                    try {
+                        const latestResponse = await fetch('/api/menu/latest');
+                        if (latestResponse.ok) {
+                            const latestResult = await latestResponse.json();
+                            console.log('[TV] Latest menu API response:', latestResult);
+                            
+                            if (latestResult.success && latestResult.data) {
+                                let menuData = latestResult.data.menu_data;
+                                
+                                if (typeof menuData === 'string') {
+                                    try {
+                                        menuData = JSON.parse(menuData);
+                                    } catch (e) {
+                                        console.error('[TV] Failed to parse menu_data:', e);
+                                        showNoMenu();
+                                        return;
+                                    }
+                                }
+                                
+                                currentMenu = menuData;
+                                currentMenuId = latestResult.data.id;
+                                currentWeekStart = latestResult.data.week_start_date;
+                                console.log('[TV] Latest menu loaded successfully as fallback, ID:', currentMenuId);
+                                
+                                // Always set selectedDay to today if not already set
+                                if (!selectedDay) {
+                                    selectedDay = getCurrentDayName();
+                                    console.log('[TV] Setting selectedDay to today:', selectedDay);
+                                }
+                                
+                                displayMenu();
+                                return;
+                            }
+                        }
+                    } catch (fallbackError) {
+                        console.error('[TV] Error loading latest menu:', fallbackError);
+                    }
+                    
+                    // If fallback also failed, show no menu
+                    showNoMenu();
+                    return;
+                }
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                
+                const result = await response.json();
+                console.log('[TV] Menu API response:', result);
+                
+                if (result.success && result.data) {
+                    let menuData = result.data.menu_data;
+                    
+                    if (typeof menuData === 'string') {
+                        try {
+                            menuData = JSON.parse(menuData);
+                        } catch (e) {
+                            console.error('[TV] Failed to parse menu_data:', e);
+                            showNoMenu();
+                            return;
+                        }
+                    }
+                    
+                    currentMenu = menuData;
+                    currentMenuId = result.data.id;
+                    currentWeekStart = result.data.week_start_date;
+                    console.log('[TV] Menu loaded successfully, ID:', currentMenuId, 'Week:', currentWeekStart);
+                    
+                    // Check if menu data has changed to prevent unnecessary refreshes
+                    const menuDataString = JSON.stringify(menuData);
+                    if (lastMenuData === menuDataString) {
+                        console.log('[TV] Menu data unchanged, skipping refresh');
+                        return;
+                    }
+                    lastMenuData = menuDataString;
+                    
+                    // Always set selectedDay to today if not already set
+                    if (!selectedDay) {
+                        selectedDay = getCurrentDayName();
+                        console.log('[TV] Setting selectedDay to today:', selectedDay);
+                    }
+                    
+                    displayMenu();
+                } else {
+                    showNoMenu();
+                }
+            } catch (error) {
+                console.error('[TV] Error loading menu:', error);
+                // Try fallback to latest menu on error
+                try {
+                    const latestResponse = await fetch('/api/menu/latest');
+                    if (latestResponse.ok) {
+                        const latestResult = await latestResponse.json();
+                        if (latestResult.success && latestResult.data) {
+                            let menuData = latestResult.data.menu_data;
+                            if (typeof menuData === 'string') {
+                                try {
+                                    menuData = JSON.parse(menuData);
+                                } catch (e) {
+                                    console.error('[TV] Failed to parse latest menu_data:', e);
+                                    showNoMenu();
+                                    return;
+                                }
+                            }
+                            currentMenu = menuData;
+                            currentMenuId = latestResult.data.id;
+                            currentWeekStart = latestResult.data.week_start_date;
+                            if (!selectedDay) {
+                                selectedDay = getCurrentDayName();
+                            }
+                            console.log('[TV] Latest menu loaded successfully as error fallback, ID:', currentMenuId);
+                            displayMenu();
+                            return;
+                        }
+                    }
+                } catch (fallbackError) {
+                    console.error('[TV] Error loading latest menu fallback:', fallbackError);
+                }
+                showNoMenu();
+            }
+        }
+        
+        // Search for recipe by title and get URL
+        async function getRecipeUrl(recipeTitle) {
+            if (!recipeTitle || recipeTitle === 'Original' || recipeTitle === '') {
+                return null;
+            }
+            
+            try {
+                const response = await fetch(`/api/recipes/search?title=${encodeURIComponent(recipeTitle)}`);
+                const result = await response.json();
+                
+                if (result.success && result.data && result.data.url) {
+                    return result.data.url;
+                }
+            } catch (error) {
+                console.warn('[TV] Error searching for recipe:', error);
+            }
+            
+            return null;
+        }
+
+        function selectDay(day) {
+            selectedDay = day;
+            console.log('[TV] Selected day:', selectedDay);
+            displayMenu();
+            updateWeekNav();
+        }
+
+        function updateWeekNav() {
+            const navContainer = document.getElementById('week-days-nav');
+            if (!navContainer) return;
+            
+            navContainer.innerHTML = '';
+            
+            ['lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado', 'domingo'].forEach((day) => {
+                const dayDate = getDateForDay(day);
+                const card = document.createElement('div');
+                card.className = `week-day-card ${day === selectedDay ? 'active' : ''}`;
+                card.onclick = () => selectDay(day);
+                
+                card.innerHTML = `
+                    <div class="week-day-name">${diasES[day].substring(0, 3).toUpperCase()}</div>
+                    <div class="week-day-date">${dayDate.getDate()}</div>
+                `;
+                
+                navContainer.appendChild(card);
+            });
+        }
+
+        async function displayMenu() {
+            const container = document.getElementById('menu-content');
+            
+            if (!currentMenu) {
+                showNoMenu();
+                return;
+            }
+            
+            // Check for new structure (two separate menus)
+            const hasNewStructure = currentMenu.menu_adultos || currentMenu.menu_ninos;
+            
+            if (hasNewStructure) {
+                await displaySeparateMenus();
+                return;
+            }
+            
+            // Fallback to old structure
+            if (!currentMenu.dias) {
+                showNoMenu();
+                return;
+            }
+
+            const dayData = currentMenu.dias[selectedDay];
+            
+            if (!dayData) {
+                showNoMenu();
+                return;
+            }
+
+            // Render old structure (not used in new design, but kept for compatibility)
+            showNoMenu();
+        }
+
+        // Helper function to normalize day names (remove accents for matching)
+        function normalizeDayName(dayName) {
+            if (!dayName) return '';
+            
+            // Direct mapping for Spanish day names
+            const dayMap = {
+                'lunes': 'lunes',
+                'martes': 'martes',
+                'miércoles': 'miercoles',
+                'miercoles': 'miercoles',
+                'jueves': 'jueves',
+                'viernes': 'viernes',
+                'sábado': 'sabado',
+                'sabado': 'sabado',
+                'domingo': 'domingo'
+            };
+            
+            const lower = dayName.toLowerCase().trim();
+            const result = dayMap[lower] || lower.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+            console.log('[TV] normalizeDayName: "' + dayName + '" -> "' + result + '"');
+            return result;
+        }
+        
+        // Helper function to get day data from menu, trying multiple variations
+        function getDayDataFromMenu(menuDias, dayName) {
+            if (!menuDias || !dayName) {
+                console.log('[TV] getDayDataFromMenu: Invalid params', { hasMenuDias: !!menuDias, dayName });
+                return null;
+            }
+            
+            const availableKeys = Object.keys(menuDias);
+            console.log('[TV] getDayDataFromMenu: Looking for "' + dayName + '" in menu keys:', availableKeys);
+            
+            // Try exact match first (case-sensitive)
+            if (menuDias[dayName]) {
+                console.log('[TV] getDayDataFromMenu: Found exact match for "' + dayName + '"');
+                return menuDias[dayName];
+            }
+            
+            // Try normalized name (without accents)
+            const normalized = normalizeDayName(dayName);
+            console.log('[TV] getDayDataFromMenu: Normalized "' + dayName + '" to "' + normalized + '"');
+            
+            // Always try normalized version, even if it's the same
+            if (menuDias[normalized]) {
+                console.log('[TV] getDayDataFromMenu: Found normalized match for "' + normalized + '"');
+                return menuDias[normalized];
+            }
+            
+            // Try all keys to find a match (case-insensitive, accent-insensitive)
+            console.log('[TV] getDayDataFromMenu: Searching all keys with normalized term "' + normalized + '"');
+            
+            for (const key of availableKeys) {
+                const keyNormalized = normalizeDayName(key);
+                console.log('[TV] getDayDataFromMenu: Comparing key "' + key + '" (normalized: "' + keyNormalized + '") with "' + normalized + '"');
+                if (keyNormalized === normalized) {
+                    console.log('[TV] getDayDataFromMenu: Found match! Key "' + key + '" (normalized: "' + keyNormalized + '") matches "' + normalized + '"');
+                    return menuDias[key];
+                }
+            }
+            
+            console.log('[TV] getDayDataFromMenu: No match found for "' + dayName + '" (normalized: "' + normalized + '")');
+            console.log('[TV] getDayDataFromMenu: Available normalized keys:', availableKeys.map(k => normalizeDayName(k)));
+            return null;
+        }
+
+        async function displaySeparateMenus() {
+            const container = document.getElementById('menu-content');
+            const dayMenuContainer = document.getElementById('day-menu');
+            const contentArea = container.querySelector('.content-area');
+            const daysListContainer = dayMenuContainer.querySelector('.days-list');
+            
+            const mealIcons = {
+                'desayuno': '🌅',
+                'comida': '🍽️',
+                'merienda': '☕',
+                'cena': '🌙'
+            };
+
+            const mealNames = {
+                'desayuno': { es: 'Desayuno', en: 'Breakfast' },
+                'comida': { es: 'Comida', en: 'Lunch' },
+                'merienda': { es: 'Merienda', en: 'Snack' },
+                'cena': { es: 'Cena', en: 'Dinner' }
+            };
+            
+            // Generate day menu items
+            const days = ['lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado', 'domingo'];
+            daysListContainer.innerHTML = days.map(day => `
+                <div class="day-menu-item ${day === selectedDay ? 'active' : ''}" 
+                     onclick="selectDay('${day}')" 
+                     data-day="${day}">
+                    ${day.charAt(0).toUpperCase() + day.slice(1)}
+                </div>
+            `).join('');
+            
+            // Helper function to render a meal card with EXACT zenith design
+            // Returns { html: string, recipeBase: string }
+            async function renderMealCard(meal, mealType, mealNames, isAdult) {
+                const mealName = typeof meal.nombre === 'string' ? meal.nombre : (meal.nombre?.name || 'N/A');
+                const prepTime = typeof meal.tiempo_prep === 'number' ? meal.tiempo_prep : (meal.tiempo_prep?.value || meal.tiempo_prep || '');
+                const calories = typeof meal.calorias === 'number' ? meal.calorias : (meal.calorias?.value || meal.calorias || '');
+                const ingredients = Array.isArray(meal.ingredientes) ? meal.ingredientes : [];
+                const recipeBase = typeof meal.receta_base === 'string' ? meal.receta_base : '';
+                const adaptaciones = typeof meal.adaptaciones === 'string' ? meal.adaptaciones : '';
+                const notas = typeof meal.notas === 'string' ? meal.notas : '';
+                const porqueSeleccionada = typeof meal.porque_seleccionada === 'string' ? meal.porque_seleccionada : '';
+                const instrucciones = typeof meal.instrucciones === 'string' ? meal.instrucciones : '';
+                
+                // Extract nutrients
+                const nutrientes = meal.nutrientes || {};
+                const proteinas = nutrientes.proteinas || '';
+                const carbohidratos = nutrientes.carbohidratos || '';
+                const grasas = nutrientes.grasas || '';
+                
+                // Format ingredients as badges (zenith style: text-xs px-3 py-1.5 glass rounded-lg)
+                let ingredientsBadgesHtml = '';
+                if (ingredients.length > 0) {
+                    const badges = ingredients.map(ing => 
+                        `<span style="font-size: 0.875rem; padding: 0.5rem 0.875rem; background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 0.5rem; color: rgba(255, 255, 255, 0.8); white-space: nowrap;">${ing}</span>`
+                    ).join('');
+                    ingredientsBadgesHtml = `<div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">${badges}</div>`;
+                }
+                
+                // Build nutrition focus grid (zenith style: p-3 bg-white/5 rounded-xl)
+                let nutritionHtml = '';
+                const nutritionItems = [];
+                if (proteinas) nutritionItems.push({ key: 'PROTEIN', val: proteinas });
+                if (carbohidratos) nutritionItems.push({ key: 'CARBS', val: carbohidratos });
+                if (grasas) nutritionItems.push({ key: 'FAT', val: grasas });
+                
+                if (nutritionItems.length > 0) {
+                    nutritionHtml = `
+                        <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                            <h3 style="font-size: 0.875rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: rgba(255, 255, 255, 0.4); display: flex; align-items: center; gap: 0.5rem;">
+                                <span style="font-size: 1rem;">ℹ️</span>
+                                <span>Nutrition Focus</span>
+                            </h3>
+                            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem;">
+                                ${nutritionItems.map(item => `
+                                    <div style="padding: 0.75rem; background: rgba(255, 255, 255, 0.05); border-radius: 0.75rem; border: 1px solid rgba(255, 255, 255, 0.05); text-align: center;">
+                                        <div style="font-size: 0.75rem; text-transform: uppercase; color: rgba(255, 255, 255, 0.3); font-weight: 700; margin-bottom: 0.25rem;">${item.key}</div>
+                                        <div style="font-size: 1rem; font-weight: 700; color: rgba(255, 255, 255, 0.9);">${item.val}</div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    `;
+                }
+                
+                // Get day name for header
+                const dayNameEn = getDayWithDate(selectedDay, 'en');
+                
+                // Return complete meal card HTML matching zenith design EXACTLY
+                return {
+                    html: `
+                        <div style="position: relative !important; overflow: hidden !important; background: rgba(255, 255, 255, 0.03) !important; backdrop-filter: blur(12px) !important; -webkit-backdrop-filter: blur(12px) !important; border: 1px solid rgba(255, 255, 255, 0.06) !important; border-radius: 1rem !important; padding: 1.2rem !important; display: flex !important; flex-direction: column !important; gap: 1rem !important; transition: all 0.5s ease !important; min-height: 220px !important; max-height: 280px !important;">
+                            <!-- Background Accent Blur (zenith: -top-24 -right-24 w-64 h-64 blur-[100px] opacity-20) -->
+                            <div style="position: absolute; top: -60px; right: -60px; width: 180px; height: 180px; background: ${isAdult ? '#3B82F6' : '#F97316'}; opacity: 0.2; filter: blur(60px); pointer-events: none; border-radius: 50%; z-index: 0;"></div>
+                            
+                            <!-- Header (zenith: flex items-center justify-between) -->
+                            <div style="display: flex; align-items: center; justify-content: space-between; position: relative; z-index: 1;">
+                                <div style="display: flex; align-items: center; gap: 0.6rem;">
+                                    <div style="padding: 0.4rem; border-radius: 0.6rem; background: ${isAdult ? 'rgba(59, 130, 246, 0.2)' : 'rgba(249, 115, 22, 0.2)'}; color: ${isAdult ? '#60A5FA' : '#FB923C'}; display: flex; align-items: center; justify-content: center; width: 1.2rem; height: 1.2rem;">
+                                        ${isAdult ? `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 13V8a6 6 0 0 1 12 0v5"></path><path d="M4 10a2 2 0 0 1-2 2v4a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-4a2 2 0 0 1-2-2"></path><path d="M8 10V8a4 4 0 1 1 8 0v2"></path></svg>` : `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12h.01"></path><path d="M15 12h.01"></path><path d="M10 16c.5.3 1.2.5 2 .5s1.5-.2 2-.5"></path><path d="M19 6.3a9 9 0 0 1 1.8 3.9 2 2 0 0 1 0 3.6 9 9 0 0 1-17.6 0 2 2 0 0 1 0-3.6A9 9 0 0 1 12 3a9 9 0 0 1 7 3.3z"></path><path d="M7.5 13.5 7 15l-1.5 1"></path><path d="M16.5 13.5 17 15l1.5 1"></path></svg>`}
+                                    </div>
+                                    <span style="font-size: 0.75rem !important; font-weight: 600 !important; letter-spacing: 0.1em !important; text-transform: uppercase !important; color: ${isAdult ? '#60A5FA' : '#FB923C'} !important;">
+                                        ${isAdult ? 'Adults' : 'Children'}
+                                    </span>
+                                </div>
+                                <div style="font-size: 0.6rem; color: rgba(255, 255, 255, 0.4); font-weight: 500; letter-spacing: 0.05em; text-transform: uppercase;">
+                                    ${dayNameEn}
+                                </div>
+                            </div>
+                            
+                            <!-- Meal Type and Name (zenith: flex flex-col gap-4) -->
+                            <div style="display: flex; flex-direction: column; gap: 0.8rem; position: relative; z-index: 1;">
+                                <div style="display: flex; flex-direction: column;">
+                                    <span style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.08em; color: rgba(255, 255, 255, 0.5); margin-bottom: 0.2rem;">${mealNames[mealType].es} / ${mealNames[mealType].en}</span>
+                                    <h2 style="font-family: 'Playfair Display', serif !important; font-size: 1.4rem !important; color: #FFFFFF !important; line-height: 1.1 !important; margin: 0 !important; transition: color 0.3s ease !important;">
+                                        ${mealName}
+                                    </h2>
+                                </div>
+                                
+                                <!-- Description with sparkles (zenith: flex items-center gap-2 p-3 bg-white/5) -->
+                                ${porqueSeleccionada ? `
+                                    <div style="display: flex; align-items: flex-start; gap: 0.4rem; padding: 0.6rem; background: rgba(255, 255, 255, 0.05); border-radius: 0.6rem; border: 1px solid rgba(255, 255, 255, 0.06);">
+                                        <span style="font-size: 0.7rem; color: #EAB308; flex-shrink: 0;">✨</span>
+                                        <p style="font-size: 0.75rem; color: rgba(255, 255, 255, 0.7); line-height: 1.3; font-style: italic; margin: 0;">
+                                            ${porqueSeleccionada}
+                                        </p>
+                                    </div>
+                                ` : ''}
+                            </div>
+                            
+                            <!-- Stats bar (zenith: flex flex-wrap gap-4 py-2 border-y border-white/5) -->
+                            <div style="display: flex; flex-wrap: wrap; gap: 0.8rem; padding: 0.6rem 0; border-top: 1px solid rgba(255, 255, 255, 0.06); border-bottom: 1px solid rgba(255, 255, 255, 0.06); position: relative; z-index: 1;">
+                                ${prepTime ? `
+                                    <div style="display: flex; align-items: center; gap: 0.4rem; color: rgba(255, 255, 255, 0.6);">
+                                        <span style="font-size: 0.8rem; width: 0.8rem; height: 0.8rem; display: flex; align-items: center; justify-content: center;">⏱️</span>
+                                        <span style="font-size: 0.75rem; font-weight: 500;">${prepTime} min</span>
+                                    </div>
+                                ` : ''}
+                                ${calories ? `
+                                    <div style="display: flex; align-items: center; gap: 0.4rem; color: rgba(255, 255, 255, 0.6);">
+                                        <span style="font-size: 0.9rem; width: 0.9rem; height: 0.9rem; display: flex; align-items: center; justify-content: center;">🔥</span>
+                                        <span style="font-size: 0.75rem; font-weight: 500;">${calories} kcal</span>
+                                    </div>
+                                ` : ''}
+                                ${ingredients.length > 0 ? `
+                                    <div style="display: flex; align-items: center; gap: 0.4rem; color: rgba(255, 255, 255, 0.6);">
+                                        <span style="font-size: 0.9rem; width: 0.9rem; height: 0.9rem; display: flex; align-items: center; justify-content: center;">🍴</span>
+                                        <span style="font-size: 0.75rem; font-weight: 500;">${ingredients.length} Items</span>
+                                    </div>
+                                ` : ''}
+                            </div>
+                            
+                            <!-- Ingredients Section (zenith: flex flex-col gap-6) -->
+                            ${ingredientsBadgesHtml ? `
+                                <div style="position: relative; z-index: 1;">
+                                    <h3 style="font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: rgba(255, 255, 255, 0.5); margin-bottom: 0.6rem; display: flex; align-items: center; gap: 0.4rem;">
+                                        <span>✓</span>
+                                        <span>Ingredients</span>
+                                    </h3>
+                                    ${ingredientsBadgesHtml}
+                                </div>
+                            ` : ''}
+                            
+                            <!-- Instructions (moved up) -->
+                            ${instrucciones ? `
+                                <div style="margin-top: 0.8rem; padding-top: 0.8rem; border-top: 1px solid rgba(255, 255, 255, 0.06); position: relative; z-index: 1;">
+                                    <div style="font-size: 0.7rem; color: rgba(255, 255, 255, 0.5); margin-bottom: 0.4rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; display: flex; align-items: center; gap: 0.4rem;">
+                                        <span>📖</span>
+                                        <span>Preparation</span>
+                                    </div>
+                                    <div style="font-size: 0.75rem; color: rgba(255, 255, 255, 0.7); line-height: 1.3; white-space: pre-wrap;">
+                                        ${instrucciones}
+                                    </div>
+                                </div>
+                            ` : ''}
+                            
+                            <!-- Adaptations -->
+                            ${adaptaciones ? `
+                                <div style="margin-top: 0.8rem; padding: 0.6rem; background: rgba(212, 175, 55, 0.1); border-radius: 0.6rem; border: 1px solid rgba(212, 175, 55, 0.2); position: relative; z-index: 1;">
+                                    <div style="font-size: 0.7rem; color: #D4AF37; font-weight: 600; margin-bottom: 0.2rem; text-transform: uppercase; letter-spacing: 0.08em;">✨ Adaptations</div>
+                                    <div style="font-size: 0.75rem; color: rgba(255, 255, 255, 0.7); line-height: 1.3;">${adaptaciones}</div>
+                                </div>
+                            ` : ''}
+                            
+                            <!-- Notes -->
+                            ${notas ? `
+                                <div style="margin-top: 0.8rem; padding: 0.6rem; background: rgba(138, 161, 147, 0.1); border-radius: 0.6rem; border: 1px solid rgba(138, 161, 147, 0.2); position: relative; z-index: 1;">
+                                    <div style="font-size: 0.75rem; color: #8AA193; line-height: 1.3;">
+                                        💡 ${notas}
+                                    </div>
+                                </div>
+                            ` : ''}
+                            
+                            <!-- Nutrition Focus (moved to bottom) -->
+                            ${nutritionHtml}
+                        </div>
+                    `,
+                    recipeBase: recipeBase
+                };
+            }
+            
+            let adultosHtml = '';
+            let ninosHtml = '';
+            let adultRecipes = [];
+            let childRecipes = [];
+
+            // ADULTOS MENU
+            if (currentMenu.menu_adultos && currentMenu.menu_adultos.dias) {
+                console.log('[TV] About to call getDayDataFromMenu for adults with selectedDay:', selectedDay);
+                console.log('[TV] menu_adultos.dias type:', typeof currentMenu.menu_adultos.dias);
+                console.log('[TV] menu_adultos.dias keys:', Object.keys(currentMenu.menu_adultos.dias));
+                try {
+                    const adultDayData = getDayDataFromMenu(currentMenu.menu_adultos.dias, selectedDay);
+                console.log('[TV] Adult day data for', selectedDay, ':', adultDayData);
+                    console.log('[TV] Available day keys in menu:', Object.keys(currentMenu.menu_adultos.dias));
+                if (adultDayData) {
+                    // Add rating and regenerate section for adults
+                    const adultRatingId = `rating-adultos-${selectedDay}`;
+                    const adultRegenId = `regen-adultos-${selectedDay}`;
+                    adultosHtml += `
+                        <div class="menu-panel adults">
+                            <div style="margin-bottom: 0.8rem; padding: 0.6rem; background: rgba(255, 255, 255, 0.05); border-radius: 0.6rem; border: 1px solid rgba(255, 255, 255, 0.1); position: relative; z-index: 10;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.6rem;">
+                                <div style="flex: 1; min-width: 120px;">
+                                    <div style="font-size: 0.6rem; color: rgba(255, 255, 255, 0.5); margin-bottom: 0.2rem; text-transform: uppercase; letter-spacing: 0.03em;">Califica este menú</div>
+                                    <div id="${adultRatingId}" style="display: flex; gap: 0.2rem; align-items: center;">
+                                        ${[1, 2, 3, 4, 5].map(star => {
+                                            return '<button onclick="rateDayMenu(\'adultos\', ' + star + ')" ' +
+                                                'style="background: none; border: none; font-size: 1rem; cursor: pointer; padding: 0.2rem; transition: transform 0.2s;" ' +
+                                                'onmouseover="this.style.transform=\'scale(1.1)\'" ' +
+                                                'onmouseout="this.style.transform=\'scale(1)\'" ' +
+                                                'title="' + star + ' ' + (star === 1 ? 'estrella' : 'estrellas') + '">' +
+                                                '<span class="star-' + star + '" style="color: rgba(255, 255, 255, 0.3);">☆</span>' +
+                                                '</button>';
+                                        }).join('')}
+                                    </div>
+                                </div>
+                                <button id="${adultRegenId}" onclick="regenerateDayMenu('adultos')" 
+                                    style="padding: 0.4rem 0.8rem; background: rgba(59, 130, 246, 0.2); border: 1px solid rgba(59, 130, 246, 0.4); border-radius: 0.4rem; color: #60A5FA; font-size: 0.7rem; font-weight: 600; cursor: pointer; transition: all 0.3s; text-transform: uppercase; letter-spacing: 0.02em;"
+                                    onmouseover="this.style.background='rgba(59, 130, 246, 0.3)'; this.style.borderColor='rgba(59, 130, 246, 0.6)'"
+                                    onmouseout="this.style.background='rgba(59, 130, 246, 0.2)'; this.style.borderColor='rgba(59, 130, 246, 0.4)'">
+                                    🔄 Regenerar
+                                </button>
+                            </div>
+                        </div>
+                            <div class="meal-grid">
+                    `;
+                    
+                    // Render meals asynchronously to fetch recipe URLs
+                    const adultMeals = ['desayuno', 'comida', 'cena'].filter(mealType => adultDayData[mealType]);
+                    console.log('[TV] Adult meals to render:', adultMeals);
+                    for (const mealType of adultMeals) {
+                        const meal = adultDayData[mealType];
+                        console.log('[TV] Rendering adult meal:', mealType, meal);
+                        const result = await renderMealCard(meal, mealType, mealNames, true);
+                        console.log('[TV] Render result for', mealType, ':', result ? 'OK' : 'FAILED');
+                        if (result && result.html) {
+                            console.log('[TV] Adding HTML for', mealType, ', length:', result.html.length);
+                            adultosHtml += result.html;
+                            if (result.recipeBase && result.recipeBase !== 'Original' && result.recipeBase !== '') {
+                                adultRecipes.push(result.recipeBase);
+                            }
+                        } else {
+                            console.error('[TV] Failed to render meal card for', mealType);
+                        }
+                    }
+                    
+                    adultosHtml += `</div></div>`;
+                } else {
+                    console.log('[TV] No adult day data for', selectedDay);
+                    adultosHtml = `<div class="menu-panel adults"><div style="text-align: center; padding: 4rem;">
+                        <div class="zenith-qr-container" style="margin: 0 auto;">
+                            <div class="zenith-qr-code" id="adults-qr-${selectedDay}"></div>
+                            <div class="zenith-qr-label">Adult Menu QR</div>
+                        </div>
+                    </div></div>`;
+                }
+                } catch (error) {
+                    console.error('[TV] Error in getDayDataFromMenu for adults:', error);
+                    adultosHtml = `<div class="menu-panel adults"><div style="text-align: center; padding: 4rem; color: #CBD5E0; font-size: 2rem;">Error loading menu</div></div>`;
+                }
+            } else {
+                console.log('[TV] No menu_adultos.dias structure');
+                adultosHtml = `<div class="menu-panel adults"><div style="text-align: center; padding: 4rem; color: #CBD5E0; font-size: 2rem;">No menu structure</div></div>`;
+            }
+            
+            // NIÑOS MENU
+            if (currentMenu.menu_ninos && currentMenu.menu_ninos.dias) {
+                console.log('[TV] About to call getDayDataFromMenu for children with selectedDay:', selectedDay);
+                console.log('[TV] menu_ninos.dias type:', typeof currentMenu.menu_ninos.dias);
+                console.log('[TV] menu_ninos.dias keys:', Object.keys(currentMenu.menu_ninos.dias));
+                try {
+                    const childDayData = getDayDataFromMenu(currentMenu.menu_ninos.dias, selectedDay);
+                console.log('[TV] Child day data for', selectedDay, ':', childDayData);
+                    console.log('[TV] Available day keys in children menu:', Object.keys(currentMenu.menu_ninos.dias));
+                if (childDayData) {
+                    // Add rating and regenerate section for children
+                    const childRatingId = `rating-ninos-${selectedDay}`;
+                    const childRegenId = `regen-ninos-${selectedDay}`;
+                    ninosHtml += `
+                        <div class="menu-panel children">
+                            <div style="margin-bottom: 0.8rem; padding: 0.6rem; background: rgba(255, 255, 255, 0.05); border-radius: 0.6rem; border: 1px solid rgba(255, 255, 255, 0.1); position: relative; z-index: 10;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.6rem;">
+                                <div style="flex: 1; min-width: 120px;">
+                                    <div style="font-size: 0.6rem; color: rgba(255, 255, 255, 0.5); margin-bottom: 0.2rem; text-transform: uppercase; letter-spacing: 0.03em;">Califica este menú</div>
+                                    <div id="${childRatingId}" style="display: flex; gap: 0.2rem; align-items: center;">
+                                        ${[1, 2, 3, 4, 5].map(star => {
+                                            return '<button onclick="rateDayMenu(\'ninos\', ' + star + ')" ' +
+                                                'style="background: none; border: none; font-size: 1rem; cursor: pointer; padding: 0.2rem; transition: transform 0.2s;" ' +
+                                                'onmouseover="this.style.transform=\'scale(1.1)\'" ' +
+                                                'onmouseout="this.style.transform=\'scale(1)\'" ' +
+                                                'title="' + star + ' ' + (star === 1 ? 'estrella' : 'estrellas') + '">' +
+                                                '<span class="star-' + star + '" style="color: rgba(255, 255, 255, 0.3);">☆</span>' +
+                                                '</button>';
+                                        }).join('')}
+                                    </div>
+                                </div>
+                                <button id="${childRegenId}" onclick="regenerateDayMenu('ninos')" 
+                                    style="padding: 0.4rem 0.8rem; background: rgba(249, 115, 22, 0.2); border: 1px solid rgba(249, 115, 22, 0.4); border-radius: 0.4rem; color: #FB923C; font-size: 0.7rem; font-weight: 600; cursor: pointer; transition: all 0.3s; text-transform: uppercase; letter-spacing: 0.02em;"
+                                    onmouseover="this.style.background='rgba(249, 115, 22, 0.3)'; this.style.borderColor='rgba(249, 115, 22, 0.6)'"
+                                    onmouseout="this.style.background='rgba(249, 115, 22, 0.2)'; this.style.borderColor='rgba(249, 115, 22, 0.4)'">
+                                    🔄 Regenerar
+                                </button>
+                            </div>
+                        </div>
+                            <div class="meal-grid">
+                    `;
+                    
+                    // Render meals asynchronously to fetch recipe URLs
+                    const childMeals = ['desayuno', 'comida', 'merienda', 'cena'].filter(mealType => childDayData[mealType]);
+                    console.log('[TV] Child meals to render:', childMeals);
+                    for (const mealType of childMeals) {
+                            const meal = childDayData[mealType];
+                        console.log('[TV] Rendering child meal:', mealType, meal);
+                        const result = await renderMealCard(meal, mealType, mealNames, false);
+                        console.log('[TV] Render result for', mealType, ':', result ? 'OK' : 'FAILED');
+                        if (result && result.html) {
+                            console.log('[TV] Adding HTML for', mealType, ', length:', result.html.length);
+                            ninosHtml += result.html;
+                            if (result.recipeBase && result.recipeBase !== 'Original' && result.recipeBase !== '') {
+                                childRecipes.push(result.recipeBase);
+                            }
+                        } else {
+                            console.error('[TV] Failed to render meal card for', mealType);
+                        }
+                    }
+                    
+                    ninosHtml += `</div></div>`;
+                } else {
+                    console.log('[TV] No child day data for', selectedDay);
+                    ninosHtml = `<div class="menu-panel children"><div style="text-align: center; padding: 4rem;">
+                        <div class="zenith-qr-container" style="margin: 0 auto;">
+                            <div class="zenith-qr-code" id="children-qr-${selectedDay}"></div>
+                            <div class="zenith-qr-label">Children Menu QR</div>
+                        </div>
+                    </div></div>`;
+                }
+                } catch (error) {
+                    console.error('[TV] Error in getDayDataFromMenu for children:', error);
+                    ninosHtml = `<div class="menu-panel children"><div style="text-align: center; padding: 4rem; color: #CBD5E0; font-size: 2rem;">Error loading menu</div></div>`;
+                }
+            } else {
+                console.log('[TV] No menu_ninos.dias structure');
+                ninosHtml = `<div class="menu-panel children"><div style="text-align: center; padding: 4rem; color: #CBD5E0; font-size: 2rem;">No menu structure</div></div>`;
+            }
+            
+            // Collect all recipes from both menus (use the ones we already collected)
+            const allRecipes = [...new Set([...adultRecipes, ...childRecipes])];
+            
+            // QR codes removed - using zenith style button instead
+            
+            let finalHtml = `
+                <div class="meal-grid">
+                    ${adultosHtml}
+                    ${ninosHtml}
+                </div>
+            `;
+            
+            console.log('[TV] Final HTML length:', finalHtml.length);
+            console.log('[TV] Adult HTML length:', adultosHtml.length);
+            console.log('[TV] Child HTML length:', ninosHtml.length);
+            console.log('[TV] About to set innerHTML');
+            
+            contentArea.innerHTML = finalHtml;
+            
+            console.log('[TV] innerHTML set successfully');
+            console.log('[TV] Container children count:', container.children.length);
+            
+            // QR Code generation disabled to prevent errors
+            // generateSimpleQRCode();
+            
+            // Force a reflow to ensure rendering
+            void container.offsetHeight;
+            
+            // Load existing ratings
+            setTimeout(loadDayRatings, 100);
+        }
+
+        function showNoMenu() {
+            const container = document.getElementById('menu-content');
+            const contentArea = container.querySelector('.content-area');
+            contentArea.innerHTML = `
+                <div class="no-menu" style="text-align: center; padding: 4rem;">
+                    <h2 style="color: var(--white); margin-bottom: 1rem;">No Menu Available</h2>
+                    <p style="color: var(--silver);">Please generate a menu first</p>
+                </div>
+            `;
+        }
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', async function() {
+            console.log('[TV] DOM Content Loaded - Version 2.6 - NUCLEAR SOLUTION');
+            
+            // NUCLEAR CACHE CLEAR
+            if ('caches' in window) {
+                caches.keys().then(function(names) {
+                    names.forEach(function(name) {
+                        caches.delete(name);
+                    });
+                });
+            }
+            
+            // Version checking DISABLED to prevent infinite reload
+            // const currentVersion = '202501191730';
+            // const lastVersion = localStorage.getItem('tv-display-version');
+            // if (lastVersion !== currentVersion) {
+            //     console.log('[TV] Version changed, forcing hard reload...');
+            //     localStorage.setItem('tv-display-version', currentVersion);
+            //     setTimeout(() => {
+            //         window.location.reload(true);
+            //     }, 100);
+            //     return;
+            // }
+            
+            // NUCLEAR STYLE VERIFICATION DISABLED - causing infinite reload
+            // setTimeout(() => {
+            //     const cards = document.querySelectorAll('[style*="min-height"]');
+            //     let cardsFixed = 0;
+            //     
+            //     cards.forEach(card => {
+            //         if (card.innerHTML.includes('Pollo al Ajillo') || card.innerHTML.includes('Chicken Fingers')) {
+            //             console.log('[TV] NUCLEAR: Forcing styles on card:', card);
+            //             
+            //             // NUCLEAR STYLE OVERRIDE
+            //             const styles = {
+            //                 position: 'relative',
+            //                 overflow: 'hidden',
+            //                 background: 'rgba(255, 255, 255, 0.03)',
+            //                 backdropFilter: 'blur(12px)',
+            //                 WebkitBackdropFilter: 'blur(12px)',
+            //                 border: '1px solid rgba(255, 255, 255, 0.06)',
+            //                 borderRadius: '1rem',
+            //                 padding: '1.2rem',
+            //                 display: 'flex',
+            //                 flexDirection: 'column',
+            //                 gap: '1rem',
+            //                 transition: 'all 0.5s ease',
+            //                 minHeight: '220px',
+            //                 maxHeight: '280px'
+            //             };
+            //             
+            //             // Apply each style individually with !important
+            //             Object.keys(styles).forEach(prop => {
+            //                 card.style[prop] = styles[prop] + ' !important';
+            //             });
+            //             
+            //             // Force font sizes
+            //             const h2Elements = card.querySelectorAll('h2');
+            //             h2Elements.forEach(h2 => {
+            //                 h2.style.fontSize = '1.4rem !important';
+            //             });
+            //             
+            //             const textElements = card.querySelectorAll('span, p');
+            //             textElements.forEach(el => {
+            //                 if (el.style.fontSize || el.getAttribute('style')?.includes('font-size')) {
+            //                     el.style.fontSize = '0.75rem !important';
+            //                 }
+            //             });
+            //             
+            //             cardsFixed++;
+            //         }
+            //     });
+            //     
+            //     console.log(`[TV] NUCLEAR: Fixed ${cardsFixed} cards`);
+            //     
+            //     // If no cards were fixed, something is wrong - but DON'T reload
+            //     if (cardsFixed === 0) {
+            //         console.log('[TV] NUCLEAR: No cards found, but NOT reloading to prevent infinite loop');
+            //         // localStorage.setItem('tv-display-version', 'nuclear-' + Date.now());
+            //         // setTimeout(() => {
+            //         //     window.location.reload(true);
+            //         // }, 1000);
+            //     }
+            // }, 3000);
+            
+            // Force cache refresh
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.getRegistrations().then(function(registrations) {
+                    for(let registration of registrations) {
+                        registration.unregister();
+                    }
+                });
+            }
+            
+            // Always start with today's day
+            selectedDay = getCurrentDayName();
+            console.log('[TV] Initializing with today:', selectedDay);
+            
+            updateDateTime();
+            updateWeather();
+            // generateSimpleQRCode(); // Disabled to prevent QR errors
+            updateWeekNav();
+            await loadMenu();
+            
+            // Update clock every second
+            setInterval(updateDateTime, 1000);
+            
+            // Auto-refresh menu every 5 minutes (DISABLED)
+            // setInterval(async () => {
+            //     console.log('[TV] Auto-refreshing menu...');
+            //     await loadMenu();
+            // }, 300000);
+            
+            // Force reload every hour (DISABLED)
+            // setInterval(() => {
+            //     console.log('[TV] Force reloading page...');
+            //     window.location.reload(true);
+            // }, 3600000);
+        });
+
+        // Rating and regeneration functions
+        async function rateDayMenu(menuType, rating) {
+            if (!currentMenuId || !currentWeekStart || !selectedDay) {
+                alert('Error: No hay menú cargado');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/menu/rate-day', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        menu_id: currentMenuId,
+                        week_start_date: currentWeekStart,
+                        day_name: selectedDay,
+                        menu_type: menuType,
+                        rating: rating
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    // Update star display
+                    const ratingId = `rating-${menuType}-${selectedDay}`;
+                    const ratingContainer = document.getElementById(ratingId);
+                    if (ratingContainer) {
+                        ratingContainer.innerHTML = [1, 2, 3, 4, 5].map(star => {
+                            const isFilled = rating >= star;
+                            const starColor = isFilled ? '#D4AF37' : 'rgba(255, 255, 255, 0.3)';
+                            const starIcon = isFilled ? '⭐' : '☆';
+                            const starText = star === 1 ? 'estrella' : 'estrellas';
+                            return '<button onclick="rateDayMenu(\'' + menuType + '\', ' + star + ')" ' +
+                                'style="background: none; border: none; font-size: 2rem; cursor: pointer; padding: 0.5rem; transition: transform 0.2s;" ' +
+                                'onmouseover="this.style.transform=\'scale(1.2)\'" ' +
+                                'onmouseout="this.style.transform=\'scale(1)\'" ' +
+                                'title="' + star + ' ' + starText + '">' +
+                                '<span style="color: ' + starColor + ';">' + starIcon + '</span>' +
+                                '</button>';
+                        }).join('');
+                    }
+                    console.log(`[TV] Rating saved: ${rating} stars for ${menuType} on ${selectedDay}`);
+                } else {
+                    alert('Error al guardar el rating: ' + (result.error || 'Error desconocido'));
+                }
+            } catch (error) {
+                console.error('[TV] Error rating menu:', error);
+                alert('Error al guardar el rating');
+            }
+        }
+        
+        async function regenerateDayMenu(menuType) {
+            if (!currentMenuId || !currentWeekStart || !selectedDay) {
+                alert('Error: No hay menú cargado');
+                return;
+            }
+            
+            if (!confirm(`¿Regenerar el menú de ${menuType} para ${selectedDay}?`)) {
+                return;
+            }
+            
+            const regenButtonId = `regen-${menuType}-${selectedDay}`;
+            const regenButton = document.getElementById(regenButtonId);
+            if (regenButton) {
+                regenButton.disabled = true;
+                regenButton.textContent = '⏳ Regenerando...';
+            }
+            
+            try {
+                const response = await fetch('/api/menu/regenerate-day', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        menu_id: currentMenuId,
+                        week_start_date: currentWeekStart,
+                        day_name: selectedDay,
+                        menu_type: menuType
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    // Reload menu
+                    await loadMenu();
+                    alert(`Menú de ${menuType} regenerado correctamente`);
+                } else {
+                    alert('Error al regenerar el menú: ' + (result.error || 'Error desconocido'));
+                }
+            } catch (error) {
+                console.error('[TV] Error regenerating menu:', error);
+                alert('Error al regenerar el menú');
+            } finally {
+                if (regenButton) {
+                    regenButton.disabled = false;
+                    regenButton.textContent = `🔄 Regenerar Menú ${menuType === 'adultos' ? 'Adultos' : 'Niños'}`;
+                }
+            }
+        }
+        
+        // Load existing ratings when menu is displayed
+        async function loadDayRatings() {
+            if (!currentMenuId || !selectedDay) {
+                console.log('[TV] Cannot load ratings: missing menuId or selectedDay', { currentMenuId, selectedDay });
+                return;
+            }
+            
+            try {
+                // Load adults rating
+                const adultResponse = await fetch(`/api/menu/get-day-rating?menu_id=${currentMenuId}&day_name=${selectedDay}&menu_type=adultos`);
+                const adultResult = await adultResponse.json();
+                if (adultResult.success && adultResult.data.rating) {
+                    const rating = adultResult.data.rating;
+                    const ratingId = `rating-adultos-${selectedDay}`;
+                    const ratingContainer = document.getElementById(ratingId);
+                    if (ratingContainer) {
+                        ratingContainer.innerHTML = [1, 2, 3, 4, 5].map(star => {
+                            const isFilled = rating >= star;
+                            return '<button onclick="rateDayMenu(\'adultos\', ' + star + ')" ' +
+                                'style="background: none; border: none; font-size: 2rem; cursor: pointer; padding: 0.5rem; transition: transform 0.2s;" ' +
+                                'onmouseover="this.style.transform=\'scale(1.2)\'" ' +
+                                'onmouseout="this.style.transform=\'scale(1)\'" ' +
+                                'title="' + star + ' ' + (star === 1 ? 'estrella' : 'estrellas') + '">' +
+                                '<span style="color: ' + (isFilled ? '#D4AF37' : 'rgba(255, 255, 255, 0.3)') + ';">' + (isFilled ? '⭐' : '☆') + '</span>' +
+                                '</button>';
+                        }).join('');
+                    }
+                }
+                
+                // Load children rating
+                const childResponse = await fetch(`/api/menu/get-day-rating?menu_id=${currentMenuId}&day_name=${selectedDay}&menu_type=ninos`);
+                const childResult = await childResponse.json();
+                if (childResult.success && childResult.data.rating) {
+                    const rating = childResult.data.rating;
+                    const ratingId = `rating-ninos-${selectedDay}`;
+                    const ratingContainer = document.getElementById(ratingId);
+                    if (ratingContainer) {
+                        ratingContainer.innerHTML = [1, 2, 3, 4, 5].map(star => {
+                            const isFilled = rating >= star;
+                            return '<button onclick="rateDayMenu(\'ninos\', ' + star + ')" ' +
+                                'style="background: none; border: none; font-size: 2rem; cursor: pointer; padding: 0.5rem; transition: transform 0.2s;" ' +
+                                'onmouseover="this.style.transform=\'scale(1.2)\'" ' +
+                                'onmouseout="this.style.transform=\'scale(1)\'" ' +
+                                'title="' + star + ' ' + (star === 1 ? 'estrella' : 'estrellas') + '">' +
+                                '<span style="color: ' + (isFilled ? '#D4AF37' : 'rgba(255, 255, 255, 0.3)') + ';">' + (isFilled ? '⭐' : '☆') + '</span>' +
+                                '</button>';
+                        }).join('');
+                    }
+                }
+            } catch (error) {
+                console.error('[TV] Error loading ratings:', error);
+                // Don't show alert, just log - ratings are optional
+            }
+        }
+        
+        // Make functions globally available
+        window.rateDayMenu = rateDayMenu;
+        window.regenerateDayMenu = regenerateDayMenu;
+        
+        // Start when page loads - initialize function removed
+        // Prevent infinite reload loop
+        let reloadCount = parseInt(localStorage.getItem('tv_reload_count') || '0');
+        if (reloadCount > 3) {
+            console.log('[TV] Too many reloads detected, stopping reload loop');
+            localStorage.removeItem('tv_reload_count');
+            return;
+        }
+        
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', function() {
+                try {
+                    if (typeof initialize === 'function') {
+                        initialize();
+                    }
+                } catch (error) {
+                    console.log('[TV] Initialize function not available:', error);
+                }
+            });
+        } else {
+            try {
+                if (typeof initialize === 'function') {
+                    initialize();
+                }
+            } catch (error) {
+                console.log('[TV] Initialize function not available:', error);
+            }
+        }
+    </script>
+</body>
+</html>
