@@ -2182,64 +2182,6 @@
             //             const h2Elements = card.querySelectorAll('h2');
             //             h2Elements.forEach(h2 => {
             //                 h2.style.fontSize = '1.4rem !important';
-            //             });
-            //             
-            //             const textElements = card.querySelectorAll('span, p');
-            //             textElements.forEach(el => {
-            //                 if (el.style.fontSize || el.getAttribute('style')?.includes('font-size')) {
-            //                     el.style.fontSize = '0.75rem !important';
-            //                 }
-            //             });
-            //             
-            //             cardsFixed++;
-            //         }
-            //     });
-            //     
-            //     console.log(`[TV] NUCLEAR: Fixed ${cardsFixed} cards`);
-            //     
-            //     // If no cards were fixed, something is wrong - but DON'T reload
-            //     if (cardsFixed === 0) {
-            //         console.log('[TV] NUCLEAR: No cards found, but NOT reloading to prevent infinite loop');
-            //         // localStorage.setItem('tv-display-version', 'nuclear-' + Date.now());
-            //         // setTimeout(() => {
-            //         //     window.location.reload(true);
-            //         // }, 1000);
-            //     }
-            // }, 3000);
-            
-            // Force cache refresh
-            if ('serviceWorker' in navigator) {
-                navigator.serviceWorker.getRegistrations().then(function(registrations) {
-                    for(let registration of registrations) {
-                        registration.unregister();
-                    }
-                });
-            }
-            
-            // Always start with today's day
-            selectedDay = getCurrentDayName();
-            console.log('[TV] Initializing with today:', selectedDay);
-            
-            updateDateTime();
-            updateWeather();
-            // generateSimpleQRCode(); // Disabled to prevent QR errors
-            updateWeekNav();
-            await loadMenu();
-            
-            // Update clock every second
-            setInterval(updateDateTime, 1000);
-            
-            // Auto-refresh menu every 5 minutes (DISABLED)
-            // setInterval(async () => {
-            //     console.log('[TV] Auto-refreshing menu...');
-            //     await loadMenu();
-            // }, 300000);
-            
-            // Force reload every hour (DISABLED)
-            // setInterval(() => {
-            //     console.log('[TV] Force reloading page...');
-            //     window.location.reload(true);
-            // }, 3600000);
         });
 
         // Rating and regeneration functions
