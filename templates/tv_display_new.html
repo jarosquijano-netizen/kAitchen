@@ -1906,7 +1906,7 @@
             if (currentMenu.menu_data && currentMenu.menu_data.menu_adultos && currentMenu.menu_data.menu_adultos.dias) {
                 const adultDayData = getDayDataFromMenu(currentMenu.menu_data.menu_adultos.dias, selectedDay);
                 if (adultDayData) {
-                    simpleHtml += '<h2 style="font-size: 1.8rem; color: #60A5FA; margin-bottom: 20px;">Menú Adultos - ' + selectedDay + '</h2>';
+                    simpleHtml += '<h2 style="font-size: 1.8rem; color: #60A5FA; margin-bottom: 10px; text-align: center;">Menú Adultos - ' + selectedDay + '</h2>';
                     
                     ['desayuno', 'comida', 'merienda', 'cena'].forEach(mealType => {
                         if (adultDayData[mealType]) {
@@ -1964,7 +1964,7 @@
             if (currentMenu.menu_data && currentMenu.menu_data.menu_ninos && currentMenu.menu_data.menu_ninos.dias) {
                 const childDayData = getDayDataFromMenu(currentMenu.menu_data.menu_ninos.dias, selectedDay);
                 if (childDayData) {
-                    simpleHtml += '<h2 style="font-size: 1.8rem; color: #FB923C; margin-bottom: 20px;">Menú Niños - ' + selectedDay + '</h2>';
+                    simpleHtml += '<h2 style="font-size: 1.8rem; color: #FB923C; margin-bottom: 10px; text-align: center;">Menú Niños - ' + selectedDay + '</h2>';
                     
                     ['desayuno', 'comida', 'merienda', 'cena'].forEach(mealType => {
                         if (childDayData[mealType]) {
