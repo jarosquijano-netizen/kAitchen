@@ -2151,6 +2151,7 @@ if __name__ == '__main__':
             print("\n[DEV] Running in DEVELOPMENT mode")
             print(f"\nInterfaz de administracion: http://localhost:{port}")
             print(f"Vista de TV: http://localhost:{port}/tv")
+            print(f"Vista de TV (NUEVA): http://localhost:{port}/tv2")
             print("\n[WARNING] Recuerda configurar ANTHROPIC_API_KEY en el archivo .env")
         
         print("="*60 + "\n")
